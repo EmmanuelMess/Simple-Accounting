@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="balance">Balance</string>
+    <string name="crash_toast_text">La app crasheó, vos podes ayudar!</string>
+    <string name="credit">Credito</string>
+    <string name="date">Dia</string>
+    <string name="debit">Debito</string>
+    <string name="reference">Referencia</string>
+    <string name="total">Total</string>
+    <string name="app_name">Simple Contabilidad</string>
+    <string name="loading">Cargando...</string>
+</resources>
