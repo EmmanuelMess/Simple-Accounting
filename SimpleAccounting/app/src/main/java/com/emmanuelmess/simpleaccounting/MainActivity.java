@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
 		final LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		final ScrollView scrollView = (ScrollView) findViewById(R.id.scrollView);
+		assert scrollView != null;
 		table = (TableLayout) findViewById(R.id.table);
 		f = new FileIO(getApplicationContext());
 
@@ -83,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
 		});
 
 		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+		assert fab != null;
 		fab.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
@@ -125,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
 		final EditText debt = (EditText) row.findViewById(R.id.editDebt),
 				credit = (EditText) row.findViewById(R.id.editCredit);
 
-		final TextView lastBalance = index > 1? (TextView) table.getChildAt(index-1).findViewById(R.id.editBalance):null,
+		final TextView lastBalance = index > 1? (TextView) table.getChildAt(index - 1).findViewById(R.id.editBalance):null,
 				balance = (TextView) row.findViewById(R.id.editBalance);
 
 		balance.setText(lastBalance != null? lastBalance.getText():"$ 0.0");
@@ -133,12 +135,10 @@ public class MainActivity extends AppCompatActivity {
 		TextWatcher watcher = new TextWatcher() {
 			@Override
 			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
 			}
 
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
-
 			}
 
 			@Override
@@ -194,9 +194,9 @@ public class MainActivity extends AppCompatActivity {
 		return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && Objects.equals(o1, o2)) || o1.equals(o2);
 	}
 
-	private boolean isTooLarge (TextView text, String newText) {
+	private boolean isTooLarge(TextView text, String newText) {
 		float textWidth = text.getPaint().measureText(newText);
-		return (textWidth+2 >= text.getMeasuredWidth ());
+		return (textWidth + 2 >= text.getMeasuredWidth());//2 for spacing between words
 	}
 
 }
