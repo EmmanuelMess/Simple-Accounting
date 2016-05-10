@@ -1,4 +1,4 @@
-package com.emmanuelmess.simpleaccounting.IO;
+package com.emmanuelmess.simpleaccounting;
 
 import android.content.ContentValues;
 import android.content.Context;

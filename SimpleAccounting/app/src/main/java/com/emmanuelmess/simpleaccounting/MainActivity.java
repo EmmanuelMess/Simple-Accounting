@@ -9,6 +9,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
@@ -18,8 +19,6 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.emmanuelmess.simpleaccounting.IO.FileIO;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -28,8 +27,10 @@ import java.util.Objects;
 public class MainActivity extends AppCompatActivity {
 	private TableLayout table = null;
 	private FileIO f;
-	private final int[] ids = {R.id.editDate, R.id.editRef, R.id.editCredit, R.id.editDebt, R.id.editBalance};
+	private final int[] editIDs = {R.id.editDate, R.id.editRef, R.id.editCredit, R.id.editDebit, R.id.textBalance},
+							textIDs = {R.id.textDate, R.id.textRef, R.id.textCredit, R.id.textDebit};
 	private float size, finalSize = 0;
+	private int editableRow = -1;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -47,9 +48,9 @@ public class MainActivity extends AppCompatActivity {
 		table.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
 			@Override
 			public void onGlobalLayout() {
-				int[] normalIDs = {R.id.date, R.id.ref, R.id.credit, R.id.debit, R.id.balance};
+				int[] headerIDs = {R.id.date, R.id.ref, R.id.credit, R.id.debit, R.id.balance};
 				View headerRow = table.getChildAt(0);
-				TextView lastColumn = (TextView) headerRow.findViewById(normalIDs[4]);
+				TextView lastColumn = (TextView) headerRow.findViewById(headerIDs[4]);
 
 				if (!isTooLarge(lastColumn, lastColumn.getText().toString())) {
 					if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN)
@@ -66,16 +67,23 @@ public class MainActivity extends AppCompatActivity {
 
 						View row = loadRow();
 
-						for (int j = 0; j < ids.length; j++) {
-							TextView t = (TextView) row.findViewById(ids[j]);
+						for (int j = 0; j < textIDs.length; j++) {
+							row.findViewById(editIDs[j]).setVisibility(View.GONE);
+
+							TextView t = (TextView) row.findViewById(textIDs[j]);
+							t.setVisibility(View.VISIBLE);
 							t.setTextSize(finalSize);
 							t.setText(dbRow[j]);
 						}
+
+						TextView t = (TextView) row.findViewById(R.id.textBalance);
+						t.setTextSize(finalSize);
+						t.setText(dbRow[4]);
 					}
 					scrollView.fullScroll(View.FOCUS_DOWN);
 				} else {
 					for (int i = 0; i < 5; i++) {
-						TextView t = (TextView) headerRow.findViewById(normalIDs[i]);
+						TextView t = (TextView) headerRow.findViewById(headerIDs[i]);
 						size = t.getTextSize() - 0.5f;
 						t.setTextSize(size);
 					}
@@ -95,11 +103,14 @@ public class MainActivity extends AppCompatActivity {
 
 					scrollView.fullScroll(View.FOCUS_DOWN);
 
+					currentEditableToView();
+					editableRow =  table.getChildCount() - 1;
+
 					f.newRow();
 					View row = loadRow();
 
-					for (int i = 0; i < 5; i++) {
-						TextView v = (TextView) row.findViewById(ids[i]);
+					for (int i = 0; i < editIDs.length; i++) {
+						TextView v = (TextView) row.findViewById(editIDs[i]);
 						v.setTextSize(finalSize);
 					}
 
@@ -114,9 +125,18 @@ public class MainActivity extends AppCompatActivity {
 		});
 	}
 
+	 @Override
+	 public void onBackPressed() {
+		 if(editableRow != -1)
+			 currentEditableToView();
+		  else
+			 super.onBackPressed();
+	 }
+
 	private View loadRow() {
 		int rowViewIndex = table.getChildCount() - 1, dbIndex = rowViewIndex - 1;
 		View row = table.getChildAt(rowViewIndex);
+		setListener(rowViewIndex);
 		checkStatus(rowViewIndex, row);
 		f.update(dbIndex, FileIO.COLUMNS[4], "$0.0");
 		addToDB(dbIndex, row);
@@ -124,11 +144,11 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	private void checkStatus(final int index, View row) {
-		final EditText debt = (EditText) row.findViewById(R.id.editDebt),
+		final EditText debit = (EditText) row.findViewById(R.id.editDebit),
 				credit = (EditText) row.findViewById(R.id.editCredit);
 
-		final TextView lastBalance = index > 1? (TextView) table.getChildAt(index - 1).findViewById(R.id.editBalance):null,
-				balance = (TextView) row.findViewById(R.id.editBalance);
+		final TextView lastBalance = index > 1? (TextView) table.getChildAt(index - 1).findViewById(R.id.textBalance):null,
+				balance = (TextView) row.findViewById(R.id.textBalance);
 
 		balance.setText(lastBalance != null? lastBalance.getText():"$ 0.0");
 
@@ -146,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
 				double balanceNum;
 				balanceNum = lastBalance != null? parse(lastBalance.getText().toString().substring(1)):0;
 				balanceNum += parse(credit.getText().toString());
-				balanceNum -= parse(debt.getText().toString());
+				balanceNum -= parse(debit.getText().toString());
 
 				String s = "$ " + balanceNum;
 				balance.setText(s);
@@ -154,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
 		};
 
 		credit.addTextChangedListener(watcher);
-		debt.addTextChangedListener(watcher);
+		debit.addTextChangedListener(watcher);
 		if (lastBalance != null)
 			lastBalance.addTextChangedListener(watcher);
 	}
@@ -168,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	private void addToDB(final int index, View row) {
-		for (int i = 0; i < ids.length; i++) {
+		for (int i = 0; i < editIDs.length; i++) {
 			final String rowName = FileIO.COLUMNS[i];
 			TextWatcher watcher = new TextWatcher() {
 				@Override
@@ -186,7 +206,53 @@ public class MainActivity extends AppCompatActivity {
 				}
 			};
 
-			((TextView) row.findViewById(ids[i])).addTextChangedListener(watcher);
+			((TextView) row.findViewById(editIDs[i])).addTextChangedListener(watcher);
+		}
+	}
+
+	private void setListener(final int rowIndex) {
+		final View row = table.getChildAt(rowIndex);
+
+		row.setOnTouchListener(new View.OnTouchListener() {
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				currentEditableToView();
+
+				for (int i = 0; i < textIDs.length; i++) {
+					TextView t1 = (TextView) row.findViewById(textIDs[i]);
+					EditText t = (EditText) row.findViewById(editIDs[i]);
+
+					t.setText(t1.getText());
+					t1.setText("");
+
+					t1.setVisibility(View.GONE);
+					t.setVisibility(View.VISIBLE);
+
+					t.setTextSize(finalSize);
+				}
+				editableRow = rowIndex;
+				return false;
+			}
+		});
+	}
+
+	private void currentEditableToView() {
+		if(editableRow != -1) {
+			View row = table.getChildAt(editableRow);
+
+			for (int i = 0; i < textIDs.length; i++) {
+				EditText t = (EditText) row.findViewById(editIDs[i]);
+				TextView t1 = (TextView) row.findViewById(textIDs[i]);
+
+				t1.setText(t.getText());
+				t.setText("");
+
+				t.setVisibility(View.GONE);
+				t1.setVisibility(View.VISIBLE);
+
+				t1.setTextSize(finalSize);
+			}
+			editableRow = -1;
 		}
 	}
 

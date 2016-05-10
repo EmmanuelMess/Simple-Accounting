@@ -17,6 +17,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/table"
+                android:weightSum="5"
                 android:stretchColumns="*">
 
                 <TableRow
@@ -30,7 +31,9 @@
                         android:id="@+id/date"
                         android:layout_column="0"
                         android:text="@string/date"
-                        android:gravity="center"/>
+                        android:gravity="center"
+                        android:layout_weight="1"
+                        android:singleLine="true"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -39,7 +42,9 @@
                         android:id="@+id/ref"
                         android:layout_column="1"
                         android:text="@string/reference"
-                        android:gravity="center"/>
+                        android:gravity="center"
+                        android:layout_weight="1"
+                        android:singleLine="true"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -48,7 +53,9 @@
                         android:id="@+id/credit"
                         android:layout_column="2"
                         android:text="@string/credit"
-                        android:gravity="center"/>
+                        android:gravity="center"
+                        android:layout_weight="1"
+                        android:singleLine="true"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -57,7 +64,9 @@
                         android:id="@+id/debit"
                         android:layout_column="3"
                         android:text="@string/debit"
-                        android:gravity="center"/>
+                        android:gravity="center"
+                        android:layout_weight="1"
+                        android:singleLine="true"/>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -66,7 +75,9 @@
                         android:id="@+id/balance"
                         android:layout_column="4"
                         android:text="@string/balance"
-                        android:gravity="center"/>
+                        android:gravity="center"
+                        android:layout_weight="1"
+                        android:singleLine="true"/>
                 </TableRow>
             </TableLayout>
             <android.support.v4.widget.Space
