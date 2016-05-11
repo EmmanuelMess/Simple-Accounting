@@ -16,6 +16,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -135,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
 
 	private View loadRow() {
 		int rowViewIndex = table.getChildCount() - 1, dbIndex = rowViewIndex - 1;
-		View row = table.getChildAt(rowViewIndex);
+		TableRow row = (TableRow) table.getChildAt(rowViewIndex);
 		setListener(rowViewIndex);
 		checkStatus(rowViewIndex, row);
 		f.update(dbIndex, FileIO.COLUMNS[4], "$0.0");
@@ -143,14 +144,11 @@ public class MainActivity extends AppCompatActivity {
 		return row;
 	}
 
-	private void checkStatus(final int index, View row) {
+	private void checkStatus(final int index, TableRow row) {
 		final EditText debit = (EditText) row.findViewById(R.id.editDebit),
 				credit = (EditText) row.findViewById(R.id.editCredit);
-
 		final TextView lastBalance = index > 1? (TextView) table.getChildAt(index - 1).findViewById(R.id.textBalance):null,
 				balance = (TextView) row.findViewById(R.id.textBalance);
-
-		balance.setText(lastBalance != null? lastBalance.getText():"$ 0.0");
 
 		TextWatcher watcher = new TextWatcher() {
 			@Override
@@ -163,13 +161,34 @@ public class MainActivity extends AppCompatActivity {
 
 			@Override
 			public void afterTextChanged(Editable editable) {
-				double balanceNum;
-				balanceNum = lastBalance != null? parse(lastBalance.getText().toString().substring(1)):0;
-				balanceNum += parse(credit.getText().toString());
-				balanceNum -= parse(debit.getText().toString());
+				if(editableRow == index) {
+					balance.setText(lastBalance != null? lastBalance.getText():"$ 0.0");
 
-				String s = "$ " + balanceNum;
-				balance.setText(s);
+					double balanceNum;
+					balanceNum = lastBalance != null? parse(lastBalance.getText().toString().substring(1)):0;
+					balanceNum = balanceNum + parse(credit.getText().toString())
+												- parse(debit.getText().toString());
+
+					String s = "$ " + balanceNum;
+					balance.setText(s);
+
+					for (int i = index + 1; i < table.getChildCount(); i++) {
+						TableRow row = (TableRow) table.getChildAt(i);
+
+						TextView lastBalanceText = (TextView) table.getChildAt(i - 1).findViewById(R.id.textBalance),
+								creditText = (TextView) row.findViewById(R.id.textCredit),
+								debitText = (TextView) row.findViewById(R.id.textDebit),
+								balanceText = (TextView) row.findViewById(R.id.textBalance);
+
+						double b;
+						b = parse(lastBalanceText.getText().toString().substring(1));
+						b = b + parse(creditText.getText().toString())
+								- parse(debitText.getText().toString());
+
+						String str = "$ " + b;
+						balanceText.setText(str);
+					}
+				}
 			}
 		};
 
@@ -243,6 +262,8 @@ public class MainActivity extends AppCompatActivity {
 			for (int i = 0; i < textIDs.length; i++) {
 				EditText t = (EditText) row.findViewById(editIDs[i]);
 				TextView t1 = (TextView) row.findViewById(textIDs[i]);
+
+				t.setOnTouchListener(null);
 
 				t1.setText(t.getText());
 				t.setText("");
