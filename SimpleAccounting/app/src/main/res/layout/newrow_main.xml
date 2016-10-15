@@ -15,21 +15,21 @@
         android:inputType="date"
         android:imeOptions="actionNext"
         android:maxLength="2"
-        android:singleLine="true"
         android:visibility="visible"
         android:layout_weight="1"
-        android:gravity="left"/>
+        android:gravity="start"
+        android:maxLines="1"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="40dp"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:id="@+id/textDate"
         android:layout_column="0"
-        android:singleLine="true"
-        android:gravity="left|center_vertical"
+        android:gravity="start|center_vertical"
         android:visibility="gone"
         android:layout_weight="1"
-        android:ems="2"/>
+        android:ems="2"
+        android:maxLines="1"/>
 
     <EditText
         android:layout_width="wrap_content"
@@ -40,21 +40,21 @@
         android:hint="@string/reference"
         android:imeOptions="actionNext"
         android:inputType="text"
-        android:singleLine="true"
         android:gravity="center"
         android:visibility="visible"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:maxLines="1"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="40dp"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:id="@+id/textRef"
         android:layout_column="1"
-        android:singleLine="true"
         android:gravity="center"
         android:visibility="gone"
         android:layout_weight="1"
-        android:ems="4"/>
+        android:ems="4"
+        android:maxLines="1"/>
 
     <EditText
         android:layout_width="wrap_content"
@@ -65,21 +65,21 @@
         android:hint="@string/credit"
         android:imeOptions="actionNext"
         android:inputType="numberDecimal"
-        android:singleLine="true"
         android:gravity="center"
         android:visibility="visible"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:maxLines="1"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="40dp"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:id="@+id/textCredit"
         android:layout_column="2"
-        android:singleLine="true"
         android:gravity="center"
         android:visibility="gone"
         android:layout_weight="1"
-        android:ems="3"/>
+        android:ems="3"
+        android:maxLines="1"/>
 
     <EditText
         android:layout_width="wrap_content"
@@ -90,21 +90,21 @@
         android:hint="@string/debit"
         android:imeOptions="actionDone"
         android:inputType="numberDecimal"
-        android:singleLine="true"
         android:visibility="visible"
         android:layout_weight="1"
-        android:gravity="center"/>
+        android:gravity="center"
+        android:maxLines="1"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="40dp"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:id="@+id/textDebit"
         android:layout_column="3"
-        android:singleLine="true"
         android:gravity="center"
         android:visibility="gone"
         android:layout_weight="1"
-        android:ems="3"/>
+        android:ems="3"
+        android:maxLines="1"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -113,8 +113,7 @@
         android:id="@+id/textBalance"
         android:layout_column="4"
         android:maxLines="1"
-        android:singleLine="true"
         android:layout_weight="1"
-        android:gravity="center_vertical|right"
+        android:gravity="center_vertical|end"
         android:ems="3"/>
 </TableRow>

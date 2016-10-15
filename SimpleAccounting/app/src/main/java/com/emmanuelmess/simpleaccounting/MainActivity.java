@@ -9,7 +9,6 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
@@ -232,9 +231,9 @@ public class MainActivity extends AppCompatActivity {
 	private void setListener(final int rowIndex) {
 		final View row = table.getChildAt(rowIndex);
 
-		row.setOnTouchListener(new View.OnTouchListener() {
+		row.setOnLongClickListener(new View.OnLongClickListener() {
 			@Override
-			public boolean onTouch(View v, MotionEvent event) {
+			public boolean onLongClick(View v) {
 				currentEditableToView();
 
 				for (int i = 0; i < textIDs.length; i++) {
@@ -250,7 +249,7 @@ public class MainActivity extends AppCompatActivity {
 					t.setTextSize(finalSize);
 				}
 				editableRow = rowIndex;
-				return false;
+				return true;
 			}
 		});
 	}
