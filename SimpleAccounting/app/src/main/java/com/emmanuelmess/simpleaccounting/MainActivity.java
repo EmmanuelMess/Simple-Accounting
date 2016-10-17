@@ -1,6 +1,7 @@
 package com.emmanuelmess.simpleaccounting;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -24,7 +25,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load every sum on table load and not save it
 	private TableLayout table = null;
 	private FileIO f;
 	private final int[] editIDs = {R.id.editDate, R.id.editRef, R.id.editCredit, R.id.editDebit, R.id.textBalance},
@@ -58,29 +59,49 @@ public class MainActivity extends AppCompatActivity {
 					else//noinspection deprecation
 						table.getViewTreeObserver().removeGlobalOnLayoutListener(this);
 
-					findViewById(R.id.space).setMinimumHeight(findViewById(R.id.fab).getHeight() - findViewById(R.id.fab).getPaddingTop());
+					findViewById(R.id.space).setMinimumHeight(findViewById(R.id.fab).getHeight()
+							- findViewById(R.id.fab).getPaddingTop());
 
-					finalSize = size;
-					String[][] dbRows = f.getAll();
-					for (String[] dbRow : dbRows) {
-						inflater.inflate(R.layout.newrow_main, table);
-
-						View row = loadRow();
-
-						for (int j = 0; j < textIDs.length; j++) {
-							row.findViewById(editIDs[j]).setVisibility(View.GONE);
-
-							TextView t = (TextView) row.findViewById(textIDs[j]);
-							t.setVisibility(View.VISIBLE);
-							t.setTextSize(finalSize);
-							t.setText(dbRow[j]);
+					(new AsyncTask<Void, Void, String[][]>() {
+						@Override
+						protected String[][] doInBackground(Void... p) {
+							return f.getAll();
 						}
 
-						TextView t = (TextView) row.findViewById(R.id.textBalance);
-						t.setTextSize(finalSize);
-						t.setText(dbRow[4]);
-					}
-					scrollView.fullScroll(View.FOCUS_DOWN);
+						@Override
+						protected void onPostExecute(String[][] dbRows) {
+							finalSize = size;
+							float memBalance = 0;
+							for (String[] dbRow : dbRows) {
+								inflater.inflate(R.layout.newrow_main, table);
+
+								View row = loadRow();
+
+								for (int j = 0; j < textIDs.length; j++) {
+									row.findViewById(editIDs[j]).setVisibility(View.GONE);
+
+									TextView t = (TextView) row.findViewById(textIDs[j]);
+									t.setVisibility(View.VISIBLE);
+									t.setTextSize(finalSize);
+									t.setText(dbRow[j]);
+								}
+
+								TextView t = (TextView) row.findViewById(R.id.textBalance);
+								t.setTextSize(finalSize);
+								if (dbRow[2] != null)
+									memBalance += Float.valueOf(dbRow[2]);
+								if (dbRow[3] != null)
+									memBalance -= Float.valueOf(dbRow[3]);
+
+								String s = "$ " + String.valueOf(memBalance);
+								t.setText(s);
+							}
+
+							scrollView.fullScroll(View.FOCUS_DOWN);
+
+							findViewById(R.id.progressBar).setVisibility(View.GONE);
+						}
+					}).execute();
 				} else {
 					for (int i = 0; i < 5; i++) {
 						TextView t = (TextView) headerRow.findViewById(headerIDs[i]);
@@ -93,34 +114,31 @@ public class MainActivity extends AppCompatActivity {
 
 		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 		assert fab != null;
-		fab.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				if (finalSize == 0) {
-					Toast.makeText(getApplicationContext(), R.string.loading, Toast.LENGTH_SHORT).show();
-				} else {
-					inflater.inflate(R.layout.newrow_main, table);
+		fab.setOnClickListener(view->{
+			if (finalSize == 0) {
+				Toast.makeText(getApplicationContext(), R.string.loading, Toast.LENGTH_SHORT).show();
+			} else {
+				inflater.inflate(R.layout.newrow_main, table);
 
-					scrollView.fullScroll(View.FOCUS_DOWN);
+				scrollView.fullScroll(View.FOCUS_DOWN);
 
-					currentEditableToView();
-					editableRow =  table.getChildCount() - 1;
+				currentEditableToView();
+				editableRow =  table.getChildCount() - 1;
 
-					f.newRow();
-					View row = loadRow();
+				f.newRow();
+				View row = loadRow();
 
-					for (int i = 0; i < editIDs.length; i++) {
-						TextView v = (TextView) row.findViewById(editIDs[i]);
-						v.setTextSize(finalSize);
-					}
-
-					EditText date = (EditText) row.findViewById(R.id.editDate);
-					date.setText(new SimpleDateFormat("dd", Locale.getDefault()).format(new Date()));
-
-					row.requestFocus();
-					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-					imm.showSoftInput(date, InputMethodManager.SHOW_IMPLICIT);
+				for (int i = 0; i < editIDs.length; i++) {
+					TextView v = (TextView) row.findViewById(editIDs[i]);
+					v.setTextSize(finalSize);
 				}
+
+				EditText date = (EditText) row.findViewById(R.id.editDate);
+				date.setText(new SimpleDateFormat("dd", Locale.getDefault()).format(new Date()));
+
+				row.requestFocus();
+				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.showSoftInput(date, InputMethodManager.SHOW_IMPLICIT);
 			}
 		});
 	}
@@ -138,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
 		TableRow row = (TableRow) table.getChildAt(rowViewIndex);
 		setListener(rowViewIndex);
 		checkStatus(rowViewIndex, row);
-		f.update(dbIndex, FileIO.COLUMNS[4], "$0.0");
+		//f.update(dbIndex, FileIO.COLUMNS[4], "$0.0");// TODO: 16/10/2016 needs testing
 		addToDB(dbIndex, row);
 		return row;
 	}
@@ -206,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	private void addToDB(final int index, View row) {
-		for (int i = 0; i < editIDs.length; i++) {
+		for (int i = 0; i < editIDs.length-1; i++) {
 			final String rowName = FileIO.COLUMNS[i];
 			TextWatcher watcher = new TextWatcher() {
 				@Override
@@ -231,26 +249,23 @@ public class MainActivity extends AppCompatActivity {
 	private void setListener(final int rowIndex) {
 		final View row = table.getChildAt(rowIndex);
 
-		row.setOnLongClickListener(new View.OnLongClickListener() {
-			@Override
-			public boolean onLongClick(View v) {
-				currentEditableToView();
+		row.setOnLongClickListener(v->{
+			currentEditableToView();
 
-				for (int i = 0; i < textIDs.length; i++) {
-					TextView t1 = (TextView) row.findViewById(textIDs[i]);
-					EditText t = (EditText) row.findViewById(editIDs[i]);
+			for (int i = 0; i < textIDs.length; i++) {
+				TextView t1 = (TextView) row.findViewById(textIDs[i]);
+				EditText t = (EditText) row.findViewById(editIDs[i]);
 
-					t.setText(t1.getText());
-					t1.setText("");
+				t.setText(t1.getText());
+				t1.setText("");
 
-					t1.setVisibility(View.GONE);
-					t.setVisibility(View.VISIBLE);
+				t1.setVisibility(View.GONE);
+				t.setVisibility(View.VISIBLE);
 
-					t.setTextSize(finalSize);
-				}
-				editableRow = rowIndex;
-				return true;
+				t.setTextSize(finalSize);
 			}
+			editableRow = rowIndex;
+			return true;
 		});
 	}
 

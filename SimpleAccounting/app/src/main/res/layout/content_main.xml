@@ -1,95 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.emmanuelmess.simpleaccounting.MainActivity"
     tools:showIn="@layout/activity_main"
-    android:gravity="center_horizontal"
-    android:id="@+id/scrollView">
+    android:layout_width="match_parent">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:id="@+id/scrollView">
+
         <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <TableLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/table"
-                android:weightSum="10"
-                android:stretchColumns="*">
-
-                <TableRow
+                android:layout_height="wrap_content">
+                <TableLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                    android:layout_height="wrap_content"
+                    android:id="@+id/table"
+                    android:weightSum="10"
+                    android:stretchColumns="*">
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceLarge"
-                        android:id="@+id/date"
-                        android:layout_column="0"
-                        android:text="@string/date"
-                        android:gravity="start"
-                        android:layout_weight="1"
-                        android:maxLines="1"/>
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        tools:ignore="UselessParent">
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceLarge"
-                        android:id="@+id/ref"
-                        android:layout_column="1"
-                        android:text="@string/reference"
-                        android:gravity="center"
-                        android:layout_weight="3"
-                        android:maxLines="1"/>
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?android:attr/textAppearanceLarge"
+                            android:id="@+id/date"
+                            android:layout_column="0"
+                            android:text="@string/date"
+                            android:gravity="start"
+                            android:layout_weight="1"
+                            android:maxLines="1"/>
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceLarge"
-                        android:id="@+id/credit"
-                        android:layout_column="2"
-                        android:text="@string/credit"
-                        android:gravity="center"
-                        android:layout_weight="2"
-                        android:maxLines="1"/>
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?android:attr/textAppearanceLarge"
+                            android:id="@+id/ref"
+                            android:layout_column="1"
+                            android:text="@string/reference"
+                            android:gravity="center"
+                            android:layout_weight="3"
+                            android:maxLines="1"/>
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceLarge"
-                        android:id="@+id/debit"
-                        android:layout_column="3"
-                        android:text="@string/debit"
-                        android:gravity="center"
-                        android:layout_weight="2"
-                        android:maxLines="1"/>
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?android:attr/textAppearanceLarge"
+                            android:id="@+id/credit"
+                            android:layout_column="2"
+                            android:text="@string/credit"
+                            android:gravity="center"
+                            android:layout_weight="2"
+                            android:maxLines="1"/>
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceLarge"
-                        android:id="@+id/balance"
-                        android:layout_column="4"
-                        android:text="@string/balance"
-                        android:gravity="end"
-                        android:layout_weight="2"
-                        android:maxLines="1"/>
-                </TableRow>
-            </TableLayout>
-            <android.support.v4.widget.Space
-                android:id="@+id/space"
-                android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentBottom="true"
-                android:layout_below="@+id/table"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentStart="true"/>
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?android:attr/textAppearanceLarge"
+                            android:id="@+id/debit"
+                            android:layout_column="3"
+                            android:text="@string/debit"
+                            android:gravity="center"
+                            android:layout_weight="2"
+                            android:maxLines="1"/>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?android:attr/textAppearanceLarge"
+                            android:id="@+id/balance"
+                            android:layout_column="4"
+                            android:text="@string/balance"
+                            android:gravity="end"
+                            android:layout_weight="2"
+                            android:maxLines="1"/>
+                    </TableRow>
+                </TableLayout>
+                <android.support.v4.widget.Space
+                    android:id="@+id/space"
+                    android:layout_width="match_parent"
+                    android:layout_height="72dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_below="@+id/table"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentStart="true"/>
 
         </RelativeLayout>
-</ScrollView>
+    </ScrollView>
+
+    <ProgressBar
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBar"
+        android:layout_centerInParent="true"/>
+
+</RelativeLayout>
