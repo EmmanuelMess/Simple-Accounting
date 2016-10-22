@@ -39,7 +39,8 @@
                             android:text="@string/date"
                             android:gravity="start"
                             android:layout_weight="1"
-                            android:maxLines="1"/>
+                            android:maxLines="1"
+                            android:textSize="14sp"/>
 
                         <TextView
                             android:layout_width="0dp"
@@ -50,7 +51,8 @@
                             android:text="@string/reference"
                             android:gravity="center"
                             android:layout_weight="3"
-                            android:maxLines="1"/>
+                            android:maxLines="1"
+                            android:textSize="14sp"/>
 
                         <TextView
                             android:layout_width="0dp"
@@ -61,7 +63,8 @@
                             android:text="@string/credit"
                             android:gravity="center"
                             android:layout_weight="2"
-                            android:maxLines="1"/>
+                            android:maxLines="1"
+                            android:textSize="14sp"/>
 
                         <TextView
                             android:layout_width="0dp"
@@ -72,7 +75,8 @@
                             android:text="@string/debit"
                             android:gravity="center"
                             android:layout_weight="2"
-                            android:maxLines="1"/>
+                            android:maxLines="1"
+                            android:textSize="14sp"/>
 
                         <TextView
                             android:layout_width="0dp"
@@ -83,7 +87,8 @@
                             android:text="@string/balance"
                             android:gravity="end"
                             android:layout_weight="2"
-                            android:maxLines="1"/>
+                            android:maxLines="1"
+                            android:textSize="14sp"/>
                     </TableRow>
                 </TableLayout>
                 <android.support.v4.widget.Space

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
           android:layout_width="match_parent"
           android:layout_height="match_parent"
           android:baselineAligned="false"
@@ -18,7 +19,8 @@
         android:visibility="visible"
         android:layout_weight="1"
         android:gravity="start"
-        android:maxLines="1"/>
+        android:maxLines="1"
+        android:textSize="12sp"/>
     <TextView
         android:layout_width="0dp"
         android:layout_height="40dp"
@@ -29,7 +31,8 @@
         android:visibility="gone"
         android:layout_weight="1"
         android:ems="2"
-        android:maxLines="1"/>
+        android:maxLines="1"
+        android:textSize="12sp"/>
 
     <EditText
         android:layout_width="0dp"
@@ -43,7 +46,8 @@
         android:gravity="center"
         android:visibility="visible"
         android:layout_weight="3"
-        android:maxLines="1"/>
+        android:maxLines="1"
+        android:textSize="12sp"/>
     <TextView
         android:layout_width="0dp"
         android:layout_height="40dp"
@@ -54,7 +58,8 @@
         android:visibility="gone"
         android:layout_weight="3"
         android:ems="4"
-        android:maxLines="1"/>
+        android:maxLines="1"
+        android:textSize="12sp"/>
 
     <EditText
         android:layout_width="0dp"
@@ -68,7 +73,8 @@
         android:gravity="center"
         android:visibility="visible"
         android:layout_weight="2"
-        android:maxLines="1"/>
+        android:maxLines="1"
+        android:textSize="12sp"/>
     <TextView
         android:layout_width="0dp"
         android:layout_height="40dp"
@@ -79,7 +85,8 @@
         android:visibility="gone"
         android:layout_weight="2"
         android:ems="3"
-        android:maxLines="1"/>
+        android:maxLines="1"
+        android:textSize="12sp"/>
 
     <EditText
         android:layout_width="0dp"
@@ -93,7 +100,8 @@
         android:visibility="visible"
         android:layout_weight="2"
         android:gravity="center"
-        android:maxLines="1"/>
+        android:maxLines="1"
+        android:textSize="12sp"/>
     <TextView
         android:layout_width="0dp"
         android:layout_height="40dp"
@@ -104,7 +112,8 @@
         android:visibility="gone"
         android:layout_weight="2"
         android:ems="3"
-        android:maxLines="1"/>
+        android:maxLines="1"
+        android:textSize="12sp"/>
 
     <TextView
         android:layout_width="0dp"
@@ -115,5 +124,6 @@
         android:maxLines="1"
         android:layout_weight="2"
         android:gravity="center_vertical|end"
-        android:ems="3"/>
+        android:ems="3"
+        android:textSize="12sp"/>
 </TableRow>

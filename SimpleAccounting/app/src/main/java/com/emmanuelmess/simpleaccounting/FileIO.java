@@ -29,7 +29,9 @@ class FileIO extends SQLiteOpenHelper {
 	}
 
 	@Override
-	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {}
+	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		// TODO: 17/10/2016 change for v1.0 -> v2.0
+	}
 
 	void newRow() {
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[]{NUMBER_COLUMN}, null, null, null,
@@ -55,7 +57,7 @@ class FileIO extends SQLiteOpenHelper {
 		CV.clear();
 	}
 
-	public String[][] getAll() {
+	String[][] getAll() {
 		String [][] data;
 
 		Cursor c = getReadableDatabase().query(TABLE_NAME, COLUMNS, null, null, null,
