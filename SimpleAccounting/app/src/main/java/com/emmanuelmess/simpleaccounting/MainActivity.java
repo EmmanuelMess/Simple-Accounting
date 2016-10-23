@@ -1,6 +1,9 @@
 package com.emmanuelmess.simpleaccounting;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Point;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -15,21 +18,27 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.emmanuelmess.simpleaccounting.IO.FileIO;
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.SimpleShowcaseEventListener;
+import com.github.amlcurran.showcaseview.targets.Target;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load every sum on table load and not save it
+	private final String PREFS_NAME = "shared prefs", PREFS_FIRST_RUN = "first_run";
+
 	private TableLayout table = null;
 	private FileIO f;
-	private final int[] ids = {R.id.editDate, R.id.editRef, R.id.editCredit, R.id.editDebt, R.id.editBalance};
-	private float size, finalSize = 0;
+	private final int[] editIDs = {R.id.editDate, R.id.editRef, R.id.editCredit, R.id.editDebit, R.id.textBalance},
+			textIDs = {R.id.textDate, R.id.textRef, R.id.textCredit, R.id.textDebit};
+	private int editableRow = -1;
+	private boolean destroyFirst = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -40,121 +49,206 @@ public class MainActivity extends AppCompatActivity {
 
 		final LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		final ScrollView scrollView = (ScrollView) findViewById(R.id.scrollView);
+		assert scrollView != null;
 		table = (TableLayout) findViewById(R.id.table);
 		f = new FileIO(getApplicationContext());
 
 		table.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
 			@Override
 			public void onGlobalLayout() {
-				int[] normalIDs = {R.id.date, R.id.ref, R.id.credit, R.id.debit, R.id.balance};
-				View headerRow = table.getChildAt(0);
-				TextView lastColumn = (TextView) headerRow.findViewById(normalIDs[4]);
+				if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN)
+					table.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+				else//noinspection deprecation
+					table.getViewTreeObserver().removeGlobalOnLayoutListener(this);
 
-				if (!isTooLarge(lastColumn, lastColumn.getText().toString())) {
-					if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN)
-						table.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-					else//noinspection deprecation
-						table.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+				findViewById(R.id.space).setMinimumHeight(findViewById(R.id.fab).getHeight()
+						- findViewById(R.id.fab).getPaddingTop());
 
-					findViewById(R.id.space).setMinimumHeight(findViewById(R.id.fab).getHeight() - findViewById(R.id.fab).getPaddingTop());
+				(new AsyncTask<Void, Void, String[][]>() {
+					@Override
+					protected String[][] doInBackground(Void... p) {
+						return f.getAll();
+					}
 
-					finalSize = size;
-					String[][] dbRows = f.getAll();
-					for (String[] dbRow : dbRows) {
-						inflater.inflate(R.layout.newrow_main, table);
+					@Override
+					protected void onPostExecute(String[][] dbRows) {
+						float memBalance = 0;
+						for (String[] dbRow : dbRows) {
+							inflater.inflate(R.layout.newrow_main, table);
 
-						View row = loadRow();
+							View row = loadRow();
 
-						for (int j = 0; j < ids.length; j++) {
-							TextView t = (TextView) row.findViewById(ids[j]);
-							t.setTextSize(finalSize);
-							t.setText(dbRow[j]);
+							for (int j = 0; j < textIDs.length; j++) {
+								row.findViewById(editIDs[j]).setVisibility(View.GONE);
+
+								TextView t = (TextView) row.findViewById(textIDs[j]);
+								t.setVisibility(View.VISIBLE);
+								t.setText(dbRow[j]);
+							}
+
+							TextView t = (TextView) row.findViewById(R.id.textBalance);
+							if (dbRow[2] != null)
+								memBalance += Float.valueOf(dbRow[2]);
+							if (dbRow[3] != null)
+								memBalance -= Float.valueOf(dbRow[3]);
+
+							String s = "$ " + String.valueOf(memBalance);
+							t.setText(s);
 						}
+
+						scrollView.fullScroll(View.FOCUS_DOWN);
+
+						findViewById(R.id.progressBar).setVisibility(View.GONE);
+
+						loadShowcaseView(inflater, scrollView);
 					}
-					scrollView.fullScroll(View.FOCUS_DOWN);
-				} else {
-					for (int i = 0; i < 5; i++) {
-						TextView t = (TextView) headerRow.findViewById(normalIDs[i]);
-						size = t.getTextSize() - 0.5f;
-						t.setTextSize(size);
-					}
-				}
+				}).execute();
 			}
 		});
 
 		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-		fab.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				if (finalSize == 0) {
-					Toast.makeText(getApplicationContext(), R.string.loading, Toast.LENGTH_SHORT).show();
-				} else {
-					inflater.inflate(R.layout.newrow_main, table);
+		assert fab != null;
+		fab.setOnClickListener(view->{
+			inflater.inflate(R.layout.newrow_main, table);
 
-					scrollView.fullScroll(View.FOCUS_DOWN);
+			scrollView.fullScroll(View.FOCUS_DOWN);
 
-					f.newRow();
-					View row = loadRow();
+			currentEditableToView();
+			editableRow = table.getChildCount() - 1;
 
-					for (int i = 0; i < 5; i++) {
-						TextView v = (TextView) row.findViewById(ids[i]);
-						v.setTextSize(finalSize);
-					}
+			f.newRow();
+			View row = loadRow();
 
-					EditText date = (EditText) row.findViewById(R.id.editDate);
-					date.setText(new SimpleDateFormat("dd", Locale.getDefault()).format(new Date()));
+			EditText date = (EditText) row.findViewById(R.id.editDate);
+			date.setText(new SimpleDateFormat("dd", Locale.getDefault()).format(new Date()));
 
-					row.requestFocus();
-					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-					imm.showSoftInput(date, InputMethodManager.SHOW_IMPLICIT);
-				}
-			}
+			row.requestFocus();
+			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.showSoftInput(date, InputMethodManager.SHOW_IMPLICIT);
 		});
+	}
+
+	@Override
+	public void onBackPressed() {
+		if (editableRow != -1)
+			currentEditableToView();
+		else
+			super.onBackPressed();
+	}
+
+	private void loadShowcaseView(LayoutInflater inflater, ScrollView scrollView) {
+		SharedPreferences myPrefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+		boolean isFirstRun = myPrefs.getBoolean(PREFS_FIRST_RUN, false);
+		if (isFirstRun || BuildConfig.DEBUG) {
+
+			if (table.getChildAt(1) == null) {
+				inflater.inflate(R.layout.newrow_main, table);
+
+				scrollView.fullScroll(View.FOCUS_DOWN);
+
+				editableRow = 1;
+				View row = table.getChildAt(1);
+
+				EditText date = (EditText) row.findViewById(R.id.editDate);
+				date.setText(new SimpleDateFormat("dd", Locale.getDefault()).format(new Date()));
+				EditText ref = (EditText) row.findViewById(R.id.editRef);
+				ref.setText(R.string.showcase_example_ref);
+				EditText credit = (EditText) row.findViewById(R.id.editCredit);
+				credit.setText("0");
+				EditText debit = (EditText) row.findViewById(R.id.editDebit);
+				debit.setText("100");
+				TextView balance = (TextView) row.findViewById(R.id.textBalance);
+				balance.setText("$ -100.0");
+
+				currentEditableToView();
+
+				destroyFirst = true;
+			}
+
+			Target target = ()->{
+				View row = table.getChildAt(1);
+				int[] location = new int[2];
+				row.getLocationInWindow(location);
+				return new Point(location[0] + row.getWidth()/2, location[1] + row.getHeight()/2);
+			};
+
+			new ShowcaseView.Builder(this)
+					.withMaterialShowcase()
+					.setTarget(target)
+					.setContentTitle(R.string.showcase_main_title)
+					.setShowcaseEventListener(new SimpleShowcaseEventListener() {
+						@Override
+						public void onShowcaseViewHide(ShowcaseView showcaseView) {
+							if (destroyFirst)
+								table.removeAllViews();
+						}
+					})
+					.build();
+
+			SharedPreferences.Editor pref_editor = myPrefs.edit();
+			pref_editor.putBoolean(PREFS_FIRST_RUN, false);
+			pref_editor.apply();
+		}
 	}
 
 	private View loadRow() {
 		int rowViewIndex = table.getChildCount() - 1, dbIndex = rowViewIndex - 1;
-		View row = table.getChildAt(rowViewIndex);
+		TableRow row = (TableRow) table.getChildAt(rowViewIndex);
+		setListener(rowViewIndex);
 		checkStatus(rowViewIndex, row);
-		f.update(dbIndex, FileIO.COLUMNS[4], "$0.0");
+		//f.update(dbIndex, FileIO.COLUMNS[4], "$0.0");// TODO: 16/10/2016 needs testing
 		addToDB(dbIndex, row);
 		return row;
 	}
 
-	private void checkStatus(final int index, View row) {
-		final EditText debt = (EditText) row.findViewById(R.id.editDebt),
+	private void checkStatus(final int index, TableRow row) {
+		final EditText debit = (EditText) row.findViewById(R.id.editDebit),
 				credit = (EditText) row.findViewById(R.id.editCredit);
-
-		final TextView lastBalance = index > 1? (TextView) table.getChildAt(index-1).findViewById(R.id.editBalance):null,
-				balance = (TextView) row.findViewById(R.id.editBalance);
-
-		balance.setText(lastBalance != null? lastBalance.getText():"$ 0.0");
+		final TextView lastBalance = index > 1? (TextView) table.getChildAt(index - 1).findViewById(R.id.textBalance):null,
+				balance = (TextView) row.findViewById(R.id.textBalance);
 
 		TextWatcher watcher = new TextWatcher() {
 			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-			}
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
 			@Override
-			public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-			}
+			public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
 			@Override
 			public void afterTextChanged(Editable editable) {
-				double balanceNum;
-				balanceNum = lastBalance != null? parse(lastBalance.getText().toString().substring(1)):0;
-				balanceNum += parse(credit.getText().toString());
-				balanceNum -= parse(debt.getText().toString());
+				if (editableRow == index) {
+					balance.setText(lastBalance != null? lastBalance.getText():"$ 0.0");
 
-				String s = "$ " + balanceNum;
-				balance.setText(s);
+					double balanceNum;
+					balanceNum = lastBalance != null? parse(lastBalance.getText().toString().substring(1)):0;
+					balanceNum = balanceNum + parse(credit.getText().toString())
+							- parse(debit.getText().toString());
+
+					String s = "$ " + balanceNum;
+					balance.setText(s);
+
+					for (int i = index + 1; i < table.getChildCount(); i++) {
+						TableRow row = (TableRow) table.getChildAt(i);
+
+						TextView lastBalanceText = (TextView) table.getChildAt(i - 1).findViewById(R.id.textBalance),
+								creditText = (TextView) row.findViewById(R.id.textCredit),
+								debitText = (TextView) row.findViewById(R.id.textDebit),
+								balanceText = (TextView) row.findViewById(R.id.textBalance);
+
+						double b;
+						b = parse(lastBalanceText.getText().toString().substring(1));
+						b = b + parse(creditText.getText().toString())
+								- parse(debitText.getText().toString());
+
+						String str = "$ " + b;
+						balanceText.setText(str);
+					}
+				}
 			}
 		};
 
 		credit.addTextChangedListener(watcher);
-		debt.addTextChangedListener(watcher);
+		debit.addTextChangedListener(watcher);
 		if (lastBalance != null)
 			lastBalance.addTextChangedListener(watcher);
 	}
@@ -168,7 +262,7 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	private void addToDB(final int index, View row) {
-		for (int i = 0; i < ids.length; i++) {
+		for (int i = 0; i < editIDs.length - 1; i++) {
 			final String rowName = FileIO.COLUMNS[i];
 			TextWatcher watcher = new TextWatcher() {
 				@Override
@@ -186,17 +280,64 @@ public class MainActivity extends AppCompatActivity {
 				}
 			};
 
-			((TextView) row.findViewById(ids[i])).addTextChangedListener(watcher);
+			((TextView) row.findViewById(editIDs[i])).addTextChangedListener(watcher);
+		}
+	}
+
+	private void setListener(final int rowIndex) {
+		final View row = table.getChildAt(rowIndex);
+
+		row.setOnLongClickListener(v->{
+			currentEditableToView();
+
+			for (int i = 0; i < textIDs.length; i++) {
+				TextView t1 = (TextView) row.findViewById(textIDs[i]);
+				EditText t = (EditText) row.findViewById(editIDs[i]);
+
+				t.setText(t1.getText());
+				t1.setText("");
+
+				t1.setVisibility(View.GONE);
+				t.setVisibility(View.VISIBLE);
+			}
+			editableRow = rowIndex;
+			return true;
+		});
+	}
+
+	private void currentEditableToView() {
+		if (editableRow != -1) {
+			View row = table.getChildAt(editableRow);
+			TextView balanceText = ((TextView) row.findViewById(R.id.textBalance));
+
+			if(balanceText.getText() == "") {
+				View previousRow = table.getChildAt(editableRow - 1);
+				if(previousRow != null) {
+					TextView lastBalance = (TextView) previousRow.findViewById(R.id.textBalance);
+					balanceText.setText(lastBalance.getText());
+				} else
+					balanceText.setText("$ 0.0");
+			}
+
+			editableRow = -1;
+
+			for (int i = 0; i < textIDs.length; i++) {
+				EditText t = (EditText) row.findViewById(editIDs[i]);
+				TextView t1 = (TextView) row.findViewById(textIDs[i]);
+
+				t.setOnTouchListener(null);
+
+				t1.setText(t.getText());
+				t.setText("");
+
+				t.setVisibility(View.GONE);
+				t1.setVisibility(View.VISIBLE);
+			}
 		}
 	}
 
 	private boolean equal(Object o1, Object o2) {
 		return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && Objects.equals(o1, o2)) || o1.equals(o2);
-	}
-
-	private boolean isTooLarge (TextView text, String newText) {
-		float textWidth = text.getPaint().measureText(newText);
-		return (textWidth+2 >= text.getMeasuredWidth ());
 	}
 
 }

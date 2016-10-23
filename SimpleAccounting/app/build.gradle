@@ -1,16 +1,25 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.2"
+    compileSdkVersion 25
+    buildToolsVersion "24.0.3"
 
     defaultConfig {
         applicationId "com.emmanuelmess.simpleaccounting"
-        minSdkVersion 8
-        targetSdkVersion 23
+        minSdkVersion 9
+        targetSdkVersion 25
         versionCode 1
         versionName "1.0"
+        jackOptions {
+            enabled true
+        }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
     buildTypes {
         release {
             minifyEnabled true
@@ -20,10 +29,11 @@ android {
 }
 
 dependencies {
-    compile(name:'acra-4.8.2', ext:'aar')
+    compile(name:'acra-4.8.5', ext:'aar')
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.1.1'
-    compile 'com.android.support:design:23.1.1'
+    compile 'com.android.support:appcompat-v7:25.0.0'
+    compile 'com.android.support:design:25.0.0'
+    compile 'com.github.amlcurran.showcaseview:library:5.4.3'
 }
 
 repositories{
