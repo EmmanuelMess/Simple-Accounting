@@ -98,7 +98,6 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 		assert fab != null;
 		fab.setOnClickListener(view->{
-
 				inflater.inflate(R.layout.newrow_main, table);
 
 				scrollView.fullScroll(View.FOCUS_DOWN);
@@ -244,6 +243,8 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 		if (editableRow != -1) {
 			View row = table.getChildAt(editableRow);
 
+			editableRow = -1;
+
 			for (int i = 0; i < textIDs.length; i++) {
 				EditText t = (EditText) row.findViewById(editIDs[i]);
 				TextView t1 = (TextView) row.findViewById(textIDs[i]);
@@ -256,7 +257,6 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 				t.setVisibility(View.GONE);
 				t1.setVisibility(View.VISIBLE);
 			}
-			editableRow = -1;
 		}
 	}
 
