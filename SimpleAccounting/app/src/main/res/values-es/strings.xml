@@ -9,4 +9,6 @@
     <string name="total">Total</string>
     <string name="app_name">Simple Contabilidad</string>
     <string name="loading">Cargando...</string>
+    <string name="showcase_main_title">Presiona por un par de segundos para editar</string>
+    <string name="showcase_example_ref">Supermercado</string>
 </resources>

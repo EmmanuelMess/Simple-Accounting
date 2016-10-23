@@ -8,4 +8,6 @@
     <string name="total">Total</string>
     <string name="crash_toast_text">The app has crashed, you can help!</string>
     <string name="loading">Loading...</string>
+    <string name="showcase_main_title">Tap and hold to edit</string>
+    <string name="showcase_example_ref">Supermarket</string>
 </resources>
