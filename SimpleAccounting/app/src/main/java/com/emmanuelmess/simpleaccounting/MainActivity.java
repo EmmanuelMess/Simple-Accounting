@@ -242,6 +242,13 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 	private void currentEditableToView() {
 		if (editableRow != -1) {
 			View row = table.getChildAt(editableRow);
+			TextView balanceText = ((TextView) row.findViewById(R.id.textBalance));
+
+			if(balanceText.getText() == "") {
+				View previousRow = table.getChildAt(editableRow - 1);
+				TextView lastBalance = (TextView) previousRow.findViewById(R.id.textBalance);
+				balanceText.setText(lastBalance != null? lastBalance.getText():"$ 0.0");
+			}
 
 			editableRow = -1;
 
