@@ -15,7 +15,7 @@ class FileIO extends SQLiteOpenHelper {
 	static final String[] COLUMNS = new String[] { "DATE", "REFERENCE", "CREDIT", "DEBT"};
 
 	private static final String NUMBER_COLUMN = "NUMBER";
-	private static final int DATABASE_VERSION = 1;
+	private static final int DATABASE_VERSION = 2;
 	private static final String TABLE_NAME = "ACCOUNTING";
 	private static final String TABLE_CREATE = "CREATE TABLE " + TABLE_NAME + " (" + NUMBER_COLUMN + " INT, " + COLUMNS[0] + " INT, " + COLUMNS[1] +
 			" TEXT, " + COLUMNS[2] + " REAL, " + COLUMNS[3] + " REAL);";
@@ -30,7 +30,10 @@ class FileIO extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		// TODO: 17/10/2016 change for v1.0 -> v2.0
+		if(oldVersion == 1) {
+			String sql = "ALTER TABLE " + TABLE_NAME + " DROP COLUMN " + "BALANCE";
+			db.execSQL(sql);
+		}
 	}
 
 	void newRow() {
