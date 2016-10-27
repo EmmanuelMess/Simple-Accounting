@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 	private void loadShowcaseView(LayoutInflater inflater, ScrollView scrollView) {
 		SharedPreferences myPrefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 		boolean isFirstRun = myPrefs.getBoolean(PREFS_FIRST_RUN, false);
-		if (isFirstRun || BuildConfig.DEBUG) {
+		if (isFirstRun) { //|| BuildConfig.DEBUG) {
 
 			if (table.getChildAt(1) == null) {
 				inflater.inflate(R.layout.newrow_main, table);
