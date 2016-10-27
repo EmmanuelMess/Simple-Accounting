@@ -31,16 +31,16 @@ class FileIO extends SQLiteOpenHelper {
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		if(oldVersion == 1) {
+
 			String sql =
-					"BEGIN TRANSACTION;" +
 					"CREATE TEMPORARY TABLE temp(" + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + ");" +
 					"INSERT INTO temp SELECT " + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + " FROM " + TABLE_NAME + ";" +
 					"DROP TABLE " + TABLE_NAME + ";" +
 					"CREATE TABLE " + TABLE_NAME + "(" + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + ");" +
 					"INSERT INTO " + TABLE_NAME + " SELECT " + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + " FROM temp;" +
-					"DROP TABLE temp;" +
-					"COMMIT;";
+					"DROP TABLE temp;";
 			db.execSQL(sql);//"copy, drop table, create new table, copy back" technique bc ALTER...DROP COLUMN isn't in SQLite
+
 		}
 	}
 
