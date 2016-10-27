@@ -1,4 +1,4 @@
-package com.emmanuelmess.simpleaccounting.IO;
+package com.emmanuelmess.simpleaccounting;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -10,18 +10,18 @@ import android.database.sqlite.SQLiteOpenHelper;
  * @author Emmanuel
  *         on 2016-01-31, at 15:53.
  */
-public class FileIO extends SQLiteOpenHelper {
+class FileIO extends SQLiteOpenHelper {
 
-	public static final String[] COLUMNS = new String[] { "DATE", "REFERENCE", "CREDIT", "DEBT", "BALANCE"};
-	public static final String NUMBER_COLUMN = "NUMBER";
+	static final String[] COLUMNS = new String[] { "DATE", "REFERENCE", "CREDIT", "DEBT"};
 
-	private static final int DATABASE_VERSION = 1;
+	private static final String NUMBER_COLUMN = "NUMBER";
+	private static final int DATABASE_VERSION = 2;
 	private static final String TABLE_NAME = "ACCOUNTING";
 	private static final String TABLE_CREATE = "CREATE TABLE " + TABLE_NAME + " (" + NUMBER_COLUMN + " INT, " + COLUMNS[0] + " INT, " + COLUMNS[1] +
-			" TEXT, " + COLUMNS[2] + " REAL, " + COLUMNS[3] + " REAL, " + COLUMNS[4] + " REAL);";
+			" TEXT, " + COLUMNS[2] + " REAL, " + COLUMNS[3] + " REAL);";
 	private final ContentValues CV = new ContentValues();
 
-	public FileIO(Context context) {super(context, TABLE_NAME, null, DATABASE_VERSION);}
+	FileIO(Context context) {super(context, TABLE_NAME, null, DATABASE_VERSION);}
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
@@ -29,9 +29,22 @@ public class FileIO extends SQLiteOpenHelper {
 	}
 
 	@Override
-	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {}
+	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		if(oldVersion == 1) {
 
-	public void newRow() {
+			String sql =
+					"CREATE TEMPORARY TABLE temp(" + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + ");" +
+					"INSERT INTO temp SELECT " + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + " FROM " + TABLE_NAME + ";" +
+					"DROP TABLE " + TABLE_NAME + ";" +
+					"CREATE TABLE " + TABLE_NAME + "(" + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + ");" +
+					"INSERT INTO " + TABLE_NAME + " SELECT " + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + " FROM temp;" +
+					"DROP TABLE temp;";
+			db.execSQL(sql);//"copy, drop table, create new table, copy back" technique bc ALTER...DROP COLUMN isn't in SQLite
+
+		}
+	}
+
+	void newRow() {
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[]{NUMBER_COLUMN}, null, null, null,
 				null, null);
 		int i;
@@ -49,13 +62,13 @@ public class FileIO extends SQLiteOpenHelper {
 		CV.clear();
 	}
 
-	public void update(int row, String column, String data) {
+	void update(int row, String column, String data) {
 		CV.put(column, data);
 		getWritableDatabase().update(TABLE_NAME, CV, NUMBER_COLUMN + "=" + row, null);
 		CV.clear();
 	}
 
-	public String[][] getAll() {
+	String[][] getAll() {
 		String [][] data;
 
 		Cursor c = getReadableDatabase().query(TABLE_NAME, COLUMNS, null, null, null,
