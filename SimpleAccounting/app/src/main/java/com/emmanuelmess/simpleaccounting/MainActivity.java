@@ -25,6 +25,7 @@ import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.SimpleShowcaseEventListener;
 import com.github.amlcurran.showcaseview.targets.Target;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -219,12 +220,12 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 				if (editableRow == index) {
 					balance.setText(lastBalance != null? lastBalance.getText():"$ 0.0");
 
-					double balanceNum;
-					balanceNum = lastBalance != null? parse(lastBalance.getText().toString().substring(1)):0;
-					balanceNum = balanceNum + parse(credit.getText().toString())
-							- parse(debit.getText().toString());
+					BigDecimal balanceNum = new BigDecimal(0);
+					balanceNum = balanceNum.add(new BigDecimal(lastBalance != null? parse(lastBalance.getText().toString().substring(1)):0));
+					balanceNum = balanceNum.add(new BigDecimal(parse(credit.getText().toString())));
+					balanceNum = balanceNum.subtract(new BigDecimal(parse(debit.getText().toString())));
 
-					String s = "$ " + balanceNum;
+					String s = "$ " + balanceNum.toString();
 					balance.setText(s);
 
 					for (int i = index + 1; i < table.getChildCount(); i++) {
