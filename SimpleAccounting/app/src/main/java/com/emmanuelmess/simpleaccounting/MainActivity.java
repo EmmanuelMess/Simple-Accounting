@@ -36,9 +36,20 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 
 	private TableLayout table = null;
 	private FileIO f;
-	private final int[] editIDs = {R.id.editDate, R.id.editRef, R.id.editCredit, R.id.editDebit, R.id.textBalance},
-			textIDs = {R.id.textDate, R.id.textRef, R.id.textCredit, R.id.textDebit};
+	private final int[] EDIT_IDS = {R.id.editDate, R.id.editRef, R.id.editCredit, R.id.editDebit, R.id.textBalance},
+			TEXT_IDS = {R.id.textDate, R.id.textRef, R.id.textCredit, R.id.textDebit},
+			MONTH_STRINGS = {R.string.january, R.string.february, R.string.march, R.string.april, R.string.may,
+					R.string.june, R.string.july, R.string.august, R.string.september, R.string.october,
+					R.string.november, R.string.december};
+
+	private LayoutInflater inflater;
+	private ScrollView scrollView;
+
+	//pointer to row being edited
 	private int editableRow = -1;
+	//pointer to month being viewed
+	private int editableMonth = -1;
+
 	private boolean destroyFirst = false;
 
 	@Override
@@ -48,9 +59,8 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 
-		final LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		final ScrollView scrollView = (ScrollView) findViewById(R.id.scrollView);
-		assert scrollView != null;
+		inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		scrollView = (ScrollView) findViewById(R.id.scrollView);
 		table = (TableLayout) findViewById(R.id.table);
 		f = new FileIO(getApplicationContext());
 
@@ -65,50 +75,12 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 				findViewById(R.id.space).setMinimumHeight(findViewById(R.id.fab).getHeight()
 						- findViewById(R.id.fab).getPaddingTop());
 
-				(new AsyncTask<Void, Void, String[][]>() {
-					@Override
-					protected String[][] doInBackground(Void... p) {
-						return f.getAll();
-					}
-
-					@Override
-					protected void onPostExecute(String[][] dbRows) {
-						float memBalance = 0;
-						for (String[] dbRow : dbRows) {
-							inflater.inflate(R.layout.newrow_main, table);
-
-							View row = loadRow();
-
-							for (int j = 0; j < textIDs.length; j++) {
-								row.findViewById(editIDs[j]).setVisibility(View.GONE);
-
-								TextView t = (TextView) row.findViewById(textIDs[j]);
-								t.setVisibility(View.VISIBLE);
-								t.setText(dbRow[j]);
-							}
-
-							TextView t = (TextView) row.findViewById(R.id.textBalance);
-							if (dbRow[2] != null)
-								memBalance += Float.valueOf(dbRow[2]);
-							if (dbRow[3] != null)
-								memBalance -= Float.valueOf(dbRow[3]);
-
-							String s = "$ " + String.valueOf(memBalance);
-							t.setText(s);
-						}
-
-						scrollView.fullScroll(View.FOCUS_DOWN);
-
-						findViewById(R.id.progressBar).setVisibility(View.GONE);
-
-						loadShowcaseView(inflater, scrollView);
-					}
-				}).execute();
+				int currentMonth = Integer.parseInt(new SimpleDateFormat("M", Locale.getDefault()).format(new Date()))-1;
+				loadMonth(currentMonth);
 			}
 		});
 
 		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-		assert fab != null;
 		fab.setOnClickListener(view->{
 			inflater.inflate(R.layout.newrow_main, table);
 
@@ -117,7 +89,7 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 			currentEditableToView();
 			editableRow = table.getChildCount() - 1;
 
-			f.newRow();
+			f.newRowInMonth(editableMonth);
 			View row = loadRow();
 
 			EditText date = (EditText) row.findViewById(R.id.editDate);
@@ -142,13 +114,15 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 		boolean isFirstRun = myPrefs.getBoolean(PREFS_FIRST_RUN, false);
 		if (isFirstRun) { //|| BuildConfig.DEBUG) {
 
-			if (table.getChildAt(1) == null) {
+			final int rowToEdit = 1;
+
+			if (table.getChildAt(rowToEdit) == null) {
 				inflater.inflate(R.layout.newrow_main, table);
 
 				scrollView.fullScroll(View.FOCUS_DOWN);
 
-				editableRow = 1;
-				View row = table.getChildAt(1);
+				editableRow = rowToEdit;
+				View row = table.getChildAt(rowToEdit);
 
 				EditText date = (EditText) row.findViewById(R.id.editDate);
 				date.setText(new SimpleDateFormat("dd", Locale.getDefault()).format(new Date()));
@@ -167,7 +141,7 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 			}
 
 			Target target = ()->{
-				View row = table.getChildAt(1);
+				View row = table.getChildAt(rowToEdit);
 				int[] location = new int[2];
 				row.getLocationInWindow(location);
 				return new Point(location[0] + row.getWidth()/2, location[1] + row.getHeight()/2);
@@ -180,8 +154,10 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 					.setShowcaseEventListener(new SimpleShowcaseEventListener() {
 						@Override
 						public void onShowcaseViewHide(ShowcaseView showcaseView) {
-							if (destroyFirst)
-								table.removeAllViews();
+							if (destroyFirst) {
+								table.removeView(table.getChildAt(rowToEdit));
+								editableRow = -1;
+							}
 						}
 					})
 					.build();
@@ -263,7 +239,7 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 	}
 
 	private void addToDB(final int index, View row) {
-		for (int i = 0; i < editIDs.length - 1; i++) {
+		for (int i = 0; i < EDIT_IDS.length - 1; i++) {
 			final String rowName = FileIO.COLUMNS[i];
 			TextWatcher watcher = new TextWatcher() {
 				@Override
@@ -281,7 +257,7 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 				}
 			};
 
-			((TextView) row.findViewById(editIDs[i])).addTextChangedListener(watcher);
+			((TextView) row.findViewById(EDIT_IDS[i])).addTextChangedListener(watcher);
 		}
 	}
 
@@ -291,9 +267,9 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 		row.setOnLongClickListener(v->{
 			currentEditableToView();
 
-			for (int i = 0; i < textIDs.length; i++) {
-				TextView t1 = (TextView) row.findViewById(textIDs[i]);
-				EditText t = (EditText) row.findViewById(editIDs[i]);
+			for (int i = 0; i < TEXT_IDS.length; i++) {
+				TextView t1 = (TextView) row.findViewById(TEXT_IDS[i]);
+				EditText t = (EditText) row.findViewById(EDIT_IDS[i]);
 
 				t.setText(t1.getText());
 				t1.setText("");
@@ -322,9 +298,9 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 
 			editableRow = -1;
 
-			for (int i = 0; i < textIDs.length; i++) {
-				EditText t = (EditText) row.findViewById(editIDs[i]);
-				TextView t1 = (TextView) row.findViewById(textIDs[i]);
+			for (int i = 0; i < TEXT_IDS.length; i++) {
+				EditText t = (EditText) row.findViewById(EDIT_IDS[i]);
+				TextView t1 = (TextView) row.findViewById(TEXT_IDS[i]);
 
 				t.setOnTouchListener(null);
 
@@ -335,6 +311,54 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 				t1.setVisibility(View.VISIBLE);
 			}
 		}
+	}
+
+	private void loadMonth(int month) {
+		(new AsyncTask<Void, Void, String[][]>() {
+			@Override
+			protected void onPreExecute() {
+				editableMonth = month;
+				((TextView) findViewById(R.id.textMonth)).setText(MONTH_STRINGS[month]);
+			}
+
+			@Override
+			protected String[][] doInBackground(Void... p) {
+				return f.getAllForMonth(month);
+			}
+
+			@Override
+			protected void onPostExecute(String[][] dbRows) {
+				float memBalance = 0;
+				for (String[] dbRow : dbRows) {
+					inflater.inflate(R.layout.newrow_main, table);
+
+					View row = loadRow();
+
+					for (int j = 0; j < TEXT_IDS.length; j++) {
+						row.findViewById(EDIT_IDS[j]).setVisibility(View.GONE);
+
+						TextView t = (TextView) row.findViewById(TEXT_IDS[j]);
+						t.setVisibility(View.VISIBLE);
+						t.setText(dbRow[j]);
+					}
+
+					TextView t = (TextView) row.findViewById(R.id.textBalance);
+					if (dbRow[2] != null)
+						memBalance += Float.valueOf(dbRow[2]);
+					if (dbRow[3] != null)
+						memBalance -= Float.valueOf(dbRow[3]);
+
+					String s = "$ " + String.valueOf(memBalance);
+					t.setText(s);
+				}
+
+				scrollView.fullScroll(View.FOCUS_DOWN);
+
+				findViewById(R.id.progressBar).setVisibility(View.GONE);
+
+				loadShowcaseView(inflater, scrollView);
+			}
+		}).execute();
 	}
 
 	private boolean equal(Object o1, Object o2) {

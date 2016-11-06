@@ -11,4 +11,16 @@
     <string name="loading">Cargando...</string>
     <string name="showcase_main_title">Presiona por un par de segundos para editar</string>
     <string name="showcase_example_ref">Supermercado</string>
+    <string name="january">Enero</string>
+    <string name="december">Diciembre</string>
+    <string name="february">Febrero</string>
+    <string name="july">Julio</string>
+    <string name="june">Junio</string>
+    <string name="march">Marzo</string>
+    <string name="may">Mayo</string>
+    <string name="november">Noviembre</string>
+    <string name="october">Octubre</string>
+    <string name="september">Setiembre</string>
+    <string name="april">Abril</string>
+    <string name="august">Agosto</string>
 </resources>

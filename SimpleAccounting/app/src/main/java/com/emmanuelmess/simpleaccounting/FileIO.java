@@ -12,13 +12,13 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 class FileIO extends SQLiteOpenHelper {
 
-	static final String[] COLUMNS = new String[] { "DATE", "REFERENCE", "CREDIT", "DEBT"};
+	static final String[] COLUMNS = new String[] { "DATE", "REFERENCE", "CREDIT", "DEBT", "MONTH"};
 
 	private static final String NUMBER_COLUMN = "NUMBER";
-	private static final int DATABASE_VERSION = 2;
+	private static final int DATABASE_VERSION = 3;
 	private static final String TABLE_NAME = "ACCOUNTING";
 	private static final String TABLE_CREATE = "CREATE TABLE " + TABLE_NAME + " (" + NUMBER_COLUMN + " INT, " + COLUMNS[0] + " INT, " + COLUMNS[1] +
-			" TEXT, " + COLUMNS[2] + " REAL, " + COLUMNS[3] + " REAL);";
+			" TEXT, " + COLUMNS[2] + " REAL, " + COLUMNS[3] + " REAL, " + COLUMNS[4] + " INT);";
 	private final ContentValues CV = new ContentValues();
 
 	FileIO(Context context) {super(context, TABLE_NAME, null, DATABASE_VERSION);}
@@ -30,21 +30,25 @@ class FileIO extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		if(oldVersion == 1) {
+		String sql;
+		switch(oldVersion){
+			case 1:
+				sql = "CREATE TEMPORARY TABLE temp(" + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + ");" +
+						"INSERT INTO temp SELECT " + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + " FROM " + TABLE_NAME + ";" +
+						"DROP TABLE " + TABLE_NAME + ";" +
+						"CREATE TABLE " + TABLE_NAME + "(" + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + ");" +
+						"INSERT INTO " + TABLE_NAME + " SELECT " + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + " FROM temp;" +
+						"DROP TABLE temp;";
+				db.execSQL(sql);//"copy, drop table, create new table, copy back" technique bc ALTER...DROP COLUMN isn't in SQLite
+			case 2:
+				sql = "ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + COLUMNS[4] + " INT;";
+				db.execSQL(sql);
 
-			String sql =
-					"CREATE TEMPORARY TABLE temp(" + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + ");" +
-					"INSERT INTO temp SELECT " + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + " FROM " + TABLE_NAME + ";" +
-					"DROP TABLE " + TABLE_NAME + ";" +
-					"CREATE TABLE " + TABLE_NAME + "(" + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + ");" +
-					"INSERT INTO " + TABLE_NAME + " SELECT " + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + " FROM temp;" +
-					"DROP TABLE temp;";
-			db.execSQL(sql);//"copy, drop table, create new table, copy back" technique bc ALTER...DROP COLUMN isn't in SQLite
-
+				//TODO dynamically put months
 		}
 	}
 
-	void newRow() {
+	void newRowInMonth(int month) {
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[]{NUMBER_COLUMN}, null, null, null,
 				null, null);
 		int i;
@@ -58,6 +62,7 @@ class FileIO extends SQLiteOpenHelper {
 		}
 
 		CV.put(NUMBER_COLUMN, i);
+		CV.put(COLUMNS[4], month);
 		getWritableDatabase().insert(TABLE_NAME, null, CV);
 		CV.clear();
 	}
@@ -68,10 +73,10 @@ class FileIO extends SQLiteOpenHelper {
 		CV.clear();
 	}
 
-	String[][] getAll() {
+	String[][] getAllForMonth(int month) {
 		String [][] data;
 
-		Cursor c = getReadableDatabase().query(TABLE_NAME, COLUMNS, null, null, null,
+		Cursor c = getReadableDatabase().query(TABLE_NAME, COLUMNS, COLUMNS[4] + "=" + month, null, null,
 				null, null);
 
 		if (c != null) {
