@@ -2,6 +2,8 @@ package com.emmanuelmess.simpleaccounting;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -11,7 +13,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Display;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
@@ -107,6 +113,44 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 			currentEditableToView();
 		else
 			super.onBackPressed();
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.toolbar, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle action bar item clicks here. The action bar will
+		// automatically handle clicks on the Home/Up button, so long
+		// as you specify a parent activity in AndroidManifest.xml.
+		int id = item.getItemId();
+
+		switch (id) {
+			case R.id.action_show_months:
+				Bitmap b = Bitmap.createBitmap(scrollView.getWidth(), getScreenHeight(), Bitmap.Config.ARGB_8888);
+				Canvas c = new Canvas(b);
+				scrollView.draw(c);
+
+				return true;
+		}
+
+		return super.onOptionsItemSelected(item);
+	}
+
+	private int getScreenHeight() {
+		Display display = getWindowManager().getDefaultDisplay();
+		Point size = new Point();
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+			display.getSize(size);
+			return size.y;
+		} else {
+			return display.getHeight();
+		}
+
 	}
 
 	private void loadShowcaseView(LayoutInflater inflater, ScrollView scrollView) {
