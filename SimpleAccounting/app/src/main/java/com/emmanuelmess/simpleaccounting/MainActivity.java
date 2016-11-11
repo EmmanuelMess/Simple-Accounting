@@ -38,10 +38,11 @@ import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
+	public static final String MONTH = "month", YEAR = "year";
+
 	public static int[] MONTH_STRINGS = new int[] {R.string.january, R.string.february, R.string.march, R.string.april, R.string.may,
 			R.string.june, R.string.july, R.string.august, R.string.september, R.string.october,
 			R.string.november, R.string.december};
-
 
 	private final String PREFS_NAME = "shared prefs", PREFS_FIRST_RUN = "first_run";
 
@@ -55,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
 	//pointer to row being edited
 	private int editableRow = -1;
 	//pointer to month being viewed
-	private int editableMonth = -1;
+	private static int editableMonth = -1, editableYear = -1;
 
 	private boolean destroyFirst = false;
 
@@ -71,6 +72,18 @@ public class MainActivity extends AppCompatActivity {
 		table = (TableLayout) findViewById(R.id.table);
 		f = new FileIO(this);
 
+		int loadMonth, loadYear;
+
+		if(getIntent().hasExtra(MONTH)) {
+			Bundle b = getIntent().getExtras();
+			loadMonth = b.getInt(MONTH);
+			loadYear = b.getInt(YEAR);
+		} else {
+			loadMonth = Integer.parseInt(new SimpleDateFormat("M", Locale.getDefault()).format(new Date())) - 1;
+			//YEARS ALREADY START IN 0!!!
+			loadYear = Integer.parseInt(new SimpleDateFormat("yyyy", Locale.getDefault()).format(new Date()));
+		}
+
 		table.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
 			@Override
 			public void onGlobalLayout() {
@@ -82,8 +95,7 @@ public class MainActivity extends AppCompatActivity {
 				findViewById(R.id.space).setMinimumHeight(findViewById(R.id.fab).getHeight()
 						- findViewById(R.id.fab).getPaddingTop());
 
-				int currentMonth = Integer.parseInt(new SimpleDateFormat("M", Locale.getDefault()).format(new Date()))-1;
-				loadMonth(currentMonth);
+				loadMonth(loadMonth, loadYear);
 			}
 		});
 
@@ -96,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
 			currentEditableToView();
 			editableRow = table.getChildCount() - 1;
 
-			f.newRowInMonth(editableMonth);
+			f.newRowInMonth(editableMonth, editableYear);
 			View row = loadRow();
 
 			EditText date = (EditText) row.findViewById(R.id.editDate);
@@ -355,17 +367,18 @@ public class MainActivity extends AppCompatActivity {
 		}
 	}
 
-	private void loadMonth(int month) {
+	private void loadMonth(int month, int year) {
 		(new AsyncTask<Void, Void, String[][]>() {
 			@Override
 			protected void onPreExecute() {
 				editableMonth = month;
+				editableYear = year;
 				((TextView) findViewById(R.id.textMonth)).setText(MONTH_STRINGS[month]);
 			}
 
 			@Override
 			protected String[][] doInBackground(Void... p) {
-				return f.getAllForMonth(month);
+				return f.getAllForMonth(month, year);
 			}
 
 			@Override
