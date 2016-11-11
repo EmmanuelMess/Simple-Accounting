@@ -73,6 +73,28 @@ class FileIO extends SQLiteOpenHelper {
 		CV.clear();
 	}
 
+	int[] getMonthsWithData() {
+		int[] data;
+
+		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[] {COLUMNS[4]}, null, null, COLUMNS[4],
+				null, null);
+
+		if (c != null) {
+			c.moveToFirst();
+		} else return new int[0];
+
+		data = new int[c.getCount()];
+		for(int x = 0; x < data.length; x++) {
+			if(c.getString(0) != null)
+				data[x] = Integer.parseInt(c.getString(0));
+			else data[x] = -1;
+			c.moveToNext();
+		}
+		c.close();
+
+		return data;
+	}
+
 	String[][] getAllForMonth(int month) {
 		String [][] data;
 

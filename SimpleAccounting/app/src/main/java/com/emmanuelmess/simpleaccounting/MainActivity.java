@@ -1,9 +1,8 @@
 package com.emmanuelmess.simpleaccounting;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -37,17 +36,19 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
 
-public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load every sum on table load and not save it
+public class MainActivity extends AppCompatActivity {
+
+	public static int[] MONTH_STRINGS = new int[] {R.string.january, R.string.february, R.string.march, R.string.april, R.string.may,
+			R.string.june, R.string.july, R.string.august, R.string.september, R.string.october,
+			R.string.november, R.string.december};
+
+
 	private final String PREFS_NAME = "shared prefs", PREFS_FIRST_RUN = "first_run";
 
 	private TableLayout table = null;
 	private FileIO f;
 	private final int[] EDIT_IDS = {R.id.editDate, R.id.editRef, R.id.editCredit, R.id.editDebit, R.id.textBalance},
-			TEXT_IDS = {R.id.textDate, R.id.textRef, R.id.textCredit, R.id.textDebit},
-			MONTH_STRINGS = {R.string.january, R.string.february, R.string.march, R.string.april, R.string.may,
-					R.string.june, R.string.july, R.string.august, R.string.september, R.string.october,
-					R.string.november, R.string.december};
-
+			TEXT_IDS = {R.id.textDate, R.id.textRef, R.id.textCredit, R.id.textDebit};
 	private LayoutInflater inflater;
 	private ScrollView scrollView;
 
@@ -68,7 +69,7 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 		inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		scrollView = (ScrollView) findViewById(R.id.scrollView);
 		table = (TableLayout) findViewById(R.id.table);
-		f = new FileIO(getApplicationContext());
+		f = new FileIO(this);
 
 		table.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
 			@Override
@@ -131,10 +132,7 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 
 		switch (id) {
 			case R.id.action_show_months:
-				Bitmap b = Bitmap.createBitmap(scrollView.getWidth(), getScreenHeight(), Bitmap.Config.ARGB_8888);
-				Canvas c = new Canvas(b);
-				scrollView.draw(c);
-
+				startActivity(new Intent(this, TempMonthActivity.class));
 				return true;
 		}
 
