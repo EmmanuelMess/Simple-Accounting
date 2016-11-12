@@ -12,7 +12,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -32,6 +31,7 @@ import com.github.amlcurran.showcaseview.targets.Target;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
@@ -57,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
 	private int editableRow = -1;
 	//pointer to month being viewed
 	private static int editableMonth = -1, editableYear = -1;
+
+	private ArrayList<Integer> rowToDBRowConversion = new ArrayList<>();
 
 	private boolean destroyFirst = false;
 
@@ -109,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
 			editableRow = table.getChildCount() - 1;
 
 			f.newRowInMonth(editableMonth, editableYear);
+			rowToDBRowConversion.add(f.getLastIndex());
 			View row = loadRow();
 
 			EditText date = (EditText) row.findViewById(R.id.editDate);
@@ -151,83 +154,11 @@ public class MainActivity extends AppCompatActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	private int getScreenHeight() {
-		Display display = getWindowManager().getDefaultDisplay();
-		Point size = new Point();
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-			display.getSize(size);
-			return size.y;
-		} else {
-			return display.getHeight();
-		}
-
-	}
-
-	private void loadShowcaseView(LayoutInflater inflater, ScrollView scrollView) {
-		SharedPreferences myPrefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-		boolean isFirstRun = myPrefs.getBoolean(PREFS_FIRST_RUN, false);
-		if (isFirstRun) { //|| BuildConfig.DEBUG) {
-
-			final int rowToEdit = 1;
-
-			if (table.getChildAt(rowToEdit) == null) {
-				inflater.inflate(R.layout.newrow_main, table);
-
-				scrollView.fullScroll(View.FOCUS_DOWN);
-
-				editableRow = rowToEdit;
-				View row = table.getChildAt(rowToEdit);
-
-				EditText date = (EditText) row.findViewById(R.id.editDate);
-				date.setText(new SimpleDateFormat("dd", Locale.getDefault()).format(new Date()));
-				EditText ref = (EditText) row.findViewById(R.id.editRef);
-				ref.setText(R.string.showcase_example_ref);
-				EditText credit = (EditText) row.findViewById(R.id.editCredit);
-				credit.setText("0");
-				EditText debit = (EditText) row.findViewById(R.id.editDebit);
-				debit.setText("100");
-				TextView balance = (TextView) row.findViewById(R.id.textBalance);
-				balance.setText("$ -100.0");
-
-				currentEditableToView();
-
-				destroyFirst = true;
-			}
-
-			Target target = ()->{
-				View row = table.getChildAt(rowToEdit);
-				int[] location = new int[2];
-				row.getLocationInWindow(location);
-				return new Point(location[0] + row.getWidth()/2, location[1] + row.getHeight()/2);
-			};
-
-			new ShowcaseView.Builder(this)
-					.withMaterialShowcase()
-					.setTarget(target)
-					.setContentTitle(R.string.showcase_main_title)
-					.setShowcaseEventListener(new SimpleShowcaseEventListener() {
-						@Override
-						public void onShowcaseViewHide(ShowcaseView showcaseView) {
-							if (destroyFirst) {
-								table.removeView(table.getChildAt(rowToEdit));
-								editableRow = -1;
-							}
-						}
-					})
-					.build();
-
-			SharedPreferences.Editor pref_editor = myPrefs.edit();
-			pref_editor.putBoolean(PREFS_FIRST_RUN, false);
-			pref_editor.apply();
-		}
-	}
-
 	private View loadRow() {
-		int rowViewIndex = table.getChildCount() - 1, dbIndex = rowViewIndex - 1;
+		int rowViewIndex = table.getChildCount() - 1, dbIndex = rowToDBRowConversion.get(rowViewIndex - 1);
 		TableRow row = (TableRow) table.getChildAt(rowViewIndex);
 		setListener(rowViewIndex);
 		checkStatus(rowViewIndex, row);
-		//f.update(dbIndex, FileIO.COLUMNS[4], "$0.0");// TODO: 16/10/2016 needs testing
 		addToDB(dbIndex, row);
 		return row;
 	}
@@ -251,7 +182,8 @@ public class MainActivity extends AppCompatActivity {
 					balance.setText(lastBalance != null? lastBalance.getText():"$ 0.0");
 
 					BigDecimal balanceNum = new BigDecimal(0);
-					balanceNum = balanceNum.add(new BigDecimal(lastBalance != null? parse(lastBalance.getText().toString().substring(1)):0));
+					balanceNum = balanceNum.add(new BigDecimal(lastBalance != null?
+							parse(lastBalance.getText().toString().substring(1)):0));
 					balanceNum = balanceNum.add(new BigDecimal(parse(credit.getText().toString())));
 					balanceNum = balanceNum.subtract(new BigDecimal(parse(debit.getText().toString())));
 
@@ -378,6 +310,12 @@ public class MainActivity extends AppCompatActivity {
 
 			@Override
 			protected String[][] doInBackground(Void... p) {
+				rowToDBRowConversion.clear();
+				int[] data = f.getIndexesForMonth(month, year);
+
+				for(int m : data)
+					rowToDBRowConversion.add(m);
+
 				return f.getAllForMonth(month, year);
 			}
 
@@ -414,6 +352,65 @@ public class MainActivity extends AppCompatActivity {
 				loadShowcaseView(inflater, scrollView);
 			}
 		}).execute();
+	}
+
+	private void loadShowcaseView(LayoutInflater inflater, ScrollView scrollView) {
+		SharedPreferences myPrefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+		boolean isFirstRun = myPrefs.getBoolean(PREFS_FIRST_RUN, false);
+		if (isFirstRun) { //|| BuildConfig.DEBUG) {
+
+			final int rowToEdit = 1;
+
+			if (table.getChildAt(rowToEdit) == null) {
+				inflater.inflate(R.layout.newrow_main, table);
+
+				scrollView.fullScroll(View.FOCUS_DOWN);
+
+				editableRow = rowToEdit;
+				View row = table.getChildAt(rowToEdit);
+
+				EditText date = (EditText) row.findViewById(R.id.editDate);
+				date.setText(new SimpleDateFormat("dd", Locale.getDefault()).format(new Date()));
+				EditText ref = (EditText) row.findViewById(R.id.editRef);
+				ref.setText(R.string.showcase_example_ref);
+				EditText credit = (EditText) row.findViewById(R.id.editCredit);
+				credit.setText("0");
+				EditText debit = (EditText) row.findViewById(R.id.editDebit);
+				debit.setText("100");
+				TextView balance = (TextView) row.findViewById(R.id.textBalance);
+				balance.setText("$ -100.0");
+
+				currentEditableToView();
+
+				destroyFirst = true;
+			}
+
+			Target target = ()->{
+				View row = table.getChildAt(rowToEdit);
+				int[] location = new int[2];
+				row.getLocationInWindow(location);
+				return new Point(location[0] + row.getWidth()/2, location[1] + row.getHeight()/2);
+			};
+
+			new ShowcaseView.Builder(this)
+					.withMaterialShowcase()
+					.setTarget(target)
+					.setContentTitle(R.string.showcase_main_title)
+					.setShowcaseEventListener(new SimpleShowcaseEventListener() {
+						@Override
+						public void onShowcaseViewHide(ShowcaseView showcaseView) {
+							if (destroyFirst) {
+								table.removeView(table.getChildAt(rowToEdit));
+								editableRow = -1;
+							}
+						}
+					})
+					.build();
+
+			SharedPreferences.Editor pref_editor = myPrefs.edit();
+			pref_editor.putBoolean(PREFS_FIRST_RUN, false);
+			pref_editor.apply();
+		}
 	}
 
 	private boolean equal(Object o1, Object o2) {

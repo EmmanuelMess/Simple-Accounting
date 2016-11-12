@@ -20,7 +20,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -81,15 +80,8 @@ public class TempMonthActivity extends ListActivity {
 
 				for (int d[] : existingMonths) {
 					int m = d[0];
-					if (m != -1) {
-						monthListData.add(new String[] {getString(MainActivity.MONTH_STRINGS[m]), String.valueOf(d[1])});
-						dateIntValues.add(new Integer[]{m, d[1]});
-					} else {
-						//TODO checked what failed
-						Toast.makeText(getApplicationContext(),
-								"Seems that the database is corrupted, repairing in background...",
-								Toast.LENGTH_SHORT).show();
-					}
+					monthListData.add(new String[] {getString(MainActivity.MONTH_STRINGS[m]), String.valueOf(d[1])});
+					dateIntValues.add(new Integer[]{m, d[1]});
 				}
 
 				// Create an empty adapter we will use to display the loaded data.
