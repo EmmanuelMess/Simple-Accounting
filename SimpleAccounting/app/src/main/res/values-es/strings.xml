@@ -23,4 +23,6 @@
     <string name="september">Setiembre</string>
     <string name="april">Abril</string>
     <string name="august">Agosto</string>
+    <string name="show_months">Mostrar meses</string>
+    <string name="title_activity_temp_month">Meses</string>
 </resources>
