@@ -61,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
 	private ArrayList<Integer> rowToDBRowConversion = new ArrayList<>();
 
 	private boolean destroyFirst = false;
+	private boolean reloadMonthOnChangeToView = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -158,12 +159,13 @@ public class MainActivity extends AppCompatActivity {
 		int rowViewIndex = table.getChildCount() - 1, dbIndex = rowToDBRowConversion.get(rowViewIndex - 1);
 		TableRow row = (TableRow) table.getChildAt(rowViewIndex);
 		setListener(rowViewIndex);
-		checkStatus(rowViewIndex, row);
+		checkEditInBalance(rowViewIndex, row);
+		checkDateChanged(rowViewIndex, row);
 		addToDB(dbIndex, row);
 		return row;
 	}
 
-	private void checkStatus(final int index, TableRow row) {
+	private void checkEditInBalance(final int index, TableRow row) {
 		final EditText debit = (EditText) row.findViewById(R.id.editDebit),
 				credit = (EditText) row.findViewById(R.id.editCredit);
 		final TextView lastBalance = index > 1? (TextView) table.getChildAt(index - 1).findViewById(R.id.textBalance):null,
@@ -214,6 +216,35 @@ public class MainActivity extends AppCompatActivity {
 		debit.addTextChangedListener(watcher);
 		if (lastBalance != null)
 			lastBalance.addTextChangedListener(watcher);
+	}
+
+	void checkDateChanged(final int index, TableRow row) {
+		final EditText date = (EditText) row.findViewById(R.id.editDate);
+
+		TextWatcher watcher = new TextWatcher() {
+			String mem = "";
+
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+				mem = s.toString();
+			}
+
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+			@Override
+			public void afterTextChanged(Editable editable) {
+				if (editableRow == index) {
+					if(!equal(mem, editable.toString())) {
+						reloadMonthOnChangeToView = true;
+					}
+				}
+
+				mem = "";
+			}
+		};
+
+		date.addTextChangedListener(watcher);
 	}
 
 	private double parse(String s) {
@@ -274,7 +305,7 @@ public class MainActivity extends AppCompatActivity {
 			TextView balanceText = ((TextView) row.findViewById(R.id.textBalance));
 
 			if(balanceText.getText() == "") {
-				View previousRow = table.getChildAt(editableRow - 1);
+				View previousRow = editableRow-1 == 0? null : table.getChildAt(editableRow - 1);
 				if(previousRow != null) {
 					TextView lastBalance = (TextView) previousRow.findViewById(R.id.textBalance);
 					balanceText.setText(lastBalance.getText());
@@ -295,6 +326,13 @@ public class MainActivity extends AppCompatActivity {
 
 				t.setVisibility(View.GONE);
 				t1.setVisibility(View.VISIBLE);
+			}
+
+			if(reloadMonthOnChangeToView){
+				reloadMonthOnChangeToView = false;
+				for(int i = table.getChildCount()-1; i > 0; i--)
+					table.removeViewAt(i);
+				loadMonth(editableMonth, editableYear);
 			}
 		}
 	}

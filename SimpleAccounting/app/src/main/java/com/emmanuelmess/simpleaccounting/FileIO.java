@@ -137,7 +137,8 @@ class FileIO extends SQLiteOpenHelper {
 		String [][] data;
 
 		Cursor c = getReadableDatabase().query(TABLE_NAME, COLUMNS,
-				COLUMNS[4] + "=" + month + " AND " + COLUMNS[5] + "=" + year, null, null, null, null);
+				COLUMNS[4] + "=" + month + " AND " + COLUMNS[5] + "=" + year,
+				null, null, null, COLUMNS[0]);
 
 		if (c != null) {
 			c.moveToFirst();
@@ -159,7 +160,8 @@ class FileIO extends SQLiteOpenHelper {
 		int[] data;
 
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[]{NUMBER_COLUMN},
-				format("%1$s = %2$s AND %3$s = %4$s", COLUMNS[4], month, COLUMNS[5], year), null, null, null, null);
+				format("%1$s = %2$s AND %3$s = %4$s", COLUMNS[4], month, COLUMNS[5], year),
+				null, null, null, COLUMNS[0]);
 
 		if (c != null) {
 			c.moveToFirst();
@@ -177,7 +179,8 @@ class FileIO extends SQLiteOpenHelper {
 
 	int getLastIndex() {
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[]{NUMBER_COLUMN},
-				format("%1$s = (SELECT MAX(%1$s) FROM %2$s)", NUMBER_COLUMN, TABLE_NAME), null, null, null, null);
+				format("%1$s = (SELECT MAX(%1$s) FROM %2$s)", NUMBER_COLUMN, TABLE_NAME),
+				null, null, null, COLUMNS[0]);
 		c.moveToFirst();
 		int data = c.getInt(0);
 		c.close();
