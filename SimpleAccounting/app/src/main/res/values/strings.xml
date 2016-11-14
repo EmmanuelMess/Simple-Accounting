@@ -24,4 +24,5 @@
     <string name="december">December</string>
     <string name="show_months">Show months</string>
     <string name="title_activity_temp_month">Months</string>
+    <string name="previous_balance">Prev. balance</string>
 </resources>

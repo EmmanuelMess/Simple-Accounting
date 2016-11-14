@@ -21,11 +21,15 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+import com.emmanuelmess.simpleaccounting.db.DBGeneral;
 
+import java.util.ArrayList;
+/**
+ * @author Emmanuel
+ */
 public class TempMonthActivity extends ListActivity {
 
-	private FileIO f;
+	private DBGeneral f;
 	private MonthListAdapter monthListAdapter;
 	private ArrayList<Integer[]> dateIntValues = new ArrayList<>();
 
@@ -61,7 +65,7 @@ public class TempMonthActivity extends ListActivity {
 		ab.setDisplayHomeAsUpEnabled(true);
 
 
-		f = new FileIO(this);
+		f = new DBGeneral(this);
 
 
 		(new AsyncTask<Void, Void, int[][]>() {

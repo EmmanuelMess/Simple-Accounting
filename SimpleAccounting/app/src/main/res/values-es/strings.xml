@@ -25,4 +25,5 @@
     <string name="august">Agosto</string>
     <string name="show_months">Mostrar meses</string>
     <string name="title_activity_temp_month">Meses</string>
+    <string name="previous_balance">Balance ant.</string>
 </resources>

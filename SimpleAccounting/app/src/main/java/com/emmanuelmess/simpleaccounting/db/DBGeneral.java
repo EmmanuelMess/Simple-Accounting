@@ -1,10 +1,9 @@
-package com.emmanuelmess.simpleaccounting;
+package com.emmanuelmess.simpleaccounting.db;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -16,11 +15,10 @@ import static java.lang.String.format;
  * @author Emmanuel
  *         on 2016-01-31, at 15:53.
  */
-class FileIO extends SQLiteOpenHelper {
+public class DBGeneral extends DBs {
 
-	static final String[] COLUMNS = new String[] { "DATE", "REFERENCE", "CREDIT", "DEBT", "MONTH", "YEAR"};
+	public static final String[] COLUMNS = new String[] { "DATE", "REFERENCE", "CREDIT", "DEBT", "MONTH", "YEAR"};
 
-	private static final String NUMBER_COLUMN = "NUMBER";
 	private static final int DATABASE_VERSION = 3;
 	private static final String TABLE_NAME = "ACCOUNTING";
 	private static final String TABLE_CREATE = format("CREATE TABLE %1$s" +
@@ -28,7 +26,7 @@ class FileIO extends SQLiteOpenHelper {
 			TABLE_NAME, NUMBER_COLUMN, COLUMNS[0], COLUMNS[1], COLUMNS[2], COLUMNS[3], COLUMNS[4], COLUMNS[5]);
 	private final ContentValues CV = new ContentValues();
 
-	FileIO(Context context) {super(context, TABLE_NAME, null, DATABASE_VERSION);}
+	public DBGeneral(Context context) {super(context, TABLE_NAME, null, DATABASE_VERSION);}
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
@@ -85,7 +83,13 @@ class FileIO extends SQLiteOpenHelper {
 		}
 	}
 
-	void newRowInMonth(int month, int year) {
+	public void update(int row, String column, String data) {
+		CV.put(column, data);
+		getWritableDatabase().update(TABLE_NAME, CV, NUMBER_COLUMN + "=" + row, null);
+		CV.clear();
+	}
+
+	public void newRowInMonth(int month, int year) {
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[]{NUMBER_COLUMN},
 				null, null, null, null, null);
 		int i;
@@ -102,12 +106,6 @@ class FileIO extends SQLiteOpenHelper {
 		CV.put(COLUMNS[4], month);
 		CV.put(COLUMNS[5], year);
 		getWritableDatabase().insert(TABLE_NAME, null, CV);
-		CV.clear();
-	}
-
-	void update(int row, String column, String data) {
-		CV.put(column, data);
-		getWritableDatabase().update(TABLE_NAME, CV, NUMBER_COLUMN + "=" + row, null);
 		CV.clear();
 	}
 
@@ -133,11 +131,33 @@ class FileIO extends SQLiteOpenHelper {
 		return data;
 	}
 
-	String[][] getAllForMonth(int month, int year) {
+	public String[] getPreviousMonthLast(int month, int year) {
+		String [] data;
+
+		Cursor c = getReadableDatabase().query(TABLE_NAME, COLUMNS,
+				format("%1$s = (SELECT MAX(%1$s) FROM %2$s WHERE %3$s);", NUMBER_COLUMN, TABLE_NAME,
+						SQLShort(OR, COLUMNS[4] + "<" + month, COLUMNS[5] + "<" + year)),
+				null, null, null, COLUMNS[0]);
+
+		if (c != null && c.getCount() != 0) {
+			c.moveToFirst();
+		} else return new String[0];
+
+		data = new String[COLUMNS.length];
+
+		for(int y = 0; y < COLUMNS.length; y++)
+			data[y] = c.getString(y);
+
+		c.close();
+
+		return data;
+	}
+
+	public String[][] getAllForMonth(int month, int year) {
 		String [][] data;
 
 		Cursor c = getReadableDatabase().query(TABLE_NAME, COLUMNS,
-				COLUMNS[4] + "=" + month + " AND " + COLUMNS[5] + "=" + year,
+				SQLShort(AND, COLUMNS[4] + "=" + month, COLUMNS[5] + "=" + year),
 				null, null, null, COLUMNS[0]);
 
 		if (c != null) {
@@ -156,7 +176,7 @@ class FileIO extends SQLiteOpenHelper {
 		return data;
 	}
 
-	int[] getIndexesForMonth(int month, int year) {
+	public int[] getIndexesForMonth(int month, int year) {
 		int[] data;
 
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[]{NUMBER_COLUMN},
@@ -177,7 +197,7 @@ class FileIO extends SQLiteOpenHelper {
 		return data;
 	}
 
-	int getLastIndex() {
+	public int getLastIndex() {
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[]{NUMBER_COLUMN},
 				format("%1$s = (SELECT MAX(%1$s) FROM %2$s)", NUMBER_COLUMN, TABLE_NAME),
 				null, null, null, COLUMNS[0]);

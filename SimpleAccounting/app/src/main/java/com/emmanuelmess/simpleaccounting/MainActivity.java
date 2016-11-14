@@ -25,6 +25,8 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.emmanuelmess.simpleaccounting.db.DBGeneral;
+import com.emmanuelmess.simpleaccounting.db.DBMonthlyBalance;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.SimpleShowcaseEventListener;
 import com.github.amlcurran.showcaseview.targets.Target;
@@ -32,10 +34,14 @@ import com.github.amlcurran.showcaseview.targets.Target;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
 
+/**
+ * @author Emmanuel
+ */
 public class MainActivity extends AppCompatActivity {
 
 	public static final String MONTH = "month", YEAR = "year";
@@ -47,7 +53,8 @@ public class MainActivity extends AppCompatActivity {
 	private final String PREFS_NAME = "shared prefs", PREFS_FIRST_RUN = "first_run";
 
 	private TableLayout table = null;
-	private FileIO f;
+	private DBGeneral dbGeneral;
+	private DBMonthlyBalance dbMonthlyBalance;
 	private final int[] EDIT_IDS = {R.id.editDate, R.id.editRef, R.id.editCredit, R.id.editDebit, R.id.textBalance},
 			TEXT_IDS = {R.id.textDate, R.id.textRef, R.id.textCredit, R.id.textDebit};
 	private LayoutInflater inflater;
@@ -73,7 +80,8 @@ public class MainActivity extends AppCompatActivity {
 		inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		scrollView = (ScrollView) findViewById(R.id.scrollView);
 		table = (TableLayout) findViewById(R.id.table);
-		f = new FileIO(this);
+		dbGeneral = new DBGeneral(this);
+		dbMonthlyBalance = new DBMonthlyBalance(this);
 
 		int loadMonth, loadYear;
 
@@ -111,8 +119,8 @@ public class MainActivity extends AppCompatActivity {
 			currentEditableToView();
 			editableRow = table.getChildCount() - 1;
 
-			f.newRowInMonth(editableMonth, editableYear);
-			rowToDBRowConversion.add(f.getLastIndex());
+			dbGeneral.newRowInMonth(editableMonth, editableYear);
+			rowToDBRowConversion.add(dbGeneral.getLastIndex());
 			View row = loadRow();
 
 			EditText date = (EditText) row.findViewById(R.id.editDate);
@@ -158,10 +166,16 @@ public class MainActivity extends AppCompatActivity {
 	private View loadRow() {
 		int rowViewIndex = table.getChildCount() - 1, dbIndex = rowToDBRowConversion.get(rowViewIndex - 1);
 		TableRow row = (TableRow) table.getChildAt(rowViewIndex);
-		setListener(rowViewIndex);
-		checkEditInBalance(rowViewIndex, row);
-		checkDateChanged(rowViewIndex, row);
-		addToDB(dbIndex, row);
+
+		if(dbIndex != -1) {
+			setListener(rowViewIndex);
+			checkEditInBalance(rowViewIndex, row);
+			checkDateChanged(rowViewIndex, row);
+			addToDB(dbIndex, row);
+		} else {
+			((TextView)row.findViewById(R.id.textCredit)).setText("");
+			((TextView)row.findViewById(R.id.textDebit)).setText("");
+		}
 		return row;
 	}
 
@@ -204,6 +218,8 @@ public class MainActivity extends AppCompatActivity {
 						b = parse(lastBalanceText.getText().toString().substring(1));
 						b = b + parse(creditText.getText().toString())
 								- parse(debitText.getText().toString());
+
+						dbMonthlyBalance.updateMonth(editableMonth, editableYear, b);
 
 						String str = "$ " + b;
 						balanceText.setText(str);
@@ -257,7 +273,7 @@ public class MainActivity extends AppCompatActivity {
 
 	private void addToDB(final int index, View row) {
 		for (int i = 0; i < EDIT_IDS.length - 1; i++) {
-			final String rowName = FileIO.COLUMNS[i];
+			final String rowName = DBGeneral.COLUMNS[i];
 			TextWatcher watcher = new TextWatcher() {
 				@Override
 				public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -270,7 +286,7 @@ public class MainActivity extends AppCompatActivity {
 				@Override
 				public void afterTextChanged(Editable editable) {
 					if (!equal(editable.toString(), ""))
-						f.update(index, rowName, editable.toString());
+						dbGeneral.update(index, rowName, editable.toString());
 				}
 			};
 
@@ -348,13 +364,37 @@ public class MainActivity extends AppCompatActivity {
 
 			@Override
 			protected String[][] doInBackground(Void... p) {
-				rowToDBRowConversion.clear();
-				int[] data = f.getIndexesForMonth(month, year);
+				String[][] monthData = dbGeneral.getAllForMonth(month, year);
 
+				if(monthData.length == 0)
+					dbMonthlyBalance.createMonth(month, year);
+
+				ArrayList<String[]> s = new ArrayList<>();
+
+				float lastMonthData = dbMonthlyBalance.getBalance(month, year);
+
+				if(lastMonthData.length != 0)
+					s.add(lastMonthData);
+
+				Collections.addAll(s, monthData);
+
+				if(lastMonthData.length != 0) {
+					String [] lastMonthBalance = s.get(0);
+					lastMonthBalance[0] = null;
+					lastMonthBalance[1] = getString(R.string.previous_balance);
+				}
+
+				rowToDBRowConversion.clear();
+
+				int[] data = dbGeneral.getIndexesForMonth(month, year);
+				if(lastMonthData.length != 0)
+					rowToDBRowConversion.add(-1);
 				for(int m : data)
 					rowToDBRowConversion.add(m);
 
-				return f.getAllForMonth(month, year);
+				if(s.size() != 0)
+					return s.toArray(new String[s.size()][s.get(0).length]);
+				else return s.toArray(new String[0][0]);
 			}
 
 			@Override
@@ -388,6 +428,14 @@ public class MainActivity extends AppCompatActivity {
 				findViewById(R.id.progressBar).setVisibility(View.GONE);
 
 				loadShowcaseView(inflater, scrollView);
+
+				if(rowToDBRowConversion.get(0) == -1) {
+					TableRow row = (TableRow) table.getChildAt(1);
+
+					for(int i = 0; i < row.getChildCount(); i++)
+						if(row.getChildAt(i).getVisibility() == View.GONE)
+							row.removeView(row.getChildAt(i));
+				}
 			}
 		}).execute();
 	}
