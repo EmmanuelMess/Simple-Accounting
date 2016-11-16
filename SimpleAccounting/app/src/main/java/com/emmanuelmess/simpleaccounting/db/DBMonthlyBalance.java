@@ -3,6 +3,7 @@ package com.emmanuelmess.simpleaccounting.db;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.Nullable;
 
 import static java.lang.String.format;
 
@@ -17,33 +18,57 @@ public class DBMonthlyBalance extends DBs {
 	private static final String TABLE_NAME = "MONTHLY_BALANCE";
 	private static final String TABLE_CREATE = format("CREATE TABLE %1$s(%2$s INT, %3$s INT, %4$s INT, %5$s REAL);",
 			TABLE_NAME, NUMBER_COLUMN, COLUMNS[0], COLUMNS[1], COLUMNS[2]);
+	private DBGeneral dbGeneral = null;
 
-	public DBMonthlyBalance(Context context) {super(context, TABLE_NAME, null, DATABASE_VERSION);}
+	public DBMonthlyBalance(Context context, @Nullable DBGeneral dbGeneral) {
+		super(context, TABLE_NAME, null, DATABASE_VERSION);
+		this.dbGeneral = dbGeneral;
+	}
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL(TABLE_CREATE);
+		if(dbGeneral != null) {
+			int [][] existentMonths = dbGeneral.getMonthsWithData();
+			for(int[] month : existentMonths) {
+				int m  = month[0], y = month[1];
+				String[][] all = dbGeneral.getAllForMonth(m, y);
+
+				Thread createMonth = (new Thread() {
+					@Override
+					public void run() {
+						super.run();
+						createMonth(m, y);
+					}
+				});
+
+				double currentBalance;
+
+				currentBalance = 0;
+
+				for(String[] data : all) {
+					if(data[2] != null)
+						currentBalance += Integer.parseInt(data[2]);
+					if(data[3] != null)
+						currentBalance -= Integer.parseInt(data[3]);
+				}
+
+				try {
+					createMonth.join();
+					updateMonth(m, y, currentBalance);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 	}
 
-	public void createMonth(int month, int year) {
-		boolean exists = false;
-		{
-			Cursor c = getReadableDatabase().query(TABLE_NAME, new String[] {NUMBER_COLUMN},
-					SQLShort(AND, format("%1$s=%2$s" , COLUMNS[0], month),
-							format("%1$s=%2$s" , COLUMNS[1], year)),
-					null, null, null, null);
-
-			exists = c.getCount() == 0;
-
-			c.close();
-
-		}
-
-		if(!exists) {
+	private void createMonth(int month, int year) {
+		if(getValueForMonth(month, year) == -1) {
 			Cursor c = getReadableDatabase().query(TABLE_NAME, new String[]{NUMBER_COLUMN},
 					null, null, null, null, null);
 			int i;
@@ -72,18 +97,39 @@ public class DBMonthlyBalance extends DBs {
 		CV.clear();
 	}
 
-	public double getBalance(int month, int year) {
+	public double getBalanceLastMonthWithData(int month, int year) {
 		double data = 0;
 
+		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[] {COLUMNS[2]},
+				SQLShort(OR, format("%1$s<%2$s" , COLUMNS[0], month),
+						format("%1$s<%2$s" , COLUMNS[1], year)),
+				null, null, null, null);
+
+		if(c.getCount() == 0)
+			data = -1;
+		else {
+			for(int i = 0; i < c.getCount(); i++) {
+				data += c.getDouble(0);
+				c.moveToNext();
+			}
+		}
+
+		c.close();
+
+		return data;
+	}
+
+
+	private double getValueForMonth(int month, int year) {
+		double data;
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[] {COLUMNS[2]},
 				SQLShort(AND, format("%1$s=%2$s" , COLUMNS[0], month),
 						format("%1$s=%2$s" , COLUMNS[1], year)),
 				null, null, null, null);
 
 		if(c.getCount() == 0)
-			throw new IllegalStateException("Non-existent month: " + (month+1) + " in year " + year);
+			data = -1;
 		else data = c.getDouble(0);
-
 		c.close();
 
 		return data;

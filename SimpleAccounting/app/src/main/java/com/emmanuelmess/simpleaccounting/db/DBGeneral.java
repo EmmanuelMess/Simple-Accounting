@@ -109,7 +109,7 @@ public class DBGeneral extends DBs {
 		CV.clear();
 	}
 
-	int[][] getMonthsWithData() {
+	public int[][] getMonthsWithData() {
 		int[][] data;
 
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[] {COLUMNS[4], COLUMNS[5]},
@@ -126,28 +126,6 @@ public class DBGeneral extends DBs {
 			else data[x] = new int[]{-1, -1};
 			c.moveToNext();
 		}
-		c.close();
-
-		return data;
-	}
-
-	public String[] getPreviousMonthLast(int month, int year) {
-		String [] data;
-
-		Cursor c = getReadableDatabase().query(TABLE_NAME, COLUMNS,
-				format("%1$s = (SELECT MAX(%1$s) FROM %2$s WHERE %3$s);", NUMBER_COLUMN, TABLE_NAME,
-						SQLShort(OR, COLUMNS[4] + "<" + month, COLUMNS[5] + "<" + year)),
-				null, null, null, COLUMNS[0]);
-
-		if (c != null && c.getCount() != 0) {
-			c.moveToFirst();
-		} else return new String[0];
-
-		data = new String[COLUMNS.length];
-
-		for(int y = 0; y < COLUMNS.length; y++)
-			data[y] = c.getString(y);
-
 		c.close();
 
 		return data;

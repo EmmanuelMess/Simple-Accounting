@@ -34,7 +34,6 @@ import com.github.amlcurran.showcaseview.targets.Target;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
@@ -52,11 +51,13 @@ public class MainActivity extends AppCompatActivity {
 
 	private final String PREFS_NAME = "shared prefs", PREFS_FIRST_RUN = "first_run";
 
+	private final int[] EDIT_IDS = {R.id.editDate, R.id.editRef, R.id.editCredit, R.id.editDebit, R.id.textBalance},
+			TEXT_IDS = {R.id.textDate, R.id.textRef, R.id.textCredit, R.id.textDebit};
+
+	private int FIRST_REAL_ROW = 1;//excluding header and previous balance
 	private TableLayout table = null;
 	private DBGeneral dbGeneral;
 	private DBMonthlyBalance dbMonthlyBalance;
-	private final int[] EDIT_IDS = {R.id.editDate, R.id.editRef, R.id.editCredit, R.id.editDebit, R.id.textBalance},
-			TEXT_IDS = {R.id.textDate, R.id.textRef, R.id.textCredit, R.id.textDebit};
 	private LayoutInflater inflater;
 	private ScrollView scrollView;
 
@@ -81,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
 		scrollView = (ScrollView) findViewById(R.id.scrollView);
 		table = (TableLayout) findViewById(R.id.table);
 		dbGeneral = new DBGeneral(this);
-		dbMonthlyBalance = new DBMonthlyBalance(this);
+		dbMonthlyBalance = new DBMonthlyBalance(this, dbGeneral);
 
 		int loadMonth, loadYear;
 
@@ -164,18 +165,14 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	private View loadRow() {
-		int rowViewIndex = table.getChildCount() - 1, dbIndex = rowToDBRowConversion.get(rowViewIndex - 1);
+		int rowViewIndex = table.getChildCount() - 1, dbIndex = rowToDBRowConversion.get(rowViewIndex - FIRST_REAL_ROW);
 		TableRow row = (TableRow) table.getChildAt(rowViewIndex);
 
-		if(dbIndex != -1) {
-			setListener(rowViewIndex);
-			checkEditInBalance(rowViewIndex, row);
-			checkDateChanged(rowViewIndex, row);
-			addToDB(dbIndex, row);
-		} else {
-			((TextView)row.findViewById(R.id.textCredit)).setText("");
-			((TextView)row.findViewById(R.id.textDebit)).setText("");
-		}
+		setListener(rowViewIndex);
+		checkEditInBalance(rowViewIndex, row);
+		checkDateChanged(rowViewIndex, row);
+		addToDB(dbIndex, row);
+
 		return row;
 	}
 
@@ -360,41 +357,37 @@ public class MainActivity extends AppCompatActivity {
 				editableMonth = month;
 				editableYear = year;
 				((TextView) findViewById(R.id.textMonth)).setText(MONTH_STRINGS[month]);
+
+				double lastMonthData = dbMonthlyBalance.getBalanceLastMonthWithData(month, year);
+				if(lastMonthData != -1) {
+					inflater.inflate(R.layout.newrow_main, table);
+
+					int rowViewIndex = table.getChildCount() - 1;
+					TableRow row = (TableRow) table.getChildAt(rowViewIndex);
+					((TextView) row.findViewById(R.id.textCredit)).setText("");
+					((TextView) row.findViewById(R.id.textDebit)).setText("");
+
+					for (int j = 0; j < EDIT_IDS.length; j++) {
+						row.findViewById(EDIT_IDS[j]).setVisibility(View.GONE);
+						row.findViewById(TEXT_IDS[j]).setVisibility(View.VISIBLE);
+					}
+
+					TextView t = (TextView) row.findViewById(R.id.textBalance);
+					String s = "$ " + String.valueOf(lastMonthData);
+					t.setText(s);
+					FIRST_REAL_ROW = 2;
+				}
 			}
 
 			@Override
 			protected String[][] doInBackground(Void... p) {
-				String[][] monthData = dbGeneral.getAllForMonth(month, year);
-
-				if(monthData.length == 0)
-					dbMonthlyBalance.createMonth(month, year);
-
-				ArrayList<String[]> s = new ArrayList<>();
-
-				float lastMonthData = dbMonthlyBalance.getBalance(month, year);
-
-				if(lastMonthData.length != 0)
-					s.add(lastMonthData);
-
-				Collections.addAll(s, monthData);
-
-				if(lastMonthData.length != 0) {
-					String [] lastMonthBalance = s.get(0);
-					lastMonthBalance[0] = null;
-					lastMonthBalance[1] = getString(R.string.previous_balance);
-				}
-
 				rowToDBRowConversion.clear();
-
 				int[] data = dbGeneral.getIndexesForMonth(month, year);
-				if(lastMonthData.length != 0)
-					rowToDBRowConversion.add(-1);
+
 				for(int m : data)
 					rowToDBRowConversion.add(m);
 
-				if(s.size() != 0)
-					return s.toArray(new String[s.size()][s.get(0).length]);
-				else return s.toArray(new String[0][0]);
+				return dbGeneral.getAllForMonth(month, year);
 			}
 
 			@Override
@@ -428,7 +421,7 @@ public class MainActivity extends AppCompatActivity {
 				findViewById(R.id.progressBar).setVisibility(View.GONE);
 
 				loadShowcaseView(inflater, scrollView);
-
+/*
 				if(rowToDBRowConversion.get(0) == -1) {
 					TableRow row = (TableRow) table.getChildAt(1);
 
@@ -436,6 +429,7 @@ public class MainActivity extends AppCompatActivity {
 						if(row.getChildAt(i).getVisibility() == View.GONE)
 							row.removeView(row.getChildAt(i));
 				}
+*/
 			}
 		}).execute();
 	}
@@ -445,7 +439,7 @@ public class MainActivity extends AppCompatActivity {
 		boolean isFirstRun = myPrefs.getBoolean(PREFS_FIRST_RUN, false);
 		if (isFirstRun) { //|| BuildConfig.DEBUG) {
 
-			final int rowToEdit = 1;
+			final int rowToEdit = FIRST_REAL_ROW;
 
 			if (table.getChildAt(rowToEdit) == null) {
 				inflater.inflate(R.layout.newrow_main, table);
