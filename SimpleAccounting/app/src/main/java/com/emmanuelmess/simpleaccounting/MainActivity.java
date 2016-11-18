@@ -165,7 +165,8 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	private View loadRow() {
-		int rowViewIndex = table.getChildCount() - 1, dbIndex = rowToDBRowConversion.get(rowViewIndex - FIRST_REAL_ROW);
+		int rowViewIndex = table.getChildCount() - 1,
+				dbIndex = rowToDBRowConversion.get(rowViewIndex - FIRST_REAL_ROW);
 		TableRow row = (TableRow) table.getChildAt(rowViewIndex);
 
 		setListener(rowViewIndex);
@@ -233,16 +234,13 @@ public class MainActivity extends AppCompatActivity {
 	void checkDateChanged(final int index, TableRow row) {
 		final EditText date = (EditText) row.findViewById(R.id.editDate);
 
-		TextWatcher watcher = new TextWatcher() {
+		TextWatcher watcher = new SimpleTextWatcher() {
 			String mem = "";
 
 			@Override
 			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 				mem = s.toString();
 			}
-
-			@Override
-			public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
 			@Override
 			public void afterTextChanged(Editable editable) {
@@ -261,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
 
 	private double parse(String s) {
 		try {
-			return Double.valueOf(s);
+			return Double.parseDouble(s);
 		} catch (NumberFormatException e) {
 			return 0;
 		}
@@ -270,15 +268,7 @@ public class MainActivity extends AppCompatActivity {
 	private void addToDB(final int index, View row) {
 		for (int i = 0; i < EDIT_IDS.length - 1; i++) {
 			final String rowName = DBGeneral.COLUMNS[i];
-			TextWatcher watcher = new TextWatcher() {
-				@Override
-				public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-				}
-
-				@Override
-				public void onTextChanged(CharSequence s, int start, int before, int count) {
-				}
-
+			TextWatcher watcher = new SimpleTextWatcher() {
 				@Override
 				public void afterTextChanged(Editable editable) {
 					if (!equal(editable.toString(), ""))
@@ -289,17 +279,7 @@ public class MainActivity extends AppCompatActivity {
 			((TextView) row.findViewById(EDIT_IDS[i])).addTextChangedListener(watcher);
 		}
 
-		TextWatcher watcher = new TextWatcher() {
-			@Override
-			public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-			}
-
-			@Override
-			public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-			}
-
+		TextWatcher watcher = new SimpleTextWatcher() {
 			@Override
 			public void afterTextChanged(Editable editable) {
 				dbMonthlyBalance.updateMonth(editableMonth, editableYear, Double.parseDouble(editable.toString().substring(1)));
@@ -377,27 +357,7 @@ public class MainActivity extends AppCompatActivity {
 				editableYear = year;
 				((TextView) findViewById(R.id.textMonth)).setText(MONTH_STRINGS[month]);
 
-				double lastMonthData = dbMonthlyBalance.getBalanceLastMonthWithData(month, year);
-				if(lastMonthData != -1) {
-					inflater.inflate(R.layout.newrow_main, table);
-
-					int rowViewIndex = table.getChildCount() - 1;
-					TableRow row = (TableRow) table.getChildAt(rowViewIndex);
-
-					for (int j = 0; j < TEXT_IDS.length; j++) {
-						row.findViewById(EDIT_IDS[j]).setVisibility(View.GONE);
-						row.findViewById(TEXT_IDS[j]).setVisibility(View.VISIBLE);
-					}
-
-					((TextView) row.findViewById(R.id.textRef)).setText(R.string.previous_balance);
-					((TextView) row.findViewById(R.id.textCredit)).setText("");
-					((TextView) row.findViewById(R.id.textDebit)).setText("");
-
-					TextView t = (TextView) row.findViewById(R.id.textBalance);
-					String s = "$ " + String.valueOf(lastMonthData);
-					t.setText(s);
-					FIRST_REAL_ROW = 2;
-				}
+				loadPreviousBalance(month, year);
 			}
 
 			@Override
@@ -437,9 +397,9 @@ public class MainActivity extends AppCompatActivity {
 
 					TextView t = (TextView) row.findViewById(R.id.textBalance);
 					if (dbRow[2] != null)
-						memBalance += Float.valueOf(dbRow[2]);
+						memBalance += Float.parseFloat(dbRow[2]);
 					if (dbRow[3] != null)
-						memBalance -= Float.valueOf(dbRow[3]);
+						memBalance -= Float.parseFloat(dbRow[3]);
 
 					String s = "$ " + String.valueOf(memBalance);
 					t.setText(s);
@@ -450,6 +410,39 @@ public class MainActivity extends AppCompatActivity {
 				findViewById(R.id.progressBar).setVisibility(View.GONE);
 
 				loadShowcaseView(inflater, scrollView);
+			}
+		}).execute();
+	}
+
+	private void loadPreviousBalance(int month, int year) {
+		(new AsyncTask<Void, Void, Double>() {
+			@Override
+			protected Double doInBackground(Void... v) {
+				return dbMonthlyBalance.getBalanceLastMonthWithData(month, year);
+			}
+
+			@Override
+			protected void onPostExecute(Double lastMonthData) {
+				if(lastMonthData != -1) {
+					inflater.inflate(R.layout.newrow_main, table);
+
+					int rowViewIndex = table.getChildCount() - 1;
+					TableRow row = (TableRow) table.getChildAt(rowViewIndex);
+
+					for (int j = 0; j < TEXT_IDS.length; j++) {
+						row.findViewById(EDIT_IDS[j]).setVisibility(View.GONE);
+						row.findViewById(TEXT_IDS[j]).setVisibility(View.VISIBLE);
+					}
+
+					((TextView) row.findViewById(R.id.textRef)).setText(R.string.previous_balance);
+					((TextView) row.findViewById(R.id.textCredit)).setText("");
+					((TextView) row.findViewById(R.id.textDebit)).setText("");
+
+					TextView t = (TextView) row.findViewById(R.id.textBalance);
+					String s = "$ " + String.valueOf(lastMonthData);
+					t.setText(s);
+					FIRST_REAL_ROW = 2;
+				}
 			}
 		}).execute();
 	}
@@ -515,6 +508,18 @@ public class MainActivity extends AppCompatActivity {
 
 	private boolean equal(Object o1, Object o2) {
 		return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && Objects.equals(o1, o2)) || o1.equals(o2);
+	}
+
+	private class SimpleTextWatcher implements TextWatcher {
+
+		@Override
+		public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+		@Override
+		public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+		@Override
+		public void afterTextChanged(Editable editable) {}
 	}
 
 }

@@ -68,7 +68,7 @@ public class DBMonthlyBalance extends DBs {
 	}
 
 	public void createMonth(int month, int year) {
-		if(getValueForMonth(month, year) == -1) {
+		if(isMonthInBD(month, year)) {
 			Cursor c = getReadableDatabase().query(TABLE_NAME, new String[]{NUMBER_COLUMN},
 					null, null, null, null, null);
 			int i;
@@ -125,17 +125,14 @@ public class DBMonthlyBalance extends DBs {
 	}
 
 
-	private double getValueForMonth(int month, int year) {
-		double data;
+	private boolean isMonthInBD(int month, int year) {
+		boolean data;
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[] {COLUMNS[2]},
 				SQLShort(AND, format("%1$s=%2$s" , COLUMNS[0], month),
 						format("%1$s=%2$s" , COLUMNS[1], year)),
-				null, null, null, null);
+				null, null, null, null, "1");
 
-		c.moveToFirst();
-		if(c.getCount() == 0)
-			data = -1;
-		else data = c.getDouble(0);
+		data = c.getCount() != 0;
 		c.close();
 
 		return data;
