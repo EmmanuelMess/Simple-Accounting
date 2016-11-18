@@ -179,8 +179,9 @@ public class MainActivity extends AppCompatActivity {
 	private void checkEditInBalance(final int index, TableRow row) {
 		final EditText debit = (EditText) row.findViewById(R.id.editDebit),
 				credit = (EditText) row.findViewById(R.id.editCredit);
-		final TextView lastBalance = index > 1? (TextView) table.getChildAt(index - 1).findViewById(R.id.textBalance):null,
-				balance = (TextView) row.findViewById(R.id.textBalance);
+
+		final TextView lastBalance = index > 1? (TextView) table.getChildAt(index - 1).findViewById(R.id.textBalance) : null;
+		final TextView balance = (TextView) row.findViewById(R.id.textBalance);
 
 		TextWatcher watcher = new TextWatcher() {
 			@Override
@@ -215,8 +216,6 @@ public class MainActivity extends AppCompatActivity {
 						b = parse(lastBalanceText.getText().toString().substring(1));
 						b = b + parse(creditText.getText().toString())
 								- parse(debitText.getText().toString());
-
-						dbMonthlyBalance.updateMonth(editableMonth, editableYear, b);
 
 						String str = "$ " + b;
 						balanceText.setText(str);
@@ -289,6 +288,25 @@ public class MainActivity extends AppCompatActivity {
 
 			((TextView) row.findViewById(EDIT_IDS[i])).addTextChangedListener(watcher);
 		}
+
+		TextWatcher watcher = new TextWatcher() {
+			@Override
+			public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+			}
+
+			@Override
+			public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+			}
+
+			@Override
+			public void afterTextChanged(Editable editable) {
+				dbMonthlyBalance.updateMonth(editableMonth, editableYear, Double.parseDouble(editable.toString().substring(1)));
+			}
+		};
+		((TextView) row.findViewById(R.id.textBalance)).addTextChangedListener(watcher);
+
 	}
 
 	private void setListener(final int rowIndex) {
@@ -307,6 +325,7 @@ public class MainActivity extends AppCompatActivity {
 				t1.setVisibility(View.GONE);
 				t.setVisibility(View.VISIBLE);
 			}
+
 			editableRow = rowIndex;
 			return true;
 		});
@@ -364,13 +383,15 @@ public class MainActivity extends AppCompatActivity {
 
 					int rowViewIndex = table.getChildCount() - 1;
 					TableRow row = (TableRow) table.getChildAt(rowViewIndex);
-					((TextView) row.findViewById(R.id.textCredit)).setText("");
-					((TextView) row.findViewById(R.id.textDebit)).setText("");
 
-					for (int j = 0; j < EDIT_IDS.length; j++) {
+					for (int j = 0; j < TEXT_IDS.length; j++) {
 						row.findViewById(EDIT_IDS[j]).setVisibility(View.GONE);
 						row.findViewById(TEXT_IDS[j]).setVisibility(View.VISIBLE);
 					}
+
+					((TextView) row.findViewById(R.id.textRef)).setText(R.string.previous_balance);
+					((TextView) row.findViewById(R.id.textCredit)).setText("");
+					((TextView) row.findViewById(R.id.textDebit)).setText("");
 
 					TextView t = (TextView) row.findViewById(R.id.textBalance);
 					String s = "$ " + String.valueOf(lastMonthData);
@@ -381,6 +402,8 @@ public class MainActivity extends AppCompatActivity {
 
 			@Override
 			protected String[][] doInBackground(Void... p) {
+				dbMonthlyBalance.createMonth(editableMonth, editableYear);
+
 				rowToDBRowConversion.clear();
 				int[] data = dbGeneral.getIndexesForMonth(month, year);
 
@@ -393,6 +416,12 @@ public class MainActivity extends AppCompatActivity {
 			@Override
 			protected void onPostExecute(String[][] dbRows) {
 				float memBalance = 0;
+
+				if(FIRST_REAL_ROW == 2) {
+					memBalance += Double.parseDouble(((TextView) table.getChildAt(1)
+							.findViewById(R.id.textBalance)).getText().toString().substring(1));
+				}
+
 				for (String[] dbRow : dbRows) {
 					inflater.inflate(R.layout.newrow_main, table);
 
@@ -421,15 +450,6 @@ public class MainActivity extends AppCompatActivity {
 				findViewById(R.id.progressBar).setVisibility(View.GONE);
 
 				loadShowcaseView(inflater, scrollView);
-/*
-				if(rowToDBRowConversion.get(0) == -1) {
-					TableRow row = (TableRow) table.getChildAt(1);
-
-					for(int i = 0; i < row.getChildCount(); i++)
-						if(row.getChildAt(i).getVisibility() == View.GONE)
-							row.removeView(row.getChildAt(i));
-				}
-*/
 			}
 		}).execute();
 	}

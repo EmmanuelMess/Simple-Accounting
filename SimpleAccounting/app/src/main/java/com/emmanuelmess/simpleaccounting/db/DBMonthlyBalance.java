@@ -67,11 +67,13 @@ public class DBMonthlyBalance extends DBs {
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 	}
 
-	private void createMonth(int month, int year) {
+	public void createMonth(int month, int year) {
 		if(getValueForMonth(month, year) == -1) {
 			Cursor c = getReadableDatabase().query(TABLE_NAME, new String[]{NUMBER_COLUMN},
 					null, null, null, null, null);
 			int i;
+
+			c.moveToFirst();
 
 			if (c.getCount() == 0) {
 				i = 0;
@@ -101,9 +103,12 @@ public class DBMonthlyBalance extends DBs {
 		double data = 0;
 
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[] {COLUMNS[2]},
-				SQLShort(OR, format("%1$s<%2$s" , COLUMNS[0], month),
-						format("%1$s<%2$s" , COLUMNS[1], year)),
+				SQLShort(OR, format("%1$s<%2$s" , COLUMNS[1], year),
+					SQLShort(AND, format("%1$s<%2$s" , COLUMNS[0], month),
+							format("%1$s=%2$s" , COLUMNS[1], year))),
 				null, null, null, null);
+
+		c.moveToFirst();
 
 		if(c.getCount() == 0)
 			data = -1;
@@ -127,6 +132,7 @@ public class DBMonthlyBalance extends DBs {
 						format("%1$s=%2$s" , COLUMNS[1], year)),
 				null, null, null, null);
 
+		c.moveToFirst();
 		if(c.getCount() == 0)
 			data = -1;
 		else data = c.getDouble(0);
