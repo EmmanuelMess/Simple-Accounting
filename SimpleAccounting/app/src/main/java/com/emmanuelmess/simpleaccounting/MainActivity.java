@@ -123,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
 			dbGeneral.newRowInMonth(editableMonth, editableYear);
 			rowToDBRowConversion.add(dbGeneral.getLastIndex());
 			View row = loadRow();
+			addToMonthsDB();
 
 			EditText date = (EditText) row.findViewById(R.id.editDate);
 			date.setText(new SimpleDateFormat("dd", Locale.getDefault()).format(new Date()));
@@ -131,6 +132,18 @@ public class MainActivity extends AppCompatActivity {
 			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 			imm.showSoftInput(date, InputMethodManager.SHOW_IMPLICIT);
 		});
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		int loadMonth = Integer.parseInt(new SimpleDateFormat("M", Locale.getDefault()).format(new Date())) - 1;
+		//YEARS ALREADY START IN 0!!!
+		int loadYear = Integer.parseInt(new SimpleDateFormat("yyyy", Locale.getDefault()).format(new Date()));
+
+		if(loadMonth != editableMonth || loadYear != editableYear) {
+			loadMonth(loadMonth, loadYear);
+		}
 	}
 
 	@Override
@@ -173,7 +186,6 @@ public class MainActivity extends AppCompatActivity {
 		checkEditInBalance(rowViewIndex, row);
 		checkDateChanged(rowViewIndex, row);
 		addToDB(dbIndex, row);
-
 		return row;
 	}
 
@@ -278,15 +290,6 @@ public class MainActivity extends AppCompatActivity {
 
 			((TextView) row.findViewById(EDIT_IDS[i])).addTextChangedListener(watcher);
 		}
-
-		TextWatcher watcher = new SimpleTextWatcher() {
-			@Override
-			public void afterTextChanged(Editable editable) {
-				dbMonthlyBalance.updateMonth(editableMonth, editableYear, Double.parseDouble(editable.toString().substring(1)));
-			}
-		};
-		((TextView) row.findViewById(R.id.textBalance)).addTextChangedListener(watcher);
-
 	}
 
 	private void setListener(final int rowIndex) {
@@ -405,6 +408,8 @@ public class MainActivity extends AppCompatActivity {
 					t.setText(s);
 				}
 
+				addToMonthsDB();
+
 				scrollView.fullScroll(View.FOCUS_DOWN);
 
 				findViewById(R.id.progressBar).setVisibility(View.GONE);
@@ -445,6 +450,20 @@ public class MainActivity extends AppCompatActivity {
 				}
 			}
 		}).execute();
+	}
+
+	private void addToMonthsDB() {
+		if(table.getChildCount()-1 >= FIRST_REAL_ROW) {
+			View row = table.getChildAt(table.getChildCount()-1);
+
+			TextWatcher watcher = new SimpleTextWatcher() {
+				@Override
+				public void afterTextChanged(Editable editable) {
+					dbMonthlyBalance.updateMonth(editableMonth, editableYear, Double.parseDouble(editable.toString().substring(1)));
+				}
+			};
+			((TextView) row.findViewById(R.id.textBalance)).addTextChangedListener(watcher);
+		}
 	}
 
 	private void loadShowcaseView(LayoutInflater inflater, ScrollView scrollView) {

@@ -104,8 +104,8 @@ public class DBMonthlyBalance extends DBs {
 
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[] {COLUMNS[2]},
 				SQLShort(OR, format("%1$s<%2$s" , COLUMNS[1], year),
-					SQLShort(AND, format("%1$s<%2$s" , COLUMNS[0], month),
-							format("%1$s=%2$s" , COLUMNS[1], year))),
+					"(" + SQLShort(AND, format("%1$s<%2$s" , COLUMNS[0], month),
+							format("%1$s=%2$s" , COLUMNS[1] , year)) + ")"),
 				null, null, null, null);
 
 		c.moveToFirst();
