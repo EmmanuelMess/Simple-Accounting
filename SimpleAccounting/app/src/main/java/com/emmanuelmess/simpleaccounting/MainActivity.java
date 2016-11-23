@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
 	private DBMonthlyBalance dbMonthlyBalance;
 	private LayoutInflater inflater;
 	private ScrollView scrollView;
+	private AsyncTask<Void, Void, String[][]> loadingMonthTask = null;
 
 	//pointer to row being edited
 	private int editableRow = -1;
@@ -141,9 +142,8 @@ public class MainActivity extends AppCompatActivity {
 		//YEARS ALREADY START IN 0!!!
 		int loadYear = Integer.parseInt(new SimpleDateFormat("yyyy", Locale.getDefault()).format(new Date()));
 
-		if(loadMonth != editableMonth || loadYear != editableYear) {
-			loadMonth(loadMonth, loadYear);
-		}
+		//if((loadMonth != editableMonth || loadYear != editableYear) && (loadingMonthTask == null ||loadingMonthTask.getStatus() == FINISHED))
+		//	loadMonth(loadMonth, loadYear);
 	}
 
 	@Override
@@ -196,13 +196,7 @@ public class MainActivity extends AppCompatActivity {
 		final TextView lastBalance = index > 1? (TextView) table.getChildAt(index - 1).findViewById(R.id.textBalance) : null;
 		final TextView balance = (TextView) row.findViewById(R.id.textBalance);
 
-		TextWatcher watcher = new TextWatcher() {
-			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-			@Override
-			public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
+		TextWatcher watcher = new SimpleTextWatcher() {
 			@Override
 			public void afterTextChanged(Editable editable) {
 				if (editableRow == index) {
@@ -352,10 +346,17 @@ public class MainActivity extends AppCompatActivity {
 		}
 	}
 
+	boolean loadingMonth = false;
+
 	private void loadMonth(int month, int year) {
-		(new AsyncTask<Void, Void, String[][]>() {
+		loadingMonthTask = new AsyncTask<Void, Void, String[][]>() {
 			@Override
 			protected void onPreExecute() {
+				if(!loadingMonth)
+					loadingMonth = true;
+				else
+					throw new IllegalStateException("Already loading month!");
+
 				editableMonth = month;
 				editableYear = year;
 				((TextView) findViewById(R.id.textMonth)).setText(MONTH_STRINGS[month]);
@@ -415,8 +416,11 @@ public class MainActivity extends AppCompatActivity {
 				findViewById(R.id.progressBar).setVisibility(View.GONE);
 
 				loadShowcaseView(inflater, scrollView);
+				loadingMonth = false;
 			}
-		}).execute();
+		};
+
+		loadingMonthTask.execute();
 	}
 
 	private void loadPreviousBalance(int month, int year) {
@@ -469,7 +473,7 @@ public class MainActivity extends AppCompatActivity {
 	private void loadShowcaseView(LayoutInflater inflater, ScrollView scrollView) {
 		SharedPreferences myPrefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 		boolean isFirstRun = myPrefs.getBoolean(PREFS_FIRST_RUN, false);
-		if (isFirstRun) { //|| BuildConfig.DEBUG) {
+		if (isFirstRun) {//|| BuildConfig.DEBUG) {
 
 			final int rowToEdit = FIRST_REAL_ROW;
 

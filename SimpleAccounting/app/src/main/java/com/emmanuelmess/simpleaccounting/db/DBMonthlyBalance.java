@@ -68,7 +68,7 @@ public class DBMonthlyBalance extends DBs {
 	}
 
 	public void createMonth(int month, int year) {
-		if(isMonthInBD(month, year)) {
+		if(!isMonthInBD(month, year)) {
 			Cursor c = getReadableDatabase().query(TABLE_NAME, new String[]{NUMBER_COLUMN},
 					null, null, null, null, null);
 			int i;
