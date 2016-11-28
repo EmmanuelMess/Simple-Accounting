@@ -2,12 +2,10 @@ package com.emmanuelmess.simpleaccounting;
 
 import android.app.ListActivity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatCallback;
 import android.support.v7.app.AppCompatDelegate;
@@ -95,7 +93,8 @@ public class TempMonthActivity extends ListActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 			case android.R.id.home:
-				NavUtils.navigateUpFromSameTask(this);
+				//NavUtils.navigateUpFromSameTask(this);
+				onBackPressed();//To make the MainActivity not destroy itself
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);
@@ -104,12 +103,17 @@ public class TempMonthActivity extends ListActivity {
 
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
+		MainActivity.setDate(dateIntValues.get(position)[0],dateIntValues.get(position)[1]);
+		onBackPressed();
+
+		/*
 		Intent intent = new Intent(getApplicationContext(), MainActivity.class);
 		Bundle extra = new Bundle();
 		extra.putInt(MainActivity.MONTH, dateIntValues.get(position)[0]);
 		extra.putInt(MainActivity.YEAR, dateIntValues.get(position)[1]);
 		intent.putExtras(extra);
 		startActivity(intent);
+		*/
 	}
 
 	private class MonthListAdapter extends ArrayAdapter<String[]> {

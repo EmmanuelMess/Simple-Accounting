@@ -68,14 +68,19 @@ public class MainActivity extends AppCompatActivity implements OnMonthFinishedLo
 	private int editableRow = -1;
 	//pointer to month being viewed
 	private static int editableMonth = -1, editableYear = -1;
+	private static boolean dateChanged = false;
 
 	private ArrayList<Integer> rowToDBRowConversion = new ArrayList<>();
 
 	private boolean destroyFirst = false;
 	private boolean reloadMonthOnChangeToView = false;
-	private boolean loadingMonth = false;
 	private boolean createNewRowWhenMonthLoaded = false;
 
+	public static void setDate(int month, int year) {
+		editableMonth = month;
+		editableYear = year;
+		dateChanged = true;
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -114,6 +119,7 @@ public class MainActivity extends AppCompatActivity implements OnMonthFinishedLo
 						- findViewById(R.id.fab).getPaddingTop());
 
 				loadMonth(loadMonth, loadYear);
+				dateChanged = false;//in case the activity gets destroyed
 			}
 		});
 
@@ -145,12 +151,19 @@ public class MainActivity extends AppCompatActivity implements OnMonthFinishedLo
 	@Override
 	protected void onResume() {
 		super.onResume();
+		if(dateChanged) {
+			loadMonth(editableMonth, editableYear);
+			dateChanged = false;
+		}
+
+		/*
 		int loadMonth = Integer.parseInt(new SimpleDateFormat("M", Locale.getDefault()).format(new Date())) - 1;
 		//YEARS ALREADY START IN 0!!!
 		int loadYear = Integer.parseInt(new SimpleDateFormat("yyyy", Locale.getDefault()).format(new Date()));
 
-		//if((loadMonth != editableMonth || loadYear != editableYear) && (loadingMonthTask == null ||loadingMonthTask.getStatus() == FINISHED))
-		//	loadMonth(loadMonth, loadYear);
+		if((loadMonth != editableMonth || loadYear != editableYear) && (loadingMonthTask == null ||loadingMonthTask.getStatus() == FINISHED))
+			loadMonth(loadMonth, loadYear);
+		*/
 	}
 
 	@Override
@@ -184,9 +197,8 @@ public class MainActivity extends AppCompatActivity implements OnMonthFinishedLo
 		return super.onOptionsItemSelected(item);
 	}
 
-	public View loadRow() {
-		int rowViewIndex = table.getChildCount() - 1,
-				dbIndex = rowToDBRowConversion.get(rowViewIndex - FIRST_REAL_ROW);
+	public View loadRow(int dbIndex) {
+		int rowViewIndex = table.getChildCount() - 1;
 		TableRow row = (TableRow) table.getChildAt(rowViewIndex);
 
 		setListener(rowViewIndex);
@@ -194,6 +206,14 @@ public class MainActivity extends AppCompatActivity implements OnMonthFinishedLo
 		checkDateChanged(rowViewIndex, row);
 		addToDB(dbIndex, row);
 		return row;
+	}
+
+	public int getFirstRealRow() {
+		return FIRST_REAL_ROW;
+	}
+
+	private View loadRow() {
+		return loadRow(rowToDBRowConversion.get(table.getChildCount() - 1 - FIRST_REAL_ROW));
 	}
 
 	private void checkEditInBalance(final int index, TableRow row) {
@@ -346,15 +366,34 @@ public class MainActivity extends AppCompatActivity implements OnMonthFinishedLo
 
 			if(reloadMonthOnChangeToView){
 				reloadMonthOnChangeToView = false;
-				for(int i = table.getChildCount()-1; i > 0; i--)
-					table.removeViewAt(i);
 				loadMonth(editableMonth, editableYear);
 			}
 		}
 	}
 
+	private void loadMonth(int month, int year) {
+		if(loadingMonthTask != null && loadingMonthTask.getStatus() != AsyncTask.Status.FINISHED)
+			throw new IllegalStateException("Already loading month!");
+
+		if(table.getChildCount() > FIRST_REAL_ROW)
+			for(int i = table.getChildCount()-1; i > 0; i--)
+				table.removeViewAt(i);
+
+		loadingMonthTask = new LoadMonthAsyncTask(month, year, FIRST_REAL_ROW, dbGeneral,
+				dbMonthlyBalance, table, inflater, this, this);
+
+		editableMonth = month;
+		editableYear = year;
+		((TextView) findViewById(R.id.textMonth)).setText(MONTH_STRINGS[month]);
+
+		loadPreviousBalance(month, year);
+
+		loadingMonthTask.execute();
+	}
+
 	@Override
-	public void OnMonthFinishedLoading() {
+	public void OnMonthFinishedLoading(ArrayList<Integer> rowToDBRowConversion) {
+		this.rowToDBRowConversion = rowToDBRowConversion;
 		addToMonthsDB();
 
 		scrollView.fullScroll(View.FOCUS_DOWN);
@@ -362,7 +401,6 @@ public class MainActivity extends AppCompatActivity implements OnMonthFinishedLo
 		findViewById(R.id.progressBar).setVisibility(View.GONE);
 
 		loadShowcaseView(inflater, scrollView);
-		loadingMonth = false;
 
 		if(createNewRowWhenMonthLoaded) {
 			inflater.inflate(R.layout.newrow_main, table);
@@ -373,7 +411,7 @@ public class MainActivity extends AppCompatActivity implements OnMonthFinishedLo
 			editableRow = table.getChildCount() - 1;
 
 			dbGeneral.newRowInMonth(editableMonth, editableYear);
-			rowToDBRowConversion.add(dbGeneral.getLastIndex());
+			this.rowToDBRowConversion.add(dbGeneral.getLastIndex());
 			View row = loadRow();
 			addToMonthsDB();
 
@@ -385,24 +423,6 @@ public class MainActivity extends AppCompatActivity implements OnMonthFinishedLo
 			imm.showSoftInput(date, InputMethodManager.SHOW_IMPLICIT);
 			createNewRowWhenMonthLoaded = false;
 		}
-	}
-
-	private void loadMonth(int month, int year) {
-		loadingMonthTask = new LoadMonthAsyncTask(month, year, FIRST_REAL_ROW, dbGeneral,
-				dbMonthlyBalance, table, inflater, rowToDBRowConversion, this, this);
-
-		editableMonth = month;
-		editableYear = year;
-		((TextView) findViewById(R.id.textMonth)).setText(MONTH_STRINGS[month]);
-
-		loadPreviousBalance(month, year);
-
-		if(!loadingMonth)
-			loadingMonth = true;
-		else
-			throw new IllegalStateException("Already loading month!");
-
-		loadingMonthTask.execute();
 	}
 
 	private void loadPreviousBalance(int month, int year) {

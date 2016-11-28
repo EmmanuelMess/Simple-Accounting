@@ -25,12 +25,12 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 	private DBMonthlyBalance dbMonthlyBalance;
 	private TableLayout table;
 	private LayoutInflater inflater;
-	private ArrayList<Integer> rowToDBRowConversion = null;
+	private ArrayList<Integer> rowToDBRowConversion = new ArrayList<>();
 	private OnMonthFinishedLoading listener;
 	private MainActivity mainActivity;
 
 	public LoadMonthAsyncTask(int m, int y, int fRealRow, DBGeneral dbG, DBMonthlyBalance db, TableLayout t,
-	                          LayoutInflater i, ArrayList<Integer> rTDB, OnMonthFinishedLoading l,
+	                          LayoutInflater i, OnMonthFinishedLoading l,
 	                          MainActivity a) {
 		month = m;
 		year = y;
@@ -39,7 +39,6 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 		dbMonthlyBalance = db;
 		table = t;
 		inflater = i;
-		rowToDBRowConversion = rTDB;
 		listener = l;
 		mainActivity = a;
 	}
@@ -48,7 +47,6 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 	protected String[][] doInBackground(Void... p) {
 		dbMonthlyBalance.createMonth(month, year);
 
-		rowToDBRowConversion.clear();
 		int[] data = dbGeneral.getIndexesForMonth(month, year);
 
 		for(int m : data)
@@ -69,7 +67,8 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 		for (String[] dbRow : dbRows) {
 			inflater.inflate(R.layout.newrow_main, table);
 
-			View row = mainActivity.loadRow();
+			int dbIndex = rowToDBRowConversion.get(table.getChildCount() - 1 - mainActivity.getFirstRealRow());
+			View row = mainActivity.loadRow(dbIndex);
 
 			for (int j = 0; j < MainActivity.TEXT_IDS.length; j++) {
 				row.findViewById(MainActivity.EDIT_IDS[j]).setVisibility(View.GONE);
@@ -89,7 +88,7 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 			t.setText(s);
 		}
 
-		listener.OnMonthFinishedLoading();
+		listener.OnMonthFinishedLoading(rowToDBRowConversion);
 	}
 
 }
