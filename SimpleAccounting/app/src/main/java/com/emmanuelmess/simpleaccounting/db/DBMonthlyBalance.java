@@ -55,7 +55,7 @@ public class DBMonthlyBalance extends DBs {
 
 				try {
 					createMonth.join();
-					updateMonth(m, y, currentBalance);
+					updateMonth(m, y, currentBalance, db);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -93,8 +93,12 @@ public class DBMonthlyBalance extends DBs {
 	}
 
 	public void updateMonth(int month, int year, double balance) {
+		updateMonth(month, year, balance, getWritableDatabase());
+	}
+	
+	private void updateMonth(int month, int year, double balance, SQLiteDatabase db) {
 		CV.put(COLUMNS[2], balance);
-		getWritableDatabase().update(TABLE_NAME, CV, SQLShort(AND, format("%1$s=%2$s" , COLUMNS[0], month),
+		db.update(TABLE_NAME, CV, SQLShort(AND, format("%1$s=%2$s" , COLUMNS[0], month),
 				format("%1$s=%2$s" , COLUMNS[1], year)), null);
 		CV.clear();
 	}

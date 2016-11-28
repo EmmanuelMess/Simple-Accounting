@@ -70,10 +70,6 @@ public class TempMonthActivity extends ListActivity {
 
 		(new AsyncTask<Void, Void, int[][]>() {
 			@Override
-			protected void onPreExecute() {
-			}
-
-			@Override
 			protected int[][] doInBackground(Void... p) {
 				return f.getMonthsWithData();
 			}
@@ -88,8 +84,6 @@ public class TempMonthActivity extends ListActivity {
 					dateIntValues.add(new Integer[]{m, d[1]});
 				}
 
-				// Create an empty adapter we will use to display the loaded data.
-				// We pass null for the cursor, then update it in onLoadFinished()
 				monthListAdapter = new MonthListAdapter(getApplicationContext(),
 						monthListData.toArray(new String[monthListData.size()][2]));
 				setListAdapter(monthListAdapter);

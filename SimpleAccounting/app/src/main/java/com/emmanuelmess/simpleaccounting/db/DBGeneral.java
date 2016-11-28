@@ -52,7 +52,7 @@ public class DBGeneral extends DBs {
 				sql = "ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + COLUMNS[5] + " INT;";
 				db.execSQL(sql);
 
-				Cursor c = getReadableDatabase().query(TABLE_NAME, new String[]{COLUMNS[0]},
+				Cursor c = db.query(TABLE_NAME, new String[]{COLUMNS[0]},
 						null, null, null, null, null);
 
 				c.moveToLast();
@@ -62,7 +62,7 @@ public class DBGeneral extends DBs {
 						//YEARS ALREADY START IN 0!!!
 						year = Integer.parseInt(new SimpleDateFormat("yyyy", Locale.getDefault()).format(new Date()));
 
-				for (int i = c.getCount(); i >= 0; i--) {
+				for (int i = c.getCount()-1; i >= 0; i--) {
 					if(last <= c.getInt(0)) {// TODO: 12/11/2016 test
 						if (month >= 0)
 							month--;
@@ -72,8 +72,11 @@ public class DBGeneral extends DBs {
 						}
 					}
 
-					update(i, COLUMNS[4], String.valueOf(month));
-					update(i, COLUMNS[4], String.valueOf(year));
+					CV.put(COLUMNS[4], month);
+					CV.put(COLUMNS[5], year);
+					db.update(TABLE_NAME, CV, NUMBER_COLUMN + "=" + i, null);
+					CV.clear();
+
 					last = c.getInt(0);
 
 					c.moveToPrevious();
