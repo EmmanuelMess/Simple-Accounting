@@ -89,9 +89,9 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 
 							TextView t = (TextView) row.findViewById(R.id.textBalance);
 							if (dbRow[2] != null)
-								memBalance += Float.valueOf(dbRow[2]);
+								memBalance += parse(dbRow[2]);
 							if (dbRow[3] != null)
-								memBalance -= Float.valueOf(dbRow[3]);
+								memBalance -= parse(dbRow[3]);
 
 							String s = "$ " + String.valueOf(memBalance);
 							t.setText(s);
