@@ -294,7 +294,7 @@ public class MainActivity extends AppCompatActivity implements OnMonthFinishedLo
 		try {
 			return Double.parseDouble(s);
 		} catch (NumberFormatException e) {
-			return 0;
+			return 0d;
 		}
 	}
 

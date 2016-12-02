@@ -80,15 +80,23 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 
 			TextView t = (TextView) row.findViewById(R.id.textBalance);
 			if (dbRow[2] != null)
-				memBalance += Float.parseFloat(dbRow[2]);
+				memBalance += parse(dbRow[2]);
 			if (dbRow[3] != null)
-				memBalance -= Float.parseFloat(dbRow[3]);
+				memBalance -= parse(dbRow[3]);
 
 			String s = "$ " + String.valueOf(memBalance);
 			t.setText(s);
 		}
 
 		listener.OnMonthFinishedLoading(rowToDBRowConversion);
+	}
+
+	private float parse(String s) {
+		try {
+			return Float.parseFloat(s);
+		} catch (NumberFormatException e) {
+			return 0f;
+		}
 	}
 
 }
