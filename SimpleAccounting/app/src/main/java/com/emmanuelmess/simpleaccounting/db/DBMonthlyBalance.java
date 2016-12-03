@@ -5,6 +5,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.Nullable;
 
+import com.emmanuelmess.simpleaccounting.Utils;
+
 import static java.lang.String.format;
 
 /**
@@ -48,9 +50,9 @@ public class DBMonthlyBalance extends DBs {
 
 				for(String[] data : all) {
 					if(data[2] != null)
-						currentBalance += Integer.parseInt(data[2]);
+						currentBalance += Utils.parse(data[2]);
 					if(data[3] != null)
-						currentBalance -= Integer.parseInt(data[3]);
+						currentBalance -= Utils.parse(data[3]);
 				}
 
 				try {

@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import com.emmanuelmess.simpleaccounting.MainActivity;
 import com.emmanuelmess.simpleaccounting.R;
+import com.emmanuelmess.simpleaccounting.Utils;
 import com.emmanuelmess.simpleaccounting.db.DBGeneral;
 import com.emmanuelmess.simpleaccounting.db.DBMonthlyBalance;
 
@@ -28,6 +29,7 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 	private ArrayList<Integer> rowToDBRowConversion = new ArrayList<>();
 	private OnMonthFinishedLoading listener;
 	private MainActivity mainActivity;
+	private boolean alreadyLoading = false;
 
 	public LoadMonthAsyncTask(int m, int y, int fRealRow, DBGeneral dbG, DBMonthlyBalance db, TableLayout t,
 	                          LayoutInflater i, OnMonthFinishedLoading l,
@@ -41,10 +43,18 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 		inflater = i;
 		listener = l;
 		mainActivity = a;
+
+		if(table.getChildCount() - mainActivity.getFirstRealRow() > 0)
+			throw new IllegalArgumentException("Table already contains "
+					+ (table.getChildCount() - 1 - mainActivity.getFirstRealRow()) + "elements!");
 	}
 
 	@Override
 	protected String[][] doInBackground(Void... p) {
+		if(!alreadyLoading)
+			alreadyLoading = true;
+		else throw new IllegalStateException("Already loading month: " + year + "-" + (month+1));
+
 		dbMonthlyBalance.createMonth(month, year);
 
 		int[] data = dbGeneral.getIndexesForMonth(month, year);
@@ -57,7 +67,7 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 
 	@Override
 	protected void onPostExecute(String[][] dbRows) {
-		float memBalance = 0;
+		double memBalance = 0;
 
 		if(firstRealRow == 2) {
 			memBalance += Double.parseDouble(((TextView) table.getChildAt(1)
@@ -80,23 +90,17 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 
 			TextView t = (TextView) row.findViewById(R.id.textBalance);
 			if (dbRow[2] != null)
-				memBalance += parse(dbRow[2]);
+				memBalance += Utils.parse(dbRow[2]);
 			if (dbRow[3] != null)
-				memBalance -= parse(dbRow[3]);
+				memBalance -= Utils.parse(dbRow[3]);
 
 			String s = "$ " + String.valueOf(memBalance);
 			t.setText(s);
 		}
 
 		listener.OnMonthFinishedLoading(rowToDBRowConversion);
-	}
 
-	private float parse(String s) {
-		try {
-			return Float.parseFloat(s);
-		} catch (NumberFormatException e) {
-			return 0f;
-		}
+		alreadyLoading = false;
 	}
 
 }

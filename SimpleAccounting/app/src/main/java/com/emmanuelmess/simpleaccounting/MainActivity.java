@@ -231,9 +231,9 @@ public class MainActivity extends AppCompatActivity implements OnMonthFinishedLo
 
 					BigDecimal balanceNum = new BigDecimal(0);
 					balanceNum = balanceNum.add(new BigDecimal(lastBalance != null?
-							parse(lastBalance.getText().toString().substring(1)):0));
-					balanceNum = balanceNum.add(new BigDecimal(parse(credit.getText().toString())));
-					balanceNum = balanceNum.subtract(new BigDecimal(parse(debit.getText().toString())));
+							Utils.parse(lastBalance.getText().toString().substring(1)):0));
+					balanceNum = balanceNum.add(new BigDecimal(Utils.parse(credit.getText().toString())));
+					balanceNum = balanceNum.subtract(new BigDecimal(Utils.parse(debit.getText().toString())));
 
 					String s = "$ " + balanceNum.toString();
 					balance.setText(s);
@@ -247,9 +247,9 @@ public class MainActivity extends AppCompatActivity implements OnMonthFinishedLo
 								balanceText = (TextView) row.findViewById(R.id.textBalance);
 
 						double b;
-						b = parse(lastBalanceText.getText().toString().substring(1));
-						b = b + parse(creditText.getText().toString())
-								- parse(debitText.getText().toString());
+						b = Utils.parse(lastBalanceText.getText().toString().substring(1));
+						b = b + Utils.parse(creditText.getText().toString())
+								- Utils.parse(debitText.getText().toString());
 
 						String str = "$ " + b;
 						balanceText.setText(str);
@@ -288,14 +288,6 @@ public class MainActivity extends AppCompatActivity implements OnMonthFinishedLo
 		};
 
 		date.addTextChangedListener(watcher);
-	}
-
-	private double parse(String s) {
-		try {
-			return Double.parseDouble(s);
-		} catch (NumberFormatException e) {
-			return 0d;
-		}
 	}
 
 	private void addToDB(final int index, View row) {
@@ -386,9 +378,38 @@ public class MainActivity extends AppCompatActivity implements OnMonthFinishedLo
 		editableYear = year;
 		((TextView) findViewById(R.id.textMonth)).setText(MONTH_STRINGS[month]);
 
-		loadPreviousBalance(month, year);
+		(new AsyncTask<Void, Void, Double>() {
+			@Override
+			protected Double doInBackground(Void... v) {
+				return dbMonthlyBalance.getBalanceLastMonthWithData(month, year);
+			}
 
-		loadingMonthTask.execute();
+			@Override
+			protected void onPostExecute(Double lastMonthData) {
+				if(lastMonthData != -1) {
+					inflater.inflate(R.layout.newrow_main, table);
+
+					int rowViewIndex = table.getChildCount() - 1;
+					TableRow row = (TableRow) table.getChildAt(rowViewIndex);
+
+					for (int j = 0; j < TEXT_IDS.length; j++) {
+						row.findViewById(EDIT_IDS[j]).setVisibility(View.GONE);
+						row.findViewById(TEXT_IDS[j]).setVisibility(View.VISIBLE);
+					}
+
+					((TextView) row.findViewById(R.id.textRef)).setText(R.string.previous_balance);
+					((TextView) row.findViewById(R.id.textCredit)).setText("");
+					((TextView) row.findViewById(R.id.textDebit)).setText("");
+
+					TextView t = (TextView) row.findViewById(R.id.textBalance);
+					String s = "$ " + String.valueOf(lastMonthData);
+					t.setText(s);
+					FIRST_REAL_ROW = 2;
+				}
+
+				loadingMonthTask.execute();
+			}
+		}).execute();
 	}
 
 	@Override
@@ -423,39 +444,6 @@ public class MainActivity extends AppCompatActivity implements OnMonthFinishedLo
 			imm.showSoftInput(date, InputMethodManager.SHOW_IMPLICIT);
 			createNewRowWhenMonthLoaded = false;
 		}
-	}
-
-	private void loadPreviousBalance(int month, int year) {
-		(new AsyncTask<Void, Void, Double>() {
-			@Override
-			protected Double doInBackground(Void... v) {
-				return dbMonthlyBalance.getBalanceLastMonthWithData(month, year);
-			}
-
-			@Override
-			protected void onPostExecute(Double lastMonthData) {
-				if(lastMonthData != -1) {
-					inflater.inflate(R.layout.newrow_main, table);
-
-					int rowViewIndex = table.getChildCount() - 1;
-					TableRow row = (TableRow) table.getChildAt(rowViewIndex);
-
-					for (int j = 0; j < TEXT_IDS.length; j++) {
-						row.findViewById(EDIT_IDS[j]).setVisibility(View.GONE);
-						row.findViewById(TEXT_IDS[j]).setVisibility(View.VISIBLE);
-					}
-
-					((TextView) row.findViewById(R.id.textRef)).setText(R.string.previous_balance);
-					((TextView) row.findViewById(R.id.textCredit)).setText("");
-					((TextView) row.findViewById(R.id.textDebit)).setText("");
-
-					TextView t = (TextView) row.findViewById(R.id.textBalance);
-					String s = "$ " + String.valueOf(lastMonthData);
-					t.setText(s);
-					FIRST_REAL_ROW = 2;
-				}
-			}
-		}).execute();
 	}
 
 	private void addToMonthsDB() {
