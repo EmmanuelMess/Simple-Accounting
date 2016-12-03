@@ -63,7 +63,7 @@ public class DBGeneral extends DBs {
 						year = Integer.parseInt(new SimpleDateFormat("yyyy", Locale.getDefault()).format(new Date()));
 
 				for (int i = c.getCount()-1; i >= 0; i--) {
-					if(last <= c.getInt(0)) {// TODO: 12/11/2016 test
+					if(last < c.getInt(0)) {// TODO: 12/11/2016 test
 						if (month >= 0)
 							month--;
 						else {
