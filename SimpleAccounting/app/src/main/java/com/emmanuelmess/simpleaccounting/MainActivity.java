@@ -239,7 +239,10 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 					balanceNum = balanceNum.add(new BigDecimal(Utils.parse(credit.getText().toString())));
 					balanceNum = balanceNum.subtract(new BigDecimal(Utils.parse(debit.getText().toString())));
 
-					String s = "$ " + balanceNum.toString();
+					if(balanceNum.compareTo(BigDecimal.ZERO) == 0)
+						balanceNum = balanceNum.setScale(1, BigDecimal.ROUND_UNNECESSARY);
+
+					String s = "$ " + balanceNum.toPlainString();
 					balance.setText(s);
 
 					for (int i = index + 1; i < table.getChildCount(); i++) {
