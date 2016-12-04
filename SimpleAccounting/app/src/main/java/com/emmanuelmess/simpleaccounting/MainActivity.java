@@ -26,7 +26,8 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.emmanuelmess.simpleaccounting.dataloading.LoadMonthAsyncTask;
-import com.emmanuelmess.simpleaccounting.dataloading.OnMonthFinishedLoading;
+import com.emmanuelmess.simpleaccounting.dataloading.LoadPrevBalanceAsyncTask;
+import com.emmanuelmess.simpleaccounting.dataloading.AsyncFinishedListener;
 import com.emmanuelmess.simpleaccounting.db.DBGeneral;
 import com.emmanuelmess.simpleaccounting.db.DBMonthlyBalance;
 import com.github.amlcurran.showcaseview.ShowcaseView;
@@ -43,7 +44,7 @@ import java.util.Objects;
 /**
  * @author Emmanuel
  */
-public class MainActivity extends AppCompatActivity implements OnMonthFinishedLoading {
+public class MainActivity extends AppCompatActivity implements AsyncFinishedListener<ArrayList<Integer>> {
 
 	public static final String MONTH = "month", YEAR = "year";
 
@@ -56,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements OnMonthFinishedLo
 	public static final int[] EDIT_IDS = {R.id.editDate, R.id.editRef, R.id.editCredit, R.id.editDebit, R.id.textBalance};
 	public static final int[] TEXT_IDS = {R.id.textDate, R.id.textRef, R.id.textCredit, R.id.textDebit};
 
-	private int FIRST_REAL_ROW = 1;//excluding header and previous balance
+	private int FIRST_REAL_ROW = 1;//excluding header and previous balance. HAS 2 STATES: 1 & 2
 	private TableLayout table = null;
 	private DBGeneral dbGeneral;
 	private DBMonthlyBalance dbMonthlyBalance;
@@ -211,6 +212,9 @@ public class MainActivity extends AppCompatActivity implements OnMonthFinishedLo
 	public int getFirstRealRow() {
 		return FIRST_REAL_ROW;
 	}
+	public void setFirstRealRow(int firstRealRow) {
+		this.FIRST_REAL_ROW = firstRealRow;
+	}
 
 	private View loadRow() {
 		return loadRow(rowToDBRowConversion.get(table.getChildCount() - 1 - FIRST_REAL_ROW));
@@ -364,56 +368,25 @@ public class MainActivity extends AppCompatActivity implements OnMonthFinishedLo
 	}
 
 	private void loadMonth(int month, int year) {
-		if(loadingMonthTask != null && loadingMonthTask.getStatus() != AsyncTask.Status.FINISHED)
-			throw new IllegalStateException("Already loading month!");
+		FIRST_REAL_ROW = 1;
 
-		if(table.getChildCount() > FIRST_REAL_ROW)
+		if(table.getChildCount() > 1)
 			for(int i = table.getChildCount()-1; i > 0; i--)
 				table.removeViewAt(i);
 
-		loadingMonthTask = new LoadMonthAsyncTask(month, year, FIRST_REAL_ROW, dbGeneral,
-				dbMonthlyBalance, table, inflater, this, this);
+		loadingMonthTask = new LoadMonthAsyncTask(month, year, dbGeneral, dbMonthlyBalance, table,
+				inflater, this, this);
 
 		editableMonth = month;
 		editableYear = year;
 		((TextView) findViewById(R.id.textMonth)).setText(MONTH_STRINGS[month]);
 
-		(new AsyncTask<Void, Void, Double>() {
-			@Override
-			protected Double doInBackground(Void... v) {
-				return dbMonthlyBalance.getBalanceLastMonthWithData(month, year);
-			}
-
-			@Override
-			protected void onPostExecute(Double lastMonthData) {
-				if(lastMonthData != -1) {
-					inflater.inflate(R.layout.newrow_main, table);
-
-					int rowViewIndex = table.getChildCount() - 1;
-					TableRow row = (TableRow) table.getChildAt(rowViewIndex);
-
-					for (int j = 0; j < TEXT_IDS.length; j++) {
-						row.findViewById(EDIT_IDS[j]).setVisibility(View.GONE);
-						row.findViewById(TEXT_IDS[j]).setVisibility(View.VISIBLE);
-					}
-
-					((TextView) row.findViewById(R.id.textRef)).setText(R.string.previous_balance);
-					((TextView) row.findViewById(R.id.textCredit)).setText("");
-					((TextView) row.findViewById(R.id.textDebit)).setText("");
-
-					TextView t = (TextView) row.findViewById(R.id.textBalance);
-					String s = "$ " + String.valueOf(lastMonthData);
-					t.setText(s);
-					FIRST_REAL_ROW = 2;
-				}
-
-				loadingMonthTask.execute();
-			}
-		}).execute();
+		(new LoadPrevBalanceAsyncTask(month, year, dbMonthlyBalance, table, inflater,
+				rowToDBRowConversion1->loadingMonthTask.execute(), this)).execute();
 	}
 
 	@Override
-	public void OnMonthFinishedLoading(ArrayList<Integer> rowToDBRowConversion) {
+	public void OnAsyncFinished(ArrayList<Integer> rowToDBRowConversion) {
 		this.rowToDBRowConversion = rowToDBRowConversion;
 		addToMonthsDB();
 

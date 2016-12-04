@@ -21,32 +21,35 @@ import java.util.ArrayList;
 
 public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 
-	private int month, year, firstRealRow;
+	private int month, year;
 	private DBGeneral dbGeneral;
 	private DBMonthlyBalance dbMonthlyBalance;
 	private TableLayout table;
 	private LayoutInflater inflater;
 	private ArrayList<Integer> rowToDBRowConversion = new ArrayList<>();
-	private OnMonthFinishedLoading listener;
+	private AsyncFinishedListener<ArrayList<Integer>> listener;
 	private MainActivity mainActivity;
-	private boolean alreadyLoading = false;
+	private static boolean alreadyLoading = false;
 
-	public LoadMonthAsyncTask(int m, int y, int fRealRow, DBGeneral dbG, DBMonthlyBalance db, TableLayout t,
-	                          LayoutInflater i, OnMonthFinishedLoading l,
+	public LoadMonthAsyncTask(int m, int y, DBGeneral dbG, DBMonthlyBalance db, TableLayout t,
+	                          LayoutInflater i, AsyncFinishedListener<ArrayList<Integer>> l,
 	                          MainActivity a) {
 		month = m;
 		year = y;
-		firstRealRow = fRealRow;
 		dbGeneral = dbG;
 		dbMonthlyBalance = db;
 		table = t;
 		inflater = i;
 		listener = l;
 		mainActivity = a;
+	}
 
+	@Override
+	protected void onPreExecute() {
 		if(table.getChildCount() - mainActivity.getFirstRealRow() > 0)
 			throw new IllegalArgumentException("Table already contains "
-					+ (table.getChildCount() - 1 - mainActivity.getFirstRealRow()) + "elements!");
+					+ (table.getChildCount() - mainActivity.getFirstRealRow()) + " elements: \n" +
+			table.toString());
 	}
 
 	@Override
@@ -69,7 +72,7 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 	protected void onPostExecute(String[][] dbRows) {
 		double memBalance = 0;
 
-		if(firstRealRow == 2) {
+		if(mainActivity.getFirstRealRow() == 2) {
 			memBalance += Double.parseDouble(((TextView) table.getChildAt(1)
 					.findViewById(R.id.textBalance)).getText().toString().substring(1));
 		}
@@ -98,7 +101,7 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 			t.setText(s);
 		}
 
-		listener.OnMonthFinishedLoading(rowToDBRowConversion);
+		listener.OnAsyncFinished(rowToDBRowConversion);
 
 		alreadyLoading = false;
 	}
