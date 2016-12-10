@@ -28,8 +28,8 @@ import android.widget.TextView;
 import com.emmanuelmess.simpleaccounting.dataloading.LoadMonthAsyncTask;
 import com.emmanuelmess.simpleaccounting.dataloading.LoadPrevBalanceAsyncTask;
 import com.emmanuelmess.simpleaccounting.dataloading.AsyncFinishedListener;
-import com.emmanuelmess.simpleaccounting.db.DBGeneral;
-import com.emmanuelmess.simpleaccounting.db.DBMonthlyBalance;
+import com.emmanuelmess.simpleaccounting.db.TableGeneral;
+import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.SimpleShowcaseEventListener;
 import com.github.amlcurran.showcaseview.targets.Target;
@@ -59,8 +59,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 	private int FIRST_REAL_ROW = 1;//excluding header and previous balance. HAS 2 STATES: 1 & 2
 	private TableLayout table = null;
-	private DBGeneral dbGeneral;
-	private DBMonthlyBalance dbMonthlyBalance;
+	private TableGeneral tableGeneral;
+	private TableMonthlyBalance tableMonthlyBalance;
 	private LayoutInflater inflater;
 	private ScrollView scrollView;
 	private AsyncTask<Void, Void, String[][]> loadingMonthTask = null;
@@ -93,8 +93,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 		inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		scrollView = (ScrollView) findViewById(R.id.scrollView);
 		table = (TableLayout) findViewById(R.id.table);
-		dbGeneral = new DBGeneral(this);
-		dbMonthlyBalance = new DBMonthlyBalance(this, dbGeneral);
+		tableGeneral = new TableGeneral(this);
+		tableMonthlyBalance = new TableMonthlyBalance(this, tableGeneral);
 
 		int loadMonth, loadYear;
 
@@ -134,8 +134,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 				if(table.getChildCount() > FIRST_REAL_ROW) {
 					editableRow = table.getChildCount() - 1;
 
-					dbGeneral.newRowInMonth(editableMonth, editableYear);
-					rowToDBRowConversion.add(dbGeneral.getLastIndex());
+					tableGeneral.newRowInMonth(editableMonth, editableYear);
+					rowToDBRowConversion.add(tableGeneral.getLastIndex());
 					View row = loadRow();
 					addToMonthsDB();
 
@@ -231,7 +231,11 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 			@Override
 			public void afterTextChanged(Editable editable) {
 				if (editableRow == index) {
-					balance.setText(lastBalance != null? lastBalance.getText():"$ 0.0");
+					if(equal(credit.getText().toString(), "."))
+						credit.setText("0");
+
+					if(equal(debit.getText().toString(), "."))
+						debit.setText("0");
 
 					BigDecimal balanceNum = new BigDecimal(0);
 					balanceNum = balanceNum.add(new BigDecimal(lastBalance != null?
@@ -299,12 +303,13 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 	private void addToDB(final int index, View row) {
 		for (int i = 0; i < EDIT_IDS.length - 1; i++) {
-			final String rowName = DBGeneral.COLUMNS[i];
+			final String rowName = TableGeneral.COLUMNS[i];
 			TextWatcher watcher = new SimpleTextWatcher() {
 				@Override
 				public void afterTextChanged(Editable editable) {
-					if (!equal(editable.toString(), ""))
-						dbGeneral.update(index, rowName, editable.toString());
+					//dbGeneral.update(index, rowName, !equal(editable.toString(), "")? editable.toString() : null);
+					if(!equal(editable.toString(), ""))
+						tableGeneral.update(index, rowName, editable.toString());
 				}
 			};
 
@@ -377,14 +382,14 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 			for(int i = table.getChildCount()-1; i > 0; i--)
 				table.removeViewAt(i);
 
-		loadingMonthTask = new LoadMonthAsyncTask(month, year, dbGeneral, dbMonthlyBalance, table,
+		loadingMonthTask = new LoadMonthAsyncTask(month, year, tableGeneral, tableMonthlyBalance, table,
 				inflater, this, this);
 
 		editableMonth = month;
 		editableYear = year;
 		((TextView) findViewById(R.id.textMonth)).setText(MONTH_STRINGS[month]);
 
-		(new LoadPrevBalanceAsyncTask(month, year, dbMonthlyBalance, table, inflater,
+		(new LoadPrevBalanceAsyncTask(month, year, tableMonthlyBalance, table, inflater,
 				rowToDBRowConversion1->loadingMonthTask.execute(), this)).execute();
 	}
 
@@ -407,8 +412,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 			currentEditableToView();
 			editableRow = table.getChildCount() - 1;
 
-			dbGeneral.newRowInMonth(editableMonth, editableYear);
-			this.rowToDBRowConversion.add(dbGeneral.getLastIndex());
+			tableGeneral.newRowInMonth(editableMonth, editableYear);
+			this.rowToDBRowConversion.add(tableGeneral.getLastIndex());
 			View row = loadRow();
 			addToMonthsDB();
 
@@ -429,7 +434,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 			TextWatcher watcher = new SimpleTextWatcher() {
 				@Override
 				public void afterTextChanged(Editable editable) {
-					dbMonthlyBalance.updateMonth(editableMonth, editableYear, Double.parseDouble(editable.toString().substring(1)));
+					tableMonthlyBalance.updateMonth(editableMonth, editableYear, Double.parseDouble(editable.toString().substring(1)));
 				}
 			};
 			((TextView) row.findViewById(R.id.textBalance)).addTextChangedListener(watcher);

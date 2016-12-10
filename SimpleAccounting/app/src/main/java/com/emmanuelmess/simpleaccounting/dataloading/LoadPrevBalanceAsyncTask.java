@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 import com.emmanuelmess.simpleaccounting.MainActivity;
 import com.emmanuelmess.simpleaccounting.R;
-import com.emmanuelmess.simpleaccounting.db.DBMonthlyBalance;
+import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
 
 import static com.emmanuelmess.simpleaccounting.MainActivity.EDIT_IDS;
 import static com.emmanuelmess.simpleaccounting.MainActivity.TEXT_IDS;
@@ -22,17 +22,17 @@ import static com.emmanuelmess.simpleaccounting.MainActivity.TEXT_IDS;
 public class LoadPrevBalanceAsyncTask extends AsyncTask<Void, Void, Double> {
 
 	private int month, year;
-	private DBMonthlyBalance dbMonthlyBalance;
+	private TableMonthlyBalance tableMonthlyBalance;
 	private TableLayout table;
 	private LayoutInflater inflater;
 	private AsyncFinishedListener<Void> listener;
 	private MainActivity mainActivity;
 
-	public LoadPrevBalanceAsyncTask(int m, int y, DBMonthlyBalance db, TableLayout t,
+	public LoadPrevBalanceAsyncTask(int m, int y, TableMonthlyBalance db, TableLayout t,
 	                                LayoutInflater i, AsyncFinishedListener l, MainActivity a) {
 		month = m;
 		year = y;
-		dbMonthlyBalance = db;
+		tableMonthlyBalance = db;
 		table = t;
 		inflater = i;
 		listener = l;
@@ -41,7 +41,7 @@ public class LoadPrevBalanceAsyncTask extends AsyncTask<Void, Void, Double> {
 
 	@Override
 	protected Double doInBackground(Void... v) {
-		return dbMonthlyBalance.getBalanceLastMonthWithData(month, year);
+		return tableMonthlyBalance.getBalanceLastMonthWithData(month, year);
 	}
 
 	@Override

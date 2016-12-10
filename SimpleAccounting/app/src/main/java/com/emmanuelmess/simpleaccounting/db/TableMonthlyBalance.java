@@ -13,28 +13,28 @@ import static java.lang.String.format;
  * @author Emmanuel
  *         on 14/11/2016, at 16:52.
  */
-public class DBMonthlyBalance extends DBs {
+public class TableMonthlyBalance extends Database {
 	private static final String[] COLUMNS = new String[] {"MONTH", "YEAR", "BALANCE"};
 
 	private static final int DATABASE_VERSION = 1;
 	private static final String TABLE_NAME = "MONTHLY_BALANCE";
 	private static final String TABLE_CREATE = format("CREATE TABLE %1$s(%2$s INT, %3$s INT, %4$s INT, %5$s REAL);",
 			TABLE_NAME, NUMBER_COLUMN, COLUMNS[0], COLUMNS[1], COLUMNS[2]);
-	private DBGeneral dbGeneral = null;
+	private TableGeneral tableGeneral = null;
 
-	public DBMonthlyBalance(Context context, @Nullable DBGeneral dbGeneral) {
+	public TableMonthlyBalance(Context context, @Nullable TableGeneral tableGeneral) {
 		super(context, TABLE_NAME, null, DATABASE_VERSION);
-		this.dbGeneral = dbGeneral;
+		this.tableGeneral = tableGeneral;
 	}
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL(TABLE_CREATE);
-		if(dbGeneral != null) {
-			int [][] existentMonths = dbGeneral.getMonthsWithData();
+		if(tableGeneral != null) {
+			int [][] existentMonths = tableGeneral.getMonthsWithData();
 			for(int[] month : existentMonths) {
 				int m  = month[0], y = month[1];
-				String[][] all = dbGeneral.getAllForMonth(m, y);
+				String[][] all = tableGeneral.getAllForMonth(m, y);
 
 				Thread createMonth = (new Thread() {
 					@Override

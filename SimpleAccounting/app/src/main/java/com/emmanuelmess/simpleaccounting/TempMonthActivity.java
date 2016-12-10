@@ -19,7 +19,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.emmanuelmess.simpleaccounting.db.DBGeneral;
+import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 
 import java.util.ArrayList;
 /**
@@ -27,7 +27,7 @@ import java.util.ArrayList;
  */
 public class TempMonthActivity extends ListActivity {
 
-	private DBGeneral f;
+	private TableGeneral f;
 	private MonthListAdapter monthListAdapter;
 	private ArrayList<Integer[]> dateIntValues = new ArrayList<>();
 
@@ -63,7 +63,7 @@ public class TempMonthActivity extends ListActivity {
 		ab.setDisplayHomeAsUpEnabled(true);
 
 
-		f = new DBGeneral(this);
+		f = new TableGeneral(this);
 
 
 		(new AsyncTask<Void, Void, int[][]>() {

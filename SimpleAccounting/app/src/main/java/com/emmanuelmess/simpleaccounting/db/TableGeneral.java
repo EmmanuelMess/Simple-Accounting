@@ -15,7 +15,7 @@ import static java.lang.String.format;
  * @author Emmanuel
  *         on 2016-01-31, at 15:53.
  */
-public class DBGeneral extends DBs {
+public class TableGeneral extends Database {
 
 	public static final String[] COLUMNS = new String[] { "DATE", "REFERENCE", "CREDIT", "DEBT", "MONTH", "YEAR"};
 
@@ -26,7 +26,7 @@ public class DBGeneral extends DBs {
 			TABLE_NAME, NUMBER_COLUMN, COLUMNS[0], COLUMNS[1], COLUMNS[2], COLUMNS[3], COLUMNS[4], COLUMNS[5]);
 	private final ContentValues CV = new ContentValues();
 
-	public DBGeneral(Context context) {super(context, TABLE_NAME, null, DATABASE_VERSION);}
+	public TableGeneral(Context context) {super(context, TABLE_NAME, null, DATABASE_VERSION);}
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {

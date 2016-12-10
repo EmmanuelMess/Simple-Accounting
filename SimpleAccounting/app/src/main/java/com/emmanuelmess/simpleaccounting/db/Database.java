@@ -10,12 +10,12 @@ import android.database.sqlite.SQLiteOpenHelper;
  *         on 14/11/2016, at 17:03.
  */
 
-abstract class DBs extends SQLiteOpenHelper {
+abstract class Database extends SQLiteOpenHelper {
 
 	static final String NUMBER_COLUMN = "NUMBER";
 	final ContentValues CV = new ContentValues();
 
-	DBs(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
+	Database(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
 		super(context, name, factory, version);
 	}
 

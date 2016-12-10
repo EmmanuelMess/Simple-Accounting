@@ -9,8 +9,8 @@ import android.widget.TextView;
 import com.emmanuelmess.simpleaccounting.MainActivity;
 import com.emmanuelmess.simpleaccounting.R;
 import com.emmanuelmess.simpleaccounting.Utils;
-import com.emmanuelmess.simpleaccounting.db.DBGeneral;
-import com.emmanuelmess.simpleaccounting.db.DBMonthlyBalance;
+import com.emmanuelmess.simpleaccounting.db.TableGeneral;
+import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
 
 import java.util.ArrayList;
 
@@ -22,8 +22,8 @@ import java.util.ArrayList;
 public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 
 	private int month, year;
-	private DBGeneral dbGeneral;
-	private DBMonthlyBalance dbMonthlyBalance;
+	private TableGeneral tableGeneral;
+	private TableMonthlyBalance tableMonthlyBalance;
 	private TableLayout table;
 	private LayoutInflater inflater;
 	private ArrayList<Integer> rowToDBRowConversion = new ArrayList<>();
@@ -31,13 +31,13 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 	private MainActivity mainActivity;
 	private static boolean alreadyLoading = false;
 
-	public LoadMonthAsyncTask(int m, int y, DBGeneral dbG, DBMonthlyBalance db, TableLayout t,
+	public LoadMonthAsyncTask(int m, int y, TableGeneral dbG, TableMonthlyBalance db, TableLayout t,
 	                          LayoutInflater i, AsyncFinishedListener<ArrayList<Integer>> l,
 	                          MainActivity a) {
 		month = m;
 		year = y;
-		dbGeneral = dbG;
-		dbMonthlyBalance = db;
+		tableGeneral = dbG;
+		tableMonthlyBalance = db;
 		table = t;
 		inflater = i;
 		listener = l;
@@ -58,14 +58,14 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 			alreadyLoading = true;
 		else throw new IllegalStateException("Already loading month: " + year + "-" + (month+1));
 
-		dbMonthlyBalance.createMonth(month, year);
+		tableMonthlyBalance.createMonth(month, year);
 
-		int[] data = dbGeneral.getIndexesForMonth(month, year);
+		int[] data = tableGeneral.getIndexesForMonth(month, year);
 
 		for(int m : data)
 			rowToDBRowConversion.add(m);
 
-		return dbGeneral.getAllForMonth(month, year);
+		return tableGeneral.getAllForMonth(month, year);
 	}
 
 	@Override
