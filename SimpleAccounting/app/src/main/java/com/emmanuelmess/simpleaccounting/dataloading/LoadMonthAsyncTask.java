@@ -80,8 +80,7 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 		for (String[] dbRow : dbRows) {
 			inflater.inflate(R.layout.newrow_main, table);
 
-			int dbIndex = rowToDBRowConversion.get(table.getChildCount() - 1 - mainActivity.getFirstRealRow());
-			View row = mainActivity.loadRow(dbIndex);
+			View row = mainActivity.loadRow();
 
 			for (int j = 0; j < MainActivity.TEXT_IDS.length; j++) {
 				row.findViewById(MainActivity.EDIT_IDS[j]).setVisibility(View.GONE);

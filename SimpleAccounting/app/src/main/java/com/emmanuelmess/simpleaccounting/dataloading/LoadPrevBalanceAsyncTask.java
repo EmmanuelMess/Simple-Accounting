@@ -29,7 +29,7 @@ public class LoadPrevBalanceAsyncTask extends AsyncTask<Void, Void, Double> {
 	private MainActivity mainActivity;
 
 	public LoadPrevBalanceAsyncTask(int m, int y, TableMonthlyBalance db, TableLayout t,
-	                                LayoutInflater i, AsyncFinishedListener l, MainActivity a) {
+	                                LayoutInflater i, AsyncFinishedListener<Void> l, MainActivity a) {
 		month = m;
 		year = y;
 		tableMonthlyBalance = db;

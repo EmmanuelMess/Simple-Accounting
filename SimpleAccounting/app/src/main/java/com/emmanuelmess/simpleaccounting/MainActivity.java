@@ -65,8 +65,9 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	private ScrollView scrollView;
 	private AsyncTask<Void, Void, String[][]> loadingMonthTask = null;
 
-	//pointer to row being edited
+	//pointer to row being edited STARTS IN 1
 	private int editableRow = -1;
+	private boolean editedColumn[] = new boolean[4];
 	//pointer to month being viewed
 	private static int editableMonth = -1, editableYear = -1;
 	private static boolean dateChanged = false;
@@ -198,14 +199,14 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 		return super.onOptionsItemSelected(item);
 	}
 
-	public View loadRow(int dbIndex) {
+	public View loadRow() {
 		int rowViewIndex = table.getChildCount() - 1;
 		TableRow row = (TableRow) table.getChildAt(rowViewIndex);
 
 		setListener(rowViewIndex);
 		checkEditInBalance(rowViewIndex, row);
 		checkDateChanged(rowViewIndex, row);
-		addToDB(dbIndex, row);
+		addToDB(row);
 		return row;
 	}
 
@@ -214,10 +215,6 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	}
 	public void setFirstRealRow(int firstRealRow) {
 		this.FIRST_REAL_ROW = firstRealRow;
-	}
-
-	private View loadRow() {
-		return loadRow(rowToDBRowConversion.get(table.getChildCount() - 1 - FIRST_REAL_ROW));
 	}
 
 	private void checkEditInBalance(final int index, TableRow row) {
@@ -301,15 +298,13 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 		date.addTextChangedListener(watcher);
 	}
 
-	private void addToDB(final int index, View row) {
+	private void addToDB(View row) {
 		for (int i = 0; i < EDIT_IDS.length - 1; i++) {
-			final String rowName = TableGeneral.COLUMNS[i];
+			final int colIndex = i;
 			TextWatcher watcher = new SimpleTextWatcher() {
 				@Override
 				public void afterTextChanged(Editable editable) {
-					//dbGeneral.update(index, rowName, !equal(editable.toString(), "")? editable.toString() : null);
-					if(!equal(editable.toString(), ""))
-						tableGeneral.update(index, rowName, editable.toString());
+					editedColumn[colIndex] = true;
 				}
 			};
 
@@ -342,6 +337,15 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	private void currentEditableToView() {
 		if (editableRow != -1) {
 			View row = table.getChildAt(editableRow);
+
+			for (int i = 0; i < EDIT_IDS.length - 1; i++) {
+				if(editedColumn[i]) {
+					String t = ((EditText) row.findViewById(EDIT_IDS[i])).getText().toString();
+					tableGeneral.update(rowToDBRowConversion.get(editableRow-FIRST_REAL_ROW),
+							TableGeneral.COLUMNS[i], (!equal(t, "")? t : null));
+				}
+			}
+
 			TextView balanceText = ((TextView) row.findViewById(R.id.textBalance));
 
 			if(balanceText.getText() == "") {
