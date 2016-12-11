@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.print.PrintManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -193,6 +194,14 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 		switch (id) {
 			case R.id.action_show_months:
 				startActivity(new Intent(this, TempMonthActivity.class));
+				return true;
+			case R.id.action_print:
+				//startActivity(new Intent(this, TempMonthActivity.class));
+				if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+					PrintManager printM = (PrintManager) getSystemService((Context.PRINT_SERVICE));
+					String job = getString(R.string.app_name) + ": " + getString(MONTH_STRINGS[editableMonth]);
+					printM.print(job, new PPrintDocumentAdapter(this, tableGeneral, tableMonthlyBalance, editableMonth, editableYear), null);
+				}
 				return true;
 		}
 

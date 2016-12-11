@@ -3,12 +3,16 @@
       xmlns:app="http://schemas.android.com/apk/res-auto"
       tools:context=".MainActivity">
 
-    <!-- "Mark Favorite", should appear as action button if possible -->
     <item
         android:id="@+id/action_show_months"
         android:icon="@drawable/ic_web_asset_black_24dp"
         android:title="@string/show_months"
-        app:showAsAction="always"/>
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/action_print"
+        android:title="@string/print"
+        app:showAsAction="never"/>
 
     <!-- Settings, should always be in the overflow
     <item android:id="@+id/action_settings"
