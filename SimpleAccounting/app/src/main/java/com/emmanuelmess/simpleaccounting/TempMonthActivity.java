@@ -21,7 +21,11 @@ import android.widget.TextView;
 
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Locale;
 /**
  * @author Emmanuel
  */
@@ -81,6 +85,17 @@ public class TempMonthActivity extends ListActivity {
 					monthListData.add(new String[] {getString(MainActivity.MONTH_STRINGS[m]), String.valueOf(d[1])});
 					dateIntValues.add(new Integer[]{m, d[1]});
 				}
+
+				int currentM = Integer.parseInt(new SimpleDateFormat("M", Locale.getDefault()).format(new Date())) - 1;
+				//YEARS ALREADY START IN 0!!!
+				int currentY = Integer.parseInt(new SimpleDateFormat("yyyy", Locale.getDefault()).format(new Date()));
+
+				if(dateIntValues.size() == 0
+						|| !Arrays.equals(dateIntValues.get(dateIntValues.size()-1), new Integer[] {currentM, currentY})) {
+					monthListData.add(new String[]{getString(MainActivity.MONTH_STRINGS[currentM]), String.valueOf(currentY)});
+					dateIntValues.add(new Integer[]{currentM, currentY});
+				}
+
 
 				monthListAdapter = new MonthListAdapter(getApplicationContext(),
 						monthListData.toArray(new String[monthListData.size()][2]));
