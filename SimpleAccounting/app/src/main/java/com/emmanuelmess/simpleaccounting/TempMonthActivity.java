@@ -2,12 +2,10 @@ package com.emmanuelmess.simpleaccounting;
 
 import android.app.ListActivity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatCallback;
 import android.support.v7.app.AppCompatDelegate;
@@ -21,15 +19,19 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.emmanuelmess.simpleaccounting.db.DBGeneral;
+import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Locale;
 /**
  * @author Emmanuel
  */
 public class TempMonthActivity extends ListActivity {
 
-	private DBGeneral f;
+	private TableGeneral f;
 	private MonthListAdapter monthListAdapter;
 	private ArrayList<Integer[]> dateIntValues = new ArrayList<>();
 
@@ -65,14 +67,10 @@ public class TempMonthActivity extends ListActivity {
 		ab.setDisplayHomeAsUpEnabled(true);
 
 
-		f = new DBGeneral(this);
+		f = new TableGeneral(this);
 
 
 		(new AsyncTask<Void, Void, int[][]>() {
-			@Override
-			protected void onPreExecute() {
-			}
-
 			@Override
 			protected int[][] doInBackground(Void... p) {
 				return f.getMonthsWithData();
@@ -88,8 +86,17 @@ public class TempMonthActivity extends ListActivity {
 					dateIntValues.add(new Integer[]{m, d[1]});
 				}
 
-				// Create an empty adapter we will use to display the loaded data.
-				// We pass null for the cursor, then update it in onLoadFinished()
+				int currentM = Integer.parseInt(new SimpleDateFormat("M", Locale.getDefault()).format(new Date())) - 1;
+				//YEARS ALREADY START IN 0!!!
+				int currentY = Integer.parseInt(new SimpleDateFormat("yyyy", Locale.getDefault()).format(new Date()));
+
+				if(dateIntValues.size() == 0
+						|| !Arrays.equals(dateIntValues.get(dateIntValues.size()-1), new Integer[] {currentM, currentY})) {
+					monthListData.add(new String[]{getString(MainActivity.MONTH_STRINGS[currentM]), String.valueOf(currentY)});
+					dateIntValues.add(new Integer[]{currentM, currentY});
+				}
+
+
 				monthListAdapter = new MonthListAdapter(getApplicationContext(),
 						monthListData.toArray(new String[monthListData.size()][2]));
 				setListAdapter(monthListAdapter);
@@ -101,7 +108,8 @@ public class TempMonthActivity extends ListActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 			case android.R.id.home:
-				NavUtils.navigateUpFromSameTask(this);
+				//NavUtils.navigateUpFromSameTask(this);
+				onBackPressed();//To make the MainActivity not destroy itself
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);
@@ -110,12 +118,17 @@ public class TempMonthActivity extends ListActivity {
 
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
+		MainActivity.setDate(dateIntValues.get(position)[0],dateIntValues.get(position)[1]);
+		onBackPressed();
+
+		/*
 		Intent intent = new Intent(getApplicationContext(), MainActivity.class);
 		Bundle extra = new Bundle();
 		extra.putInt(MainActivity.MONTH, dateIntValues.get(position)[0]);
 		extra.putInt(MainActivity.YEAR, dateIntValues.get(position)[1]);
 		intent.putExtras(extra);
 		startActivity(intent);
+		*/
 	}
 
 	private class MonthListAdapter extends ArrayAdapter<String[]> {
