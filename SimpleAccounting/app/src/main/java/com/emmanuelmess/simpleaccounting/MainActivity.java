@@ -24,6 +24,7 @@ import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.emmanuelmess.simpleaccounting.dataloading.AsyncFinishedListener;
 import com.emmanuelmess.simpleaccounting.dataloading.LoadMonthAsyncTask;
@@ -196,12 +197,16 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 				startActivity(new Intent(this, TempMonthActivity.class));
 				return true;
 			case R.id.action_print:
-				//startActivity(new Intent(this, TempMonthActivity.class));
-				if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-					PrintManager printM = (PrintManager) getSystemService((Context.PRINT_SERVICE));
-					String job = getString(R.string.app_name) + ": " + getString(MONTH_STRINGS[editableMonth]);
-					printM.print(job, new PPrintDocumentAdapter(this, tableGeneral, tableMonthlyBalance, editableMonth, editableYear), null);
+				if (table.getChildCount() > 1) {
+					if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+						PrintManager printM = (PrintManager) getSystemService((Context.PRINT_SERVICE));
+						String job = getString(R.string.app_name) + ": " + getString(MONTH_STRINGS[editableMonth]);
+						printM.print(job, new PPrintDocumentAdapter(this, tableGeneral, tableMonthlyBalance, editableMonth, editableYear), null);
+					}
+				} else {
+					Toast.makeText(this, getString(R.string.nothing_to_print), Toast.LENGTH_SHORT).show();
 				}
+
 				return true;
 		}
 

@@ -5,14 +5,15 @@
 
     <item
         android:id="@+id/action_show_months"
-        android:icon="@drawable/ic_web_asset_black_24dp"
+        android:icon="@drawable/ic_web_asset_white_24dp"
         android:title="@string/show_months"
         app:showAsAction="ifRoom"/>
 
     <item
         android:id="@+id/action_print"
+        android:icon="@drawable/ic_print_white_24dp"
         android:title="@string/print"
-        app:showAsAction="never"/>
+        app:showAsAction="ifRoom"/>
 
     <!-- Settings, should always be in the overflow
     <item android:id="@+id/action_settings"

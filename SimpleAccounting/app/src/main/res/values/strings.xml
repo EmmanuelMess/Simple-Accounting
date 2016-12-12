@@ -26,4 +26,5 @@
     <string name="title_activity_temp_month">Months</string>
     <string name="previous_balance">Prev. balance</string>
     <string name="print">Print</string>
+    <string name="nothing_to_print">There\'s nothing to print!</string>
 </resources>

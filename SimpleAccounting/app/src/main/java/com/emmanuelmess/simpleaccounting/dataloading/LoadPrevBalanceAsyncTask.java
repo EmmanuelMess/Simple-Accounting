@@ -46,7 +46,7 @@ public class LoadPrevBalanceAsyncTask extends AsyncTask<Void, Void, Double> {
 
 	@Override
 	protected void onPostExecute(Double lastMonthData) {
-		if (lastMonthData != -1) {
+		if (lastMonthData != null) {
 			inflater.inflate(R.layout.newrow_main, table);
 
 			int rowViewIndex = table.getChildCount() - 1;
