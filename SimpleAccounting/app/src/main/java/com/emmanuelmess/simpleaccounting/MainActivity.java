@@ -94,8 +94,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 		inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		scrollView = (ScrollView) findViewById(R.id.scrollView);
 		table = (TableLayout) findViewById(R.id.table);
-		tableGeneral = new TableGeneral(this);
-		tableMonthlyBalance = new TableMonthlyBalance(this, tableGeneral);
+		tableGeneral = new TableGeneral(this);//DO NOT change the order of table creation!
+		tableMonthlyBalance = new TableMonthlyBalance(this);
 
 		int loadMonth, loadYear;
 
@@ -228,41 +228,49 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 			@Override
 			public void afterTextChanged(Editable editable) {
 				if (editableRow == index) {
-					if(equal(credit.getText().toString(), "."))
+					if (equal(credit.getText().toString(), "."))
 						credit.setText("0");
 
-					if(equal(debit.getText().toString(), "."))
+					if (equal(debit.getText().toString(), "."))
 						debit.setText("0");
 
-					BigDecimal balanceNum = new BigDecimal(0);
-					balanceNum = balanceNum.add(new BigDecimal(lastBalance != null?
-							Utils.parse(lastBalance.getText().toString().substring(1)):0));
-					balanceNum = balanceNum.add(new BigDecimal(Utils.parse(credit.getText().toString())));
-					balanceNum = balanceNum.subtract(new BigDecimal(Utils.parse(debit.getText().toString())));
+					BigDecimal balanceNum = new BigDecimal(0)
+							.add(new BigDecimal(lastBalance != null ?
+									Utils.parse(lastBalance.getText().toString().substring(1)) : 0))
+							.add(new BigDecimal(Utils.parse(credit.getText().toString())))
+							.subtract(new BigDecimal(Utils.parse(debit.getText().toString())));
 
-					if(balanceNum.compareTo(BigDecimal.ZERO) == 0)
+					if (balanceNum.compareTo(BigDecimal.ZERO) == 0)
 						balanceNum = balanceNum.setScale(1, BigDecimal.ROUND_UNNECESSARY);
 
 					String s = "$ " + balanceNum.toPlainString();
 					balance.setText(s);
 
-					for (int i = index + 1; i < table.getChildCount(); i++) {
-						TableRow row = (TableRow) table.getChildAt(i);
-
-						TextView lastBalanceText = (TextView) table.getChildAt(i - 1).findViewById(R.id.textBalance),
-								creditText = (TextView) row.findViewById(R.id.textCredit),
-								debitText = (TextView) row.findViewById(R.id.textDebit),
-								balanceText = (TextView) row.findViewById(R.id.textBalance);
-
-						double b;
-						b = Utils.parse(lastBalanceText.getText().toString().substring(1));
-						b = b + Utils.parse(creditText.getText().toString())
-								- Utils.parse(debitText.getText().toString());
-
-						String str = "$ " + b;
-						balanceText.setText(str);
-					}
+					updateBalances(index+1);
 				}
+			}
+
+			private void updateBalances(int index) {
+				TableRow row = (TableRow) table.getChildAt(index);
+
+				TextView lastBalanceText = (TextView) table.getChildAt(index -1).findViewById(R.id.textBalance),
+						creditText = (TextView) row.findViewById(R.id.textCredit),
+						debitText = (TextView) row.findViewById(R.id.textDebit),
+						balanceText = (TextView) row.findViewById(R.id.textBalance);
+
+				BigDecimal balanceNum = new BigDecimal(Utils.parse(lastBalanceText.getText().toString().substring(1)))
+						.add(new BigDecimal(Utils.parse(creditText.getText().toString())))
+						.subtract(new BigDecimal(Utils.parse(debitText.getText().toString())));
+
+
+				if (balanceNum.compareTo(BigDecimal.ZERO) == 0)
+					balanceNum = balanceNum.setScale(1, BigDecimal.ROUND_UNNECESSARY);
+
+				String s = "$ " + balanceNum.toPlainString();
+				balanceText.setText(s);
+
+				if(index+1 < row.getChildCount())
+					updateBalances(index+1);
 			}
 		};
 

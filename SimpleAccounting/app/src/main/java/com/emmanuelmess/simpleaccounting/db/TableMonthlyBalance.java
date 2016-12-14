@@ -20,49 +20,14 @@ public class TableMonthlyBalance extends Database {
 	private static final String TABLE_NAME = "MONTHLY_BALANCE";
 	private static final String TABLE_CREATE = format("CREATE TABLE %1$s(%2$s INT, %3$s INT, %4$s INT, %5$s REAL);",
 			TABLE_NAME, NUMBER_COLUMN, COLUMNS[0], COLUMNS[1], COLUMNS[2]);
-	private TableGeneral tableGeneral = null;
 
-	public TableMonthlyBalance(Context context, @Nullable TableGeneral tableGeneral) {
+	public TableMonthlyBalance(Context context) {
 		super(context, TABLE_NAME, null, DATABASE_VERSION);
-		this.tableGeneral = tableGeneral;
 	}
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL(TABLE_CREATE);
-		if(tableGeneral != null) {
-			int [][] existentMonths = tableGeneral.getMonthsWithData();
-			for(int[] month : existentMonths) {
-				int m  = month[0], y = month[1];
-				String[][] all = tableGeneral.getAllForMonth(m, y);
-
-				Thread createMonth = (new Thread() {
-					@Override
-					public void run() {
-						super.run();
-						createMonth(m, y);
-					}
-				});
-
-				double currentBalance;
-
-				currentBalance = 0;
-
-				for(String[] data : all) {
-					if(data[2] != null)
-						currentBalance += Utils.parse(data[2]);
-					if(data[3] != null)
-						currentBalance -= Utils.parse(data[3]);
-				}
-
-				try {
-					createMonth.join();
-					updateMonth(m, y, currentBalance, db);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		}
 	}
 
 	@Override
@@ -95,12 +60,8 @@ public class TableMonthlyBalance extends Database {
 	}
 
 	public void updateMonth(int month, int year, double balance) {
-		updateMonth(month, year, balance, getWritableDatabase());
-	}
-	
-	private void updateMonth(int month, int year, double balance, SQLiteDatabase db) {
 		CV.put(COLUMNS[2], balance);
-		db.update(TABLE_NAME, CV, SQLShort(AND, format("%1$s=%2$s" , COLUMNS[0], month),
+		getWritableDatabase().update(TABLE_NAME, CV, SQLShort(AND, format("%1$s=%2$s" , COLUMNS[0], month),
 				format("%1$s=%2$s" , COLUMNS[1], year)), null);
 		CV.clear();
 	}
