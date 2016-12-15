@@ -67,19 +67,19 @@ public class TableGeneral extends Database {
 						year = Integer.parseInt(new SimpleDateFormat("yyyy", Locale.getDefault()).format(new Date()));
 
 				for (int i = c.getCount() - 1; i >= 0; i--) {
-					CV.put(COLUMNS[4], month);
-					CV.put(COLUMNS[5], year);
-					db.update(TABLE_NAME, CV, NUMBER_COLUMN + "=" + i, null);
-					CV.clear();
-
-					if (last < c.getInt(0)) {// TODO: 12/11/2016 test
-						if (month >= 0)
+					if (last > c.getInt(0)) {// TODO: 12/11/2016 test
+						if (month > 0)
 							month--;
 						else {
 							month = 12 - 1;
 							year--;
 						}
 					}
+
+					CV.put(COLUMNS[4], month);
+					CV.put(COLUMNS[5], year);
+					db.update(TABLE_NAME, CV, NUMBER_COLUMN + "=" + i, null);
+					CV.clear();
 
 					last = c.getInt(0);
 					c.moveToPrevious();
