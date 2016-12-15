@@ -92,7 +92,7 @@ public class TableGeneral extends Database {
 				int[][] existentMonths = this.getMonthsWithData();
 				for (int[] month : existentMonths) {
 					int m = month[0], y = month[1];
-					String[][] all = this.getAllForMonth(m, y);
+					String[][] all = this.getAllForMonth(m, y, db);
 
 					Thread createMonth = (new Thread() {
 						@Override
@@ -148,9 +148,13 @@ public class TableGeneral extends Database {
 	}
 
 	public int[][] getMonthsWithData() {
+		return getMonthsWithData(getReadableDatabase());
+	}
+
+	private int[][] getMonthsWithData(SQLiteDatabase db) {
 		int[][] data;
 
-		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[] {COLUMNS[4], COLUMNS[5]},
+		Cursor c = db.query(TABLE_NAME, new String[] {COLUMNS[4], COLUMNS[5]},
 				null, null, COLUMNS[4], null, null);
 
 		if (c != null) {
@@ -170,9 +174,13 @@ public class TableGeneral extends Database {
 	}
 
 	public String[][] getAllForMonth(int month, int year) {
+		return getAllForMonth(month, year, getReadableDatabase());
+	}
+
+	private String[][] getAllForMonth(int month, int year, SQLiteDatabase db) {
 		String [][] data;
 
-		Cursor c = getReadableDatabase().query(TABLE_NAME, COLUMNS,
+		Cursor c = db.query(TABLE_NAME, COLUMNS,
 				SQLShort(AND, COLUMNS[4] + "=" + month, COLUMNS[5] + "=" + year),
 				null, null, null, COLUMNS[0]);
 
