@@ -105,9 +105,9 @@ public class TableGeneral extends Database {
 
 					for (String[] data : all) {
 						if (data[2] != null)
-							currentBalance = currentBalance.add(new BigDecimal(Utils.parse(data[2])));
+							currentBalance = currentBalance.add(Utils.parseString(data[2]));
 						if (data[3] != null)
-							currentBalance = currentBalance.subtract(new BigDecimal(Utils.parse(data[3])));
+							currentBalance = currentBalance.subtract(Utils.parseString(data[3]));
 					}
 
 					try {

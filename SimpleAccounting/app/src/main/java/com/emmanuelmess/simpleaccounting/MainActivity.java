@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
+import static com.emmanuelmess.simpleaccounting.Utils.*;
 import static com.emmanuelmess.simpleaccounting.Utils.equal;
 
 /**
@@ -234,43 +235,46 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 					if (equal(debit.getText().toString(), "."))
 						debit.setText("0");
 
-					BigDecimal balanceNum = new BigDecimal(0)
-							.add(new BigDecimal(lastBalance != null ?
-									Utils.parse(lastBalance.getText().toString().substring(1)) : 0))
-							.add(new BigDecimal(Utils.parse(credit.getText().toString())))
-							.subtract(new BigDecimal(Utils.parse(debit.getText().toString())));
+					BigDecimal balanceNum = (lastBalance != null?
+							parseString(parseViewToString(lastBalance).substring(2)) : BigDecimal.ZERO)
+							.add(parseView(credit))
+							.subtract(parseView(debit));
 
 					if (balanceNum.compareTo(BigDecimal.ZERO) == 0)
 						balanceNum = balanceNum.setScale(1, BigDecimal.ROUND_UNNECESSARY);
 
 					String s = "$ " + balanceNum.toPlainString();
+					if(equal(s, "$ "))
+						throw new IllegalStateException();
 					balance.setText(s);
 
-					updateBalances(index+1);
+					updateBalances(index+1, balanceNum);
 				}
 			}
 
-			private void updateBalances(int index) {
+			private void updateBalances(int index, BigDecimal lastBalance) {
 				TableRow row = (TableRow) table.getChildAt(index);
+				if(row == null)
+					return;
 
-				TextView lastBalanceText = (TextView) table.getChildAt(index -1).findViewById(R.id.textBalance),
-						creditText = (TextView) row.findViewById(R.id.textCredit),
+				TextView creditText = (TextView) row.findViewById(R.id.textCredit),
 						debitText = (TextView) row.findViewById(R.id.textDebit),
 						balanceText = (TextView) row.findViewById(R.id.textBalance);
 
-				BigDecimal balanceNum = new BigDecimal(Utils.parse(lastBalanceText.getText().toString().substring(1)))
-						.add(new BigDecimal(Utils.parse(creditText.getText().toString())))
-						.subtract(new BigDecimal(Utils.parse(debitText.getText().toString())));
+				lastBalance = lastBalance
+						.add(parseView(creditText))
+						.subtract(parseView(debitText));
 
+				if (lastBalance.compareTo(BigDecimal.ZERO) == 0)
+					lastBalance = lastBalance.setScale(1, BigDecimal.ROUND_UNNECESSARY);
 
-				if (balanceNum.compareTo(BigDecimal.ZERO) == 0)
-					balanceNum = balanceNum.setScale(1, BigDecimal.ROUND_UNNECESSARY);
-
-				String s = "$ " + balanceNum.toPlainString();
+				String s = "$ " + lastBalance.toPlainString();
+				if(equal(s, "$ "))
+					throw new IllegalStateException();
 				balanceText.setText(s);
 
 				if(index+1 < row.getChildCount())
-					updateBalances(index+1);
+					updateBalances(index+1, lastBalance);
 			}
 		};
 

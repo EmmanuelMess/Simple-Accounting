@@ -12,6 +12,7 @@ import com.emmanuelmess.simpleaccounting.Utils;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 
 /**
@@ -70,11 +71,12 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 
 	@Override
 	protected void onPostExecute(String[][] dbRows) {
-		double memBalance = 0;
+		BigDecimal memBalance = BigDecimal.ZERO;
 
 		if(mainActivity.getFirstRealRow() == 2) {
-			memBalance += Double.parseDouble(((TextView) table.getChildAt(1)
-					.findViewById(R.id.textBalance)).getText().toString().substring(1));
+			memBalance = memBalance.add(Utils.parseString(
+					((TextView) table.getChildAt(1).findViewById(R.id.textBalance))
+							.getText().toString().substring(2)));
 		}
 
 		for (String[] dbRow : dbRows) {
@@ -92,9 +94,9 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 
 			TextView t = (TextView) row.findViewById(R.id.textBalance);
 			if (dbRow[2] != null)
-				memBalance += Utils.parse(dbRow[2]);
+				memBalance = memBalance.add(Utils.parseString(dbRow[2]));
 			if (dbRow[3] != null)
-				memBalance -= Utils.parse(dbRow[3]);
+				memBalance = memBalance.subtract(Utils.parseString(dbRow[3]));
 
 			String s = "$ " + String.valueOf(memBalance);
 			t.setText(s);
