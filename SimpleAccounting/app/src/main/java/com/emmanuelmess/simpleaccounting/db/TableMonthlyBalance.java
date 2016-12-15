@@ -3,9 +3,6 @@ package com.emmanuelmess.simpleaccounting.db;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.annotation.Nullable;
-
-import com.emmanuelmess.simpleaccounting.Utils;
 
 import static java.lang.String.format;
 
@@ -34,32 +31,10 @@ public class TableMonthlyBalance extends Database {
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 	}
 
-	public void createMonth(int month, int year) {
-		if(!isMonthInBD(month, year)) {
-			Cursor c = getReadableDatabase().query(TABLE_NAME, new String[]{NUMBER_COLUMN},
-					null, null, null, null, null);
-			int i;
-
-			c.moveToFirst();
-
-			if (c.getCount() == 0) {
-				i = 0;
-			} else {
-				c.moveToLast();
-				i = c.getInt(0) + 1;
-				c.close();
-			}
-
-			CV.put(NUMBER_COLUMN, i);
-			CV.put(COLUMNS[0], month);
-			CV.put(COLUMNS[1], year);
-			CV.put(COLUMNS[2], 0);
-			getWritableDatabase().insert(TABLE_NAME, null, CV);
-			CV.clear();
-		}
-	}
-
 	public void updateMonth(int month, int year, double balance) {
+		if(!isMonthInBD(month, year))
+			createMonth(month, year);
+
 		CV.put(COLUMNS[2], balance);
 		getWritableDatabase().update(TABLE_NAME, CV, SQLShort(AND, format("%1$s=%2$s" , COLUMNS[0], month),
 				format("%1$s=%2$s" , COLUMNS[1], year)), null);
@@ -91,7 +66,6 @@ public class TableMonthlyBalance extends Database {
 		return data;
 	}
 
-
 	private boolean isMonthInBD(int month, int year) {
 		boolean data;
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[] {COLUMNS[2]},
@@ -103,6 +77,16 @@ public class TableMonthlyBalance extends Database {
 		c.close();
 
 		return data;
+	}
+
+	private void createMonth(int month, int year) {
+		if(!isMonthInBD(month, year)) {
+			CV.put(COLUMNS[0], month);
+			CV.put(COLUMNS[1], year);
+			CV.put(COLUMNS[2], 0);
+			getWritableDatabase().insert(TABLE_NAME, null, CV);
+			CV.clear();
+		}
 	}
 
 }

@@ -21,7 +21,7 @@ public class Utils {
 	}
 
 	public static BigDecimal parseString(String s) {
-		if(s.length() == 0)
+		if(s.length() == 0 || equal(s, "."))
 			return new BigDecimal("0");
 		else return new BigDecimal(s);
 	}

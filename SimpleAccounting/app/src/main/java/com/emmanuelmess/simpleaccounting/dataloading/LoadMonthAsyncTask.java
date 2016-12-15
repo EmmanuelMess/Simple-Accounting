@@ -59,8 +59,6 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 			alreadyLoading = true;
 		else throw new IllegalStateException("Already loading month: " + year + "-" + (month+1));
 
-		tableMonthlyBalance.createMonth(month, year);
-
 		int[] data = tableGeneral.getIndexesForMonth(month, year);
 
 		for(int m : data)

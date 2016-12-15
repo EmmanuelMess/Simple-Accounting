@@ -89,19 +89,11 @@ public class TableGeneral extends Database {
 
 				/*Updates MonthlyBalance*/ {
 				TableMonthlyBalance tableMonthlyBalance = new TableMonthlyBalance(super.context);
-				int[][] existentMonths = this.getMonthsWithData();
+				int[][] existentMonths = this.getMonthsWithData(db);
+				BigDecimal currentBalance = BigDecimal.ZERO;
 				for (int[] month : existentMonths) {
 					int m = month[0], y = month[1];
 					String[][] all = this.getAllForMonth(m, y, db);
-
-					Thread createMonth = (new Thread() {
-						@Override
-						public void run() {
-							tableMonthlyBalance.createMonth(m, y);
-						}
-					});
-
-					BigDecimal currentBalance = BigDecimal.ZERO;
 
 					for (String[] data : all) {
 						if (data[2] != null)
@@ -110,12 +102,7 @@ public class TableGeneral extends Database {
 							currentBalance = currentBalance.subtract(Utils.parseString(data[3]));
 					}
 
-					try {
-						createMonth.join();
-						tableMonthlyBalance.updateMonth(m, y, currentBalance.doubleValue());
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
+					tableMonthlyBalance.updateMonth(m, y, currentBalance.doubleValue());
 				}
 			}
 		}
