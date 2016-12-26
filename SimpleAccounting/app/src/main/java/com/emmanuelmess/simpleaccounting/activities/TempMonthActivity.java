@@ -1,4 +1,4 @@
-package com.emmanuelmess.simpleaccounting;
+package com.emmanuelmess.simpleaccounting.activities;
 
 import android.app.ListActivity;
 import android.content.Context;
@@ -19,6 +19,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.emmanuelmess.simpleaccounting.MainActivity;
+import com.emmanuelmess.simpleaccounting.R;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 
 import java.text.SimpleDateFormat;
@@ -56,7 +58,7 @@ public class TempMonthActivity extends ListActivity {
 			}
 		};
 
-		AppCompatDelegate delegate = AppCompatDelegate.create(this,callback);
+		AppCompatDelegate delegate = AppCompatDelegate.create(this, callback);
 
 		delegate.onCreate(savedInstanceState);
 		delegate.setContentView(R.layout.activity_temp_month);
@@ -82,7 +84,7 @@ public class TempMonthActivity extends ListActivity {
 
 				for (int d[] : existingMonths) {
 					int m = d[0];
-					monthListData.add(new String[] {getString(MainActivity.MONTH_STRINGS[m]), String.valueOf(d[1])});
+					monthListData.add(new String[]{getString(MainActivity.MONTH_STRINGS[m]), String.valueOf(d[1])});
 					dateIntValues.add(new Integer[]{m, d[1]});
 				}
 
@@ -90,8 +92,8 @@ public class TempMonthActivity extends ListActivity {
 				//YEARS ALREADY START IN 0!!!
 				int currentY = Integer.parseInt(new SimpleDateFormat("yyyy", Locale.getDefault()).format(new Date()));
 
-				if(dateIntValues.size() == 0
-						|| !Arrays.equals(dateIntValues.get(dateIntValues.size()-1), new Integer[] {currentM, currentY})) {
+				if (dateIntValues.size() == 0
+						|| !Arrays.equals(dateIntValues.get(dateIntValues.size() - 1), new Integer[]{currentM, currentY})) {
 					monthListData.add(new String[]{getString(MainActivity.MONTH_STRINGS[currentM]), String.valueOf(currentY)});
 					dateIntValues.add(new Integer[]{currentM, currentY});
 				}
