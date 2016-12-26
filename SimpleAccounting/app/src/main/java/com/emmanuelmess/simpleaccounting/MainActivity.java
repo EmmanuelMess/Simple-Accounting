@@ -313,10 +313,10 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 
 			if(balanceText.getText() == "") {
 				View previousRow = table.getChildAt(editableRow - 1);
-				if(previousRow != null) {
-					TextView lastBalance = (TextView) previousRow.findViewById(R.id.textBalance);
+				TextView lastBalance;
+				if(previousRow != null && (lastBalance = (TextView) previousRow.findViewById(R.id.textBalance)) != null)
 					balanceText.setText(lastBalance.getText());
-				} else
+				else
 					balanceText.setText("$ 0.0");
 			}
 
