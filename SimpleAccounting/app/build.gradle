@@ -9,7 +9,8 @@ android {
         minSdkVersion 9
         targetSdkVersion 25
         versionCode 6
-        versionName "1.1.4"
+        versionName "1.2"
+		
         jackOptions {
             enabled true
         }
@@ -35,10 +36,3 @@ dependencies {
     compile 'com.android.support:design:25.1.0'
     compile 'com.github.amlcurran.showcaseview:library:5.4.3'
 }
-
-repositories{
-    flatDir{
-        dirs 'libs'
-    }
-}
-

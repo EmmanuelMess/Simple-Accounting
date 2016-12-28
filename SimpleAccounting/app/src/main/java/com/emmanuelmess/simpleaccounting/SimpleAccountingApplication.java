@@ -1,6 +1,7 @@
 package com.emmanuelmess.simpleaccounting;
 
 import android.app.Application;
+import android.content.Context;
 
 import org.acra.ACRA;
 import org.acra.ReportingInteractionMode;
@@ -15,10 +16,11 @@ import org.acra.annotation.ReportsCrashes;
 		resToastText = R.string.crash_toast_text)
 public class SimpleAccountingApplication extends Application {
 	@Override
-	public void onCreate() {
-		super.onCreate();
+	protected void attachBaseContext(Context base) {
+		super.attachBaseContext(base);
 
 		// The following line triggers the initialization of ACRA
 		ACRA.init(this);
 	}
 }
+
