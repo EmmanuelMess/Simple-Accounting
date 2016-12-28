@@ -14,9 +14,12 @@ abstract class Database extends SQLiteOpenHelper {
 
 	static final String NUMBER_COLUMN = "NUMBER";
 	final ContentValues CV = new ContentValues();
+	Context context;
 
 	Database(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
 		super(context, name, factory, version);
+
+		this.context = context;
 	}
 
 

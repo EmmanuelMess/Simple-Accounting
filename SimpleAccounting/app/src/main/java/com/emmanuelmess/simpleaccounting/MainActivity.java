@@ -26,6 +26,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.emmanuelmess.simpleaccounting.activities.TempMonthActivity;
 import com.emmanuelmess.simpleaccounting.dataloading.AsyncFinishedListener;
 import com.emmanuelmess.simpleaccounting.dataloading.LoadMonthAsyncTask;
 import com.emmanuelmess.simpleaccounting.dataloading.LoadPrevBalanceAsyncTask;
@@ -41,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
+import static com.emmanuelmess.simpleaccounting.Utils.*;
 import static com.emmanuelmess.simpleaccounting.Utils.equal;
 
 /**
@@ -97,8 +99,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 		inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		scrollView = (ScrollView) findViewById(R.id.scrollView);
 		table = (TableLayout) findViewById(R.id.table);
-		tableGeneral = new TableGeneral(this);
-		tableMonthlyBalance = new TableMonthlyBalance(this, tableGeneral);
+		tableGeneral = new TableGeneral(this);//DO NOT change the order of table creation!
+		tableMonthlyBalance = new TableMonthlyBalance(this);
 
 		int loadMonth, loadYear;
 
@@ -243,41 +245,52 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 			@Override
 			public void afterTextChanged(Editable editable) {
 				if (editableRow == index) {
-					if(equal(credit.getText().toString(), "."))
+					if (equal(credit.getText().toString(), "."))
 						credit.setText("0");
 
-					if(equal(debit.getText().toString(), "."))
+					if (equal(debit.getText().toString(), "."))
 						debit.setText("0");
 
-					BigDecimal balanceNum = new BigDecimal(0);
-					balanceNum = balanceNum.add(new BigDecimal(lastBalance != null?
-							Utils.parse(lastBalance.getText().toString().substring(1)):0));
-					balanceNum = balanceNum.add(new BigDecimal(Utils.parse(credit.getText().toString())));
-					balanceNum = balanceNum.subtract(new BigDecimal(Utils.parse(debit.getText().toString())));
+					BigDecimal balanceNum = (lastBalance != null?
+							parseString(parseViewToString(lastBalance).substring(2)) : BigDecimal.ZERO)
+							.add(parseView(credit))
+							.subtract(parseView(debit));
 
-					if(balanceNum.compareTo(BigDecimal.ZERO) == 0)
+					if (balanceNum.compareTo(BigDecimal.ZERO) == 0)
 						balanceNum = balanceNum.setScale(1, BigDecimal.ROUND_UNNECESSARY);
 
 					String s = "$ " + balanceNum.toPlainString();
+					if(equal(s, "$ "))
+						throw new IllegalStateException();
 					balance.setText(s);
 
-					for (int i = index + 1; i < table.getChildCount(); i++) {
-						TableRow row = (TableRow) table.getChildAt(i);
-
-						TextView lastBalanceText = (TextView) table.getChildAt(i - 1).findViewById(R.id.textBalance),
-								creditText = (TextView) row.findViewById(R.id.textCredit),
-								debitText = (TextView) row.findViewById(R.id.textDebit),
-								balanceText = (TextView) row.findViewById(R.id.textBalance);
-
-						double b;
-						b = Utils.parse(lastBalanceText.getText().toString().substring(1));
-						b = b + Utils.parse(creditText.getText().toString())
-								- Utils.parse(debitText.getText().toString());
-
-						String str = "$ " + b;
-						balanceText.setText(str);
-					}
+					updateBalances(index+1, balanceNum);
 				}
+			}
+
+			private void updateBalances(int index, BigDecimal lastBalance) {
+				TableRow row = (TableRow) table.getChildAt(index);
+				if(row == null)
+					return;
+
+				TextView creditText = (TextView) row.findViewById(R.id.textCredit),
+						debitText = (TextView) row.findViewById(R.id.textDebit),
+						balanceText = (TextView) row.findViewById(R.id.textBalance);
+
+				lastBalance = lastBalance
+						.add(parseView(creditText))
+						.subtract(parseView(debitText));
+
+				if (lastBalance.compareTo(BigDecimal.ZERO) == 0)
+					lastBalance = lastBalance.setScale(1, BigDecimal.ROUND_UNNECESSARY);
+
+				String s = "$ " + lastBalance.toPlainString();
+				if(equal(s, "$ "))
+					throw new IllegalStateException();
+				balanceText.setText(s);
+
+				if(index+1 < row.getChildCount())
+					updateBalances(index+1, lastBalance);
 			}
 		};
 
