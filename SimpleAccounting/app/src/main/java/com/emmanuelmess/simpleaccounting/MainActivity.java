@@ -34,6 +34,8 @@ import java.util.Objects;
 public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load every sum on table load and not save it
 	private final String PREFS_NAME = "shared prefs", PREFS_FIRST_RUN = "first_run";
 
+	public static final int FIRST_REAL_ROW = 1;
+
 	private TableLayout table = null;
 	private FileIO f;
 	private final int[] editIDs = {R.id.editDate, R.id.editRef, R.id.editCredit, R.id.editDebit, R.id.textBalance},
@@ -115,7 +117,7 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 			scrollView.fullScroll(View.FOCUS_DOWN);
 
 			currentEditableToView();
-			editableRow = table.getChildCount() - 1;
+			updateEditableRow(table.getChildCount() - 1);
 
 			f.newRow();
 			View row = loadRow();
@@ -147,7 +149,7 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 
 				scrollView.fullScroll(View.FOCUS_DOWN);
 
-				editableRow = 1;
+				updateEditableRow(1);
 				View row = table.getChildAt(1);
 
 				EditText date = (EditText) row.findViewById(R.id.editDate);
@@ -301,7 +303,7 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 				t1.setVisibility(View.GONE);
 				t.setVisibility(View.VISIBLE);
 			}
-			editableRow = rowIndex;
+			updateEditableRow(rowIndex);
 			return true;
 		});
 	}
@@ -311,7 +313,7 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 			View row = table.getChildAt(editableRow);
 			TextView balanceText = ((TextView) row.findViewById(R.id.textBalance));
 
-			if(balanceText.getText() == "") {
+			if(balanceText != null && balanceText.getText() == "") {
 				View previousRow = table.getChildAt(editableRow - 1);
 				TextView lastBalance;
 				if(previousRow != null && (lastBalance = (TextView) previousRow.findViewById(R.id.textBalance)) != null)
@@ -320,7 +322,7 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 					balanceText.setText("$ 0.0");
 			}
 
-			editableRow = -1;
+			updateEditableRow(-1);
 
 			for (int i = 0; i < textIDs.length; i++) {
 				EditText t = (EditText) row.findViewById(editIDs[i]);
@@ -335,6 +337,15 @@ public class MainActivity extends AppCompatActivity {// TODO: 16/10/2016 load ev
 				t1.setVisibility(View.VISIBLE);
 			}
 		}
+	}
+
+	private void updateEditableRow(int value) {
+		if(value == -1)
+			ACRAHelper.reset();
+		else
+			ACRAHelper.writeData(table, value);
+
+		editableRow = value;
 	}
 
 	private boolean equal(Object o1, Object o2) {
