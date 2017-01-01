@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -24,6 +25,7 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.emmanuelmess.simpleaccounting.activities.SettingsActivity;
 import com.emmanuelmess.simpleaccounting.activities.TempMonthActivity;
 import com.emmanuelmess.simpleaccounting.dataloading.AsyncFinishedListener;
 import com.emmanuelmess.simpleaccounting.dataloading.LoadMonthAsyncTask;
@@ -40,8 +42,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
-import static com.emmanuelmess.simpleaccounting.Utils.*;
 import static com.emmanuelmess.simpleaccounting.Utils.equal;
+import static com.emmanuelmess.simpleaccounting.Utils.parseString;
+import static com.emmanuelmess.simpleaccounting.Utils.parseView;
+import static com.emmanuelmess.simpleaccounting.Utils.parseViewToString;
 
 /**
  * @author Emmanuel
@@ -61,15 +65,20 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 	private int FIRST_REAL_ROW = 1;//excluding header and previous balance. HAS 2 STATES: 1 & 2
 	private TableLayout table = null;
+	private Toolbar toolbar;
 	private TableGeneral tableGeneral;
 	private TableMonthlyBalance tableMonthlyBalance;
 	private LayoutInflater inflater;
 	private ScrollView scrollView;
+	private SharedPreferences preferences;
 	private AsyncTask<Void, Void, String[][]> loadingMonthTask = null;
 
 	//pointer to row being edited STARTS IN 1
 	private int editableRow = -1;
 	private boolean editedColumn[] = new boolean[4];
+
+	private boolean loadSeparateMonths;
+
 	//pointer to month being viewed
 	private static int editableMonth = -1, editableYear = -1;
 	private static boolean dateChanged = false;
@@ -90,14 +99,21 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 
 		inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		scrollView = (ScrollView) findViewById(R.id.scrollView);
 		table = (TableLayout) findViewById(R.id.table);
-		tableGeneral = new TableGeneral(this);//DO NOT change the order of table creation!
+		tableGeneral = new TableGeneral(this);
 		tableMonthlyBalance = new TableMonthlyBalance(this);
+
+		preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+		if(!preferences.contains(SettingsActivity.NEW_SYSTEM))
+			preferences.edit().putBoolean(SettingsActivity.NEW_SYSTEM, !tableGeneral.hasRows()).apply();
+
+		loadSeparateMonths = preferences.getBoolean(SettingsActivity.NEW_SYSTEM, false);
 
 		int loadMonth, loadYear;
 
@@ -155,19 +171,33 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	@Override
 	protected void onResume() {
 		super.onResume();
-		if(dateChanged) {
+		if(loadSeparateMonths != preferences.getBoolean(SettingsActivity.NEW_SYSTEM, false)) {
+			loadSeparateMonths = preferences.getBoolean(SettingsActivity.NEW_SYSTEM, false);
+
+			findViewById(R.id.textMonth).setVisibility(loadSeparateMonths? View.VISIBLE:View.GONE);
+			invalidateOptionsMenu(); // now onCreateOptionsMenu(...) is called again
+
+			loadMonth(editableMonth, editableYear);
+		}
+
+		if(dateChanged && !loadSeparateMonths) {
+			editableMonth = Integer.parseInt(new SimpleDateFormat("M", Locale.getDefault()).format(new Date())) - 1;
+			//YEARS ALREADY START IN 0!!!
+			editableYear = Integer.parseInt(new SimpleDateFormat("yyyy", Locale.getDefault()).format(new Date()));
+
 			loadMonth(editableMonth, editableYear);
 			dateChanged = false;
 		}
+	}
 
-		/*
-		int loadMonth = Integer.parseInt(new SimpleDateFormat("M", Locale.getDefault()).format(new Date())) - 1;
-		//YEARS ALREADY START IN 0!!!
-		int loadYear = Integer.parseInt(new SimpleDateFormat("yyyy", Locale.getDefault()).format(new Date()));
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.toolbar, menu);
 
-		if((loadMonth != editableMonth || loadYear != editableYear) && (loadingMonthTask == null ||loadingMonthTask.getStatus() == FINISHED))
-			loadMonth(loadMonth, loadYear);
-		*/
+		menu.findItem(R.id.action_show_months).setVisible(loadSeparateMonths);
+
+		return true;
 	}
 
 	@Override
@@ -179,13 +209,6 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.toolbar, menu);
-		return true;
-	}
-
-	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle action bar item clicks here. The action bar will
 		// automatically handle clicks on the Home/Up button, so long
@@ -194,7 +217,11 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 		switch (id) {
 			case R.id.action_show_months:
-				startActivity(new Intent(this, TempMonthActivity.class));
+				if(loadSeparateMonths)
+					startActivity(new Intent(this, TempMonthActivity.class));
+				return true;
+			case R.id.action_settings:
+				startActivity(new Intent(this, SettingsActivity.class));
 				return true;
 		}
 
@@ -401,13 +428,14 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 		loadingMonthTask = new LoadMonthAsyncTask(month, year, tableGeneral, tableMonthlyBalance, table,
 				inflater, this, this);
+		if(loadSeparateMonths) {
+			editableMonth = month;
+			editableYear = year;
+			((TextView) findViewById(R.id.textMonth)).setText(MONTH_STRINGS[month]);
 
-		editableMonth = month;
-		editableYear = year;
-		((TextView) findViewById(R.id.textMonth)).setText(MONTH_STRINGS[month]);
-
-		(new LoadPrevBalanceAsyncTask(month, year, tableMonthlyBalance, table, inflater,
-				rowToDBRowConversion1->loadingMonthTask.execute(), this)).execute();
+			(new LoadPrevBalanceAsyncTask(month, year, tableMonthlyBalance, table, inflater,
+					rowToDBRowConversion->loadingMonthTask.execute(), this)).execute();
+		} else loadingMonthTask.execute();
 	}
 
 	@Override

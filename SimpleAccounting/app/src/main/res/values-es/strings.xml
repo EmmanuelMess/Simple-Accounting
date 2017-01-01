@@ -26,4 +26,9 @@
     <string name="show_months">Mostrar meses</string>
     <string name="title_activity_temp_month">Meses</string>
     <string name="previous_balance">Balance ant.</string>
+    <string name="action_settings">Ajustes</string>
+    <string name="title_activity_settings">Ajustes</string>
+    <string name="pref_header_general">General</string>
+    <string name="pref_title_new_system">Usar nuevo sistema</string>
+    <string name="pref_desc_new_system">Divide por meses las entradas</string>
 </resources>

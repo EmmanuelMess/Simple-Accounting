@@ -8,11 +8,11 @@
         android:id="@+id/action_show_months"
         android:icon="@drawable/ic_web_asset_black_24dp"
         android:title="@string/show_months"
-        app:showAsAction="always"/>
+        app:showAsAction="ifRoom"/>
 
-    <!-- Settings, should always be in the overflow
+    <!-- Settings, should always be in the overflow-->
     <item android:id="@+id/action_settings"
           android:title="@string/action_settings"
-          app:showAsAction="never"/>-->
+          app:showAsAction="never"/>
 
 </menu>
