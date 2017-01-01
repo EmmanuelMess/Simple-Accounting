@@ -4,6 +4,8 @@ import android.app.Application;
 import android.content.Context;
 
 import org.acra.ACRA;
+import org.acra.ReportingInteractionMode;
+import org.acra.annotation.ReportsCrashes;
 /**
  * @author Emmanuel
  *         on 2016-01-26, at 16:16.
