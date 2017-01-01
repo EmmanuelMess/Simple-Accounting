@@ -41,7 +41,7 @@ public class TableMonthlyBalance extends Database {
 		CV.clear();
 	}
 
-	public double getBalanceLastMonthWithData(int month, int year) {
+	public Double getBalanceLastMonthWithData(int month, int year) {
 		double data = 0;
 
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[] {COLUMNS[2]},
@@ -53,7 +53,7 @@ public class TableMonthlyBalance extends Database {
 		c.moveToFirst();
 
 		if(c.getCount() == 0)
-			data = -1;
+			return null;
 		else {
 			for(int i = 0; i < c.getCount(); i++) {
 				data += c.getDouble(0);

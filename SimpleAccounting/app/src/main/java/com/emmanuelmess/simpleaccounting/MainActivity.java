@@ -7,6 +7,7 @@ import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.print.PrintManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -24,6 +25,7 @@ import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.emmanuelmess.simpleaccounting.activities.SettingsActivity;
 import com.emmanuelmess.simpleaccounting.activities.TempMonthActivity;
@@ -64,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	public static final int[] TEXT_IDS = {R.id.textDate, R.id.textRef, R.id.textCredit, R.id.textDebit};
 
 	private int FIRST_REAL_ROW = 1;//excluding header and previous balance. HAS 2 STATES: 1 & 2
+	
 	private TableLayout table = null;
 	private Toolbar toolbar;
 	private TableGeneral tableGeneral;
@@ -151,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 				currentEditableToView();
 				if(table.getChildCount() > FIRST_REAL_ROW) {
-					editableRow = table.getChildCount() - 1;
+					updateEditableRow(table.getChildCount() - 1);
 
 					tableGeneral.newRowInMonth(editableMonth, editableYear);
 					rowToDBRowConversion.add(tableGeneral.getLastIndex());
@@ -222,6 +225,18 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 				return true;
 			case R.id.action_settings:
 				startActivity(new Intent(this, SettingsActivity.class));
+				return true;
+			case R.id.action_print:
+				if (table.getChildCount() > 1) {
+					if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+						PrintManager printM = (PrintManager) getSystemService((Context.PRINT_SERVICE));
+						String job = getString(R.string.app_name) + ": " + getString(MONTH_STRINGS[editableMonth]);
+						printM.print(job, new PPrintDocumentAdapter(this, tableGeneral, tableMonthlyBalance, editableMonth, editableYear), null);
+					}
+				} else {
+					Toast.makeText(this, getString(R.string.nothing_to_print), Toast.LENGTH_SHORT).show();
+				}
+
 				return true;
 		}
 
@@ -368,8 +383,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 				t1.setVisibility(View.GONE);
 				t.setVisibility(View.VISIBLE);
 			}
-
-			editableRow = rowIndex;
+			updateEditableRow(rowIndex);
 			return true;
 		});
 	}
@@ -388,16 +402,16 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 			TextView balanceText = ((TextView) row.findViewById(R.id.textBalance));
 
-			if(balanceText.getText() == "") {
+			if(balanceText != null && balanceText.getText() == "") {
 				View previousRow = editableRow-1 == 0? null : table.getChildAt(editableRow - 1);
-				if(previousRow != null) {
-					TextView lastBalance = (TextView) previousRow.findViewById(R.id.textBalance);
+				TextView lastBalance;
+				if(previousRow != null && (lastBalance = (TextView) previousRow.findViewById(R.id.textBalance)) != null)
 					balanceText.setText(lastBalance.getText());
-				} else
+				else
 					balanceText.setText("$ 0.0");
 			}
 
-			editableRow = -1;
+			updateEditableRow(-1);
 
 			for (int i = 0; i < TEXT_IDS.length; i++) {
 				EditText t = (EditText) row.findViewById(EDIT_IDS[i]);
@@ -498,7 +512,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 				scrollView.fullScroll(View.FOCUS_DOWN);
 
-				editableRow = rowToEdit;
+				updateEditableRow(rowToEdit);
 				View row = table.getChildAt(rowToEdit);
 
 				EditText date = (EditText) row.findViewById(R.id.editDate);
@@ -544,7 +558,16 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 			pref_editor.apply();
 		}
 	}
+  
+  private void updateEditableRow(int value) {
+		if(value == -1)
+			ACRAHelper.reset();
+		else
+			ACRAHelper.writeData(table, value);
 
+		editableRow = value;
+	}
+	
 	private class SimpleTextWatcher implements TextWatcher {
 
 		@Override

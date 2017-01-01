@@ -31,4 +31,6 @@
     <string name="pref_header_general">General</string>
     <string name="pref_title_new_system">Usar nuevo sistema</string>
     <string name="pref_desc_new_system">Divide por meses las entradas</string>
+    <string name="print">Imprimir</string>
+    <string name="nothing_to_print">No hay nada que imprimir!</string>
 </resources>

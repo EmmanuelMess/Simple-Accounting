@@ -25,11 +25,12 @@
     <string name="show_months">Show months</string>
     <string name="title_activity_temp_month">Months</string>
     <string name="previous_balance">Prev. balance</string>
+    <string name="print">Print</string>
+    <string name="nothing_to_print">There\'s nothing to print!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_settings">Settings</string>
-
+  
     <!-- Strings related to Settings -->
-
     <string name="pref_header_general">General</string>
     <string name="pref_title_new_system">Use new system</string>
     <string name="pref_desc_new_system">Sorts entries by months</string>
