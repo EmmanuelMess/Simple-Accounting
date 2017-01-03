@@ -83,8 +83,6 @@ public class TempMonthActivity extends ListActivity {
 				ArrayList<String[]> monthListData = new ArrayList<>();
 
 				for (int d[] : existingMonths) {
-					if(d[0] == -1 || d[1] == -1) continue;
-
 					int m = d[0];
 					monthListData.add(new String[]{getString(MainActivity.MONTH_STRINGS[m]), String.valueOf(d[1])});
 					dateIntValues.add(new Integer[]{m, d[1]});

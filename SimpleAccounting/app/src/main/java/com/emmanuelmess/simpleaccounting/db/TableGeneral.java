@@ -160,28 +160,6 @@ public class TableGeneral extends Database {
 		return data;
 	}
 
-	public String[][] getAll() {
-		String [][] data;
-
-		Cursor c = getReadableDatabase().query(TABLE_NAME, COLUMNS, null, null, null, null,
-				COLUMNS[0]);
-
-		if (c != null) {
-			c.moveToFirst();
-		} else return new String[0][0];
-
-		data = new String[c.getCount()][COLUMNS.length];
-		for(int x = 0; x < data.length; x++) {
-			for(int y = 0; y < COLUMNS.length; y++){
-				data[x][y] = c.getString(y);
-			}
-			c.moveToNext();
-		}
-		c.close();
-
-		return data;
-	}
-
 	public String[][] getAllForMonth(int month, int year) {
 		return getAllForMonth(month, year, getReadableDatabase());
 	}
@@ -234,14 +212,10 @@ public class TableGeneral extends Database {
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[]{NUMBER_COLUMN},
 				format("%1$s = (SELECT MAX(%1$s) FROM %2$s)", NUMBER_COLUMN, TABLE_NAME),
 				null, null, null, COLUMNS[0]);
-		if(!c.moveToFirst()) return -1;
+		c.moveToFirst();
 		int data = c.getInt(0);
 		c.close();
 		return data;
-	}
-
-	public boolean hasRows() {
-		return getLastIndex() != -1;
 	}
 
 }

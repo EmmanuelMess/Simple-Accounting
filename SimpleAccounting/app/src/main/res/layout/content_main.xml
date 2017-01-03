@@ -17,18 +17,17 @@
 
         <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/relativeView">
+                android:layout_height="wrap_content">
 
-            <TextView
-                android:layout_height="match_parent"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:id="@+id/textMonth"
-                android:gravity="center"
-                android:maxLines="1"
-                android:textSize="@dimen/title"
-                android:layout_width="match_parent"
-                android:textStyle="normal|bold"/>
+                <TextView
+                    android:layout_height="match_parent"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:id="@+id/textMonth"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:textSize="@dimen/title"
+                    android:layout_width="match_parent"
+                    android:textStyle="normal|bold"/>
 
             <TableLayout
                 android:layout_width="match_parent"

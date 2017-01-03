@@ -1,6 +1,5 @@
 package com.emmanuelmess.simpleaccounting.dataloading;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,7 +9,6 @@ import android.widget.TextView;
 import com.emmanuelmess.simpleaccounting.MainActivity;
 import com.emmanuelmess.simpleaccounting.R;
 import com.emmanuelmess.simpleaccounting.Utils;
-import com.emmanuelmess.simpleaccounting.activities.SettingsActivity;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
 
@@ -61,16 +59,12 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 			alreadyLoading = true;
 		else throw new IllegalStateException("Already loading month: " + year + "-" + (month+1));
 
-		boolean loadSeparateMonths = mainActivity.getPreferences(Context.MODE_PRIVATE)
-				.getBoolean(SettingsActivity.NEW_SYSTEM, !tableGeneral.hasRows());
-		if(loadSeparateMonths) {
-			int[] data = tableGeneral.getIndexesForMonth(month, year);
+		int[] data = tableGeneral.getIndexesForMonth(month, year);
 
-			for (int m : data)
-				rowToDBRowConversion.add(m);
+		for(int m : data)
+			rowToDBRowConversion.add(m);
 
-			return tableGeneral.getAllForMonth(month, year);
-		} else return tableGeneral.getAll();
+		return tableGeneral.getAllForMonth(month, year);
 	}
 
 	@Override
