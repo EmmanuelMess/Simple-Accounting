@@ -8,11 +8,13 @@
         android:icon="@drawable/ic_web_asset_white_24dp"
         android:title="@string/show_months"
         app:showAsAction="ifRoom"/>
+    <!--
+    //TO BE ADDED IN NEXT UPDATE
     <item
         android:id="@+id/action_print"
         android:icon="@drawable/ic_print_white_24dp"
         android:title="@string/print"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="ifRoom"/>-->
 
     <!-- Settings, should always be in the overflow
     <item android:id="@+id/action_settings"

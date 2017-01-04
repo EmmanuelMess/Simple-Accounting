@@ -20,6 +20,7 @@ import static java.lang.String.format;
  */
 public class TableGeneral extends Database {
 
+	public static final int OLDER_THAN_UPDATE = -2;
 	public static final String[] COLUMNS = new String[] { "DATE", "REFERENCE", "CREDIT", "DEBT", "MONTH", "YEAR"};
 
 	private static final int DATABASE_VERSION = 3;
@@ -61,27 +62,15 @@ public class TableGeneral extends Database {
 
 				c.moveToLast();
 
-				int last = -1;
 				int month = Integer.parseInt(new SimpleDateFormat("M", Locale.getDefault()).format(new Date())) - 1,
 						//YEARS ALREADY START IN 0!!!
 						year = Integer.parseInt(new SimpleDateFormat("yyyy", Locale.getDefault()).format(new Date()));
 
-				for (int i = c.getCount() - 1; i >= 0; i--) {
-					if (last > c.getInt(0)) {// TODO: 12/11/2016 test
-						if (month > 0)
-							month--;
-						else {
-							month = 12 - 1;
-							year--;
-						}
-					}
-
-					CV.put(COLUMNS[4], month);
-					CV.put(COLUMNS[5], year);
+				for (int i = 0; i < c.getCount(); i++) {
+					CV.put(COLUMNS[4], OLDER_THAN_UPDATE);
+					CV.put(COLUMNS[5], OLDER_THAN_UPDATE);
 					db.update(TABLE_NAME, CV, NUMBER_COLUMN + "=" + i, null);
 					CV.clear();
-
-					last = c.getInt(0);
 					c.moveToPrevious();
 				}
 				c.close();
