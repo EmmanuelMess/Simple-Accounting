@@ -7,6 +7,7 @@ import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.print.PrintManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -24,6 +25,7 @@ import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.emmanuelmess.simpleaccounting.activities.TempMonthActivity;
 import com.emmanuelmess.simpleaccounting.dataloading.AsyncFinishedListener;
@@ -220,8 +222,6 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 				startActivity(new Intent(this, TempMonthActivity.class));
 				return true;
 
-			/*
-			TO BE ADDED IN NEXT UPDATE
 			case R.id.action_print:
 				if (table.getChildCount() > 1) {
 					if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
@@ -234,7 +234,6 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 				}
 
 				return true;
-			*/
 		}
 
 		return super.onOptionsItemSelected(item);
