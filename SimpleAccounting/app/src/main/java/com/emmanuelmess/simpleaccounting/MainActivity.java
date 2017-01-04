@@ -219,22 +219,6 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 			case R.id.action_show_months:
 				startActivity(new Intent(this, TempMonthActivity.class));
 				return true;
-
-			/*
-			TO BE ADDED IN NEXT UPDATE
-			case R.id.action_print:
-				if (table.getChildCount() > 1) {
-					if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-						PrintManager printM = (PrintManager) getSystemService((Context.PRINT_SERVICE));
-						String job = getString(R.string.app_name) + ": " + getString(MONTH_STRINGS[editableMonth]);//TODO WILL BREAK
-						printM.print(job, new PPrintDocumentAdapter(this, tableGeneral, tableMonthlyBalance, editableMonth, editableYear), null);
-					}
-				} else {
-					Toast.makeText(this, getString(R.string.nothing_to_print), Toast.LENGTH_SHORT).show();
-				}
-
-				return true;
-			*/
 		}
 
 		return super.onOptionsItemSelected(item);
