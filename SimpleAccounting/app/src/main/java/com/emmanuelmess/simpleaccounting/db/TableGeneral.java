@@ -48,9 +48,6 @@ public class TableGeneral extends Database {
 					"DROP TABLE temp;";
 			db.execSQL(sql);//"copy, drop table, create new table, copy back" technique bc ALTER...DROP COLUMN isn't in SQLite
 
-			sql = "DROP TABLE " + TableMonthlyBalance.TABLE_NAME;
-			db.execSQL(sql);
-
 			oldVersion = 2;
 		}
 
