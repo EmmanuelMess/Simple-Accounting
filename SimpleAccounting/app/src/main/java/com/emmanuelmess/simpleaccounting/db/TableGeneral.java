@@ -8,9 +8,6 @@ import android.database.sqlite.SQLiteDatabase;
 import com.emmanuelmess.simpleaccounting.Utils;
 
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 import static java.lang.String.format;
 
@@ -23,7 +20,7 @@ public class TableGeneral extends Database {
 	public static final int OLDER_THAN_UPDATE = -2;
 	public static final String[] COLUMNS = new String[] { "DATE", "REFERENCE", "CREDIT", "DEBT", "MONTH", "YEAR"};
 
-	private static final int DATABASE_VERSION = 3;
+	private static final int DATABASE_VERSION = 4;
 	private static final String TABLE_NAME = "ACCOUNTING";
 	private static final String TABLE_CREATE = format("CREATE TABLE %1$s" +
 			" (%2$s INT, %3$s INT, %4$s TEXT, %5$s REAL, %6$s REAL, %7$s INT, %8$s INT);",
@@ -40,6 +37,23 @@ public class TableGeneral extends Database {
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		String sql;
+
+		/*I made a mistake on update 1.1.4, this should undo that*/
+		if(oldVersion == 3) {
+			sql = "CREATE TEMPORARY TABLE temp(" + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + ");" +
+					"INSERT INTO temp SELECT " + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + " FROM " + TABLE_NAME + ";" +
+					"DROP TABLE " + TABLE_NAME + ";" +
+					"CREATE TABLE " + TABLE_NAME + "(" + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + ");" +
+					"INSERT INTO " + TABLE_NAME + " SELECT " + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + " FROM temp;" +
+					"DROP TABLE temp;";
+			db.execSQL(sql);//"copy, drop table, create new table, copy back" technique bc ALTER...DROP COLUMN isn't in SQLite
+
+			sql = "DROP TABLE " + TableMonthlyBalance.TABLE_NAME;
+			db.execSQL(sql);
+
+			oldVersion = 2;
+		}
+
 		switch (oldVersion) {
 			case 1:
 				sql = "CREATE TEMPORARY TABLE temp(" + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + ");" +
@@ -61,10 +75,6 @@ public class TableGeneral extends Database {
 						null);
 
 				c.moveToLast();
-
-				int month = Integer.parseInt(new SimpleDateFormat("M", Locale.getDefault()).format(new Date())) - 1,
-						//YEARS ALREADY START IN 0!!!
-						year = Integer.parseInt(new SimpleDateFormat("yyyy", Locale.getDefault()).format(new Date()));
 
 				for (int i = 0; i < c.getCount(); i++) {
 					CV.put(COLUMNS[4], OLDER_THAN_UPDATE);

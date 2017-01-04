@@ -12,9 +12,9 @@ import static java.lang.String.format;
  */
 public class TableMonthlyBalance extends Database {
 	private static final String[] COLUMNS = new String[] {"MONTH", "YEAR", "BALANCE"};
+	public static final String TABLE_NAME = "MONTHLY_BALANCE";
 
 	private static final int DATABASE_VERSION = 1;
-	private static final String TABLE_NAME = "MONTHLY_BALANCE";
 	private static final String TABLE_CREATE = format("CREATE TABLE %1$s(%2$s INT, %3$s INT, %4$s INT, %5$s REAL);",
 			TABLE_NAME, NUMBER_COLUMN, COLUMNS[0], COLUMNS[1], COLUMNS[2]);
 
