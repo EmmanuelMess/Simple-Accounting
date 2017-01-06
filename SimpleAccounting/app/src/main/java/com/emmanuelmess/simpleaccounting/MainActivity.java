@@ -435,6 +435,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 			for(int i = table.getChildCount()-1; i > 0; i--)
 				table.removeViewAt(i);
 
+		tableGeneral.getReadableDatabase();//triggers onUpdate()
+
 		loadingMonthTask = new LoadMonthAsyncTask(month, year, tableGeneral, tableMonthlyBalance, table,
 				inflater, this, this);
 

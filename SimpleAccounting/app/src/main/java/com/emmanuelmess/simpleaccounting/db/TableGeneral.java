@@ -57,30 +57,27 @@ public class TableGeneral extends Database {
 				db.execSQL(sql);//"copy, drop table, create new table, copy back" technique bc ALTER...DROP COLUMN isn't in SQLite
 			case 2:
 				/*Updates this table*/{
-				if(!solvingMistake) {
-					sql = "ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + COLUMNS[4] + " INT;";
-					db.execSQL(sql);
+					if(!solvingMistake) {
+						sql = "ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + COLUMNS[4] + " INT;";
+						db.execSQL(sql);
 
-					sql = "ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + COLUMNS[5] + " INT;";
-					db.execSQL(sql);
+						sql = "ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + COLUMNS[5] + " INT;";
+						db.execSQL(sql);
+					}
+
+					Cursor c = db.query(TABLE_NAME, new String[]{COLUMNS[0]}, null, null, null, null, null);
+					CV.put(COLUMNS[4], OLDER_THAN_UPDATE);
+					CV.put(COLUMNS[5], OLDER_THAN_UPDATE);
+					for (int i = 0; i < c.getCount(); i++)
+						db.update(TABLE_NAME, CV, NUMBER_COLUMN + "=" + i, null);
+					CV.clear();
+					c.close();
 				}
 
-				Cursor c = db.query(TABLE_NAME, new String[]{COLUMNS[0]}, null, null, null, null, null);
-				CV.put(COLUMNS[4], OLDER_THAN_UPDATE);
-				CV.put(COLUMNS[5], OLDER_THAN_UPDATE);
-				for (int i = 0; i < c.getCount(); i++)
-					db.update(TABLE_NAME, CV, NUMBER_COLUMN + "=" + i, null);
-				CV.clear();
-				c.close();
-			}
-
 				/*Updates MonthlyBalance*/ {
-				TableMonthlyBalance tableMonthlyBalance = new TableMonthlyBalance(super.context);
-				int[][] existentMonths = getMonthsWithData(db);
-				BigDecimal currentBalance = BigDecimal.ZERO;
-				for (int[] monthYear : existentMonths) {
-					int m = monthYear[0], y = monthYear[1];
-					String[][] all = getAllForMonth(m, y, db);
+					TableMonthlyBalance tableMonthlyBalance = new TableMonthlyBalance(super.context);
+					BigDecimal currentBalance = BigDecimal.ZERO;
+					String[][] all = getAllForMonth(OLDER_THAN_UPDATE, OLDER_THAN_UPDATE, db);
 
 					for (String[] data : all) {
 						if (data[2] != null)
@@ -89,9 +86,8 @@ public class TableGeneral extends Database {
 							currentBalance = currentBalance.subtract(Utils.parseString(data[3]));
 					}
 
-					tableMonthlyBalance.updateMonth(m, y, currentBalance.doubleValue());
+					tableMonthlyBalance.updateMonth(OLDER_THAN_UPDATE, OLDER_THAN_UPDATE, currentBalance.doubleValue());
 				}
-			}
 		}
 	}
 
