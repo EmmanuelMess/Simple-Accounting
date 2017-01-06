@@ -435,7 +435,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 			(new LoadPrevBalanceAsyncTask(month, year, tableMonthlyBalance, table, inflater,
 					rowToDBRowConversion1->loadingMonthTask.execute(), this)).execute();
 		} else {
-			monthText.setText(getString(R.string.before_update_1_2) + updateMonth + "-" + updateYear);
+			monthText.setText(getString(R.string.before_update_1_2)
+					+ " " + getString(MONTH_STRINGS[updateMonth]) + "-" + updateYear);
 			loadingMonthTask.execute();
 		}
 	}

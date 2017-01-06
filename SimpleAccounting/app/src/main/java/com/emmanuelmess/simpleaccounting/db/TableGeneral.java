@@ -50,8 +50,7 @@ public class TableGeneral extends Database {
 			db.execSQL(sql);//"copy, drop table, create new table, copy back" technique bc ALTER...DROP COLUMN isn't in SQLite
 
 			{
-				Cursor c = db.query(TABLE_NAME, new String[]{COLUMNS[0]}, null, null, null, null,
-						null);
+				Cursor c = db.query(TABLE_NAME, new String[]{COLUMNS[0]}, null, null, null, null, null);
 				CV.put(COLUMNS[4], OLDER_THAN_UPDATE);
 				CV.put(COLUMNS[5], OLDER_THAN_UPDATE);
 				for (int i = 0; i < c.getCount(); i++)

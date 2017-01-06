@@ -90,15 +90,21 @@ public class TempMonthActivity extends ListActivity {
 				for (int d[] : existingMonths) {
 					int m = d[0], y = d[1];
 
-					if(m == TableGeneral.OLDER_THAN_UPDATE && y == TableGeneral.OLDER_THAN_UPDATE && !olderThanAlreadyPut) {
+					if(m == TableGeneral.OLDER_THAN_UPDATE && y == TableGeneral.OLDER_THAN_UPDATE
+							&& olderThanAlreadyPut)
+						continue;
+
+					if(m == TableGeneral.OLDER_THAN_UPDATE && y == TableGeneral.OLDER_THAN_UPDATE) {
 						olderThanAlreadyPut = true;
 
 						updateYear = preferences.getInt(MainActivity.UPDATE_YEAR_SETTING, -1);
 						updateMonth = preferences.getInt(MainActivity.UPDATE_MONTH_SETTING, -1);
 
-						monthListData.add(new String[]{getString(R.string.before_update_1_2) + " " + updateMonth, String.valueOf(updateYear)});
+						monthListData.add(new String[]{getString(R.string.before_update_1_2)
+								+ " " + updateMonth, String.valueOf(updateYear)});
 					} else
-						monthListData.add(new String[]{getString(MainActivity.MONTH_STRINGS[m]), String.valueOf(y)});
+						monthListData.add(new String[]{getString(MainActivity.MONTH_STRINGS[m]),
+								String.valueOf(y)});
 
 					dateIntValues.add(new Integer[]{m, y});
 				}
@@ -109,8 +115,8 @@ public class TempMonthActivity extends ListActivity {
 
 				if (dateIntValues.size() == 0
 						|| !Arrays.equals(dateIntValues.get(dateIntValues.size() - 1), new Integer[]{currentM, currentY})) {
-					monthListData.add(new String[]{getString(MainActivity.MONTH_STRINGS[currentM]), String.valueOf(currentY)});
-					dateIntValues.add(new Integer[]{currentM, currentY});
+					monthListData.add(0, new String[]{getString(MainActivity.MONTH_STRINGS[currentM]), String.valueOf(currentY)});
+					dateIntValues.add(0, new Integer[]{currentM, currentY});
 				}
 
 
