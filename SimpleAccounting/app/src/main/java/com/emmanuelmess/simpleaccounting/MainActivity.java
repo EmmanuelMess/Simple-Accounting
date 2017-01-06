@@ -51,8 +51,8 @@ import static com.emmanuelmess.simpleaccounting.Utils.parseViewToString;
  */
 public class MainActivity extends AppCompatActivity implements AsyncFinishedListener<ArrayList<Integer>> {
 
-	public static final String UPDATE_YEAR_SETTING = "update 1.2 date";
-	public static final String UPDATE_MONTH_SETTING = "update 1.2 date";
+	public static final String UPDATE_YEAR_SETTING = "update 1.2 year";
+	public static final String UPDATE_MONTH_SETTING = "update 1.2 month";
 
 	public static final String MONTH = "month", YEAR = "year";
 
