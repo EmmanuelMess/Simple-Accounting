@@ -37,19 +37,59 @@ public class TableGeneral extends Database {
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		String sql;
+		final String tempTable = "temp";
 
 		/*I made a mistake on update 1.1.4, this should undo that*/
-		if(oldVersion == 3)
-			oldVersion = 1;
+		if(oldVersion == 3) {
+			sql = "CREATE TEMPORARY TABLE " + tempTable + "(" + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + ");" +
+					"INSERT INTO " + tempTable + " SELECT " + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + " FROM " + TABLE_NAME + ";" +
+					"DROP TABLE " + TABLE_NAME + ";" +
+					"CREATE TABLE " + TABLE_NAME + "(" + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + "," + COLUMNS[4] + "," + COLUMNS[5] + ");" +
+					"INSERT INTO " + TABLE_NAME + " SELECT " + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + " FROM " + tempTable + ";" +
+					"DROP TABLE " + tempTable + ";";
+			db.execSQL(sql);//"copy, drop table, create new table, copy back" technique bc ALTER...DROP COLUMN isn't in SQLite
+
+			{
+				Cursor c = db.query(TABLE_NAME, new String[]{COLUMNS[0]}, null, null, null, null,
+						null);
+				CV.put(COLUMNS[4], OLDER_THAN_UPDATE);
+				CV.put(COLUMNS[5], OLDER_THAN_UPDATE);
+				for (int i = 0; i < c.getCount(); i++)
+					db.update(TABLE_NAME, CV, NUMBER_COLUMN + "=" + i, null);
+				CV.clear();
+				c.close();
+			}
+
+				/*Updates MonthlyBalance*/
+			{
+				TableMonthlyBalance tableMonthlyBalance = new TableMonthlyBalance(super.context);
+				int[][] existentMonths = this.getMonthsWithData(db);
+				BigDecimal currentBalance = BigDecimal.ZERO;
+				for (int[] month : existentMonths) {
+					int m = month[0], y = month[1];
+					String[][] all = this.getAllForMonth(m, y, db);
+
+					for (String[] data : all) {
+						if (data[2] != null)
+							currentBalance = currentBalance.add(Utils.parseString(data[2]));
+						if (data[3] != null)
+							currentBalance = currentBalance.subtract(Utils.parseString(data[3]));
+					}
+
+					tableMonthlyBalance.updateMonth(m, y, currentBalance.doubleValue());
+				}
+			}
+			return;
+		}
 
 		switch (oldVersion) {
 			case 1:
-				sql = "CREATE TEMPORARY TABLE temp(" + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + ");" +
-						"INSERT INTO temp SELECT " + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + " FROM " + TABLE_NAME + ";" +
+				sql = "CREATE TEMPORARY TABLE " + tempTable + "(" + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + ");" +
+						"INSERT INTO " + tempTable + " SELECT " + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + " FROM " + TABLE_NAME + ";" +
 						"DROP TABLE " + TABLE_NAME + ";" +
 						"CREATE TABLE " + TABLE_NAME + "(" + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + ");" +
-						"INSERT INTO " + TABLE_NAME + " SELECT " + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + " FROM temp;" +
-						"DROP TABLE temp;";
+						"INSERT INTO " + TABLE_NAME + " SELECT " + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + " FROM " + tempTable + ";" +
+						"DROP TABLE " + tempTable + ";";
 				db.execSQL(sql);//"copy, drop table, create new table, copy back" technique bc ALTER...DROP COLUMN isn't in SQLite
 			case 2:
 				/*Updates this table*/{

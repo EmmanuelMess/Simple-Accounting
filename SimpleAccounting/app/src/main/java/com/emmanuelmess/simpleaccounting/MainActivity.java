@@ -124,8 +124,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 		if(!preferences.contains(UPDATE_YEAR_SETTING)) {
 			SharedPreferences.Editor prefEditor = preferences.edit();
-			prefEditor.putInt(UPDATE_YEAR_SETTING, currentMonthYear[0]);
-			prefEditor.putInt(UPDATE_MONTH_SETTING, currentMonthYear[1]);
+			prefEditor.putInt(UPDATE_MONTH_SETTING, currentMonthYear[0]);
+			prefEditor.putInt(UPDATE_YEAR_SETTING, currentMonthYear[1]);
 			prefEditor.apply();
 		}
 
