@@ -101,7 +101,7 @@ public class TempMonthActivity extends ListActivity {
 						updateMonth = preferences.getInt(MainActivity.UPDATE_MONTH_SETTING, -1);
 
 						monthListData.add(new String[]{getString(R.string.before_update_1_2)
-								+ " " + updateMonth, String.valueOf(updateYear)});
+								+ " " + getString(MainActivity.MONTH_STRINGS[updateMonth]).toLowerCase(), String.valueOf(updateYear)});
 					} else
 						monthListData.add(new String[]{getString(MainActivity.MONTH_STRINGS[m]),
 								String.valueOf(y)});

@@ -38,47 +38,12 @@ public class TableGeneral extends Database {
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		String sql;
 		final String tempTable = "temp";
+		boolean solvingMistake = false;
 
 		/*I made a mistake on update 1.1.4, this should undo that*/
 		if(oldVersion == 3) {
-			sql = "CREATE TEMPORARY TABLE " + tempTable + "(" + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + ");" +
-					"INSERT INTO " + tempTable + " SELECT " + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + " FROM " + TABLE_NAME + ";" +
-					"DROP TABLE " + TABLE_NAME + ";" +
-					"CREATE TABLE " + TABLE_NAME + "(" + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + "," + COLUMNS[4] + "," + COLUMNS[5] + ");" +
-					"INSERT INTO " + TABLE_NAME + " SELECT " + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + " FROM " + tempTable + ";" +
-					"DROP TABLE " + tempTable + ";";
-			db.execSQL(sql);//"copy, drop table, create new table, copy back" technique bc ALTER...DROP COLUMN isn't in SQLite
-
-			{
-				Cursor c = db.query(TABLE_NAME, new String[]{COLUMNS[0]}, null, null, null, null, null);
-				CV.put(COLUMNS[4], OLDER_THAN_UPDATE);
-				CV.put(COLUMNS[5], OLDER_THAN_UPDATE);
-				for (int i = 0; i < c.getCount(); i++)
-					db.update(TABLE_NAME, CV, NUMBER_COLUMN + "=" + i, null);
-				CV.clear();
-				c.close();
-			}
-
-				/*Updates MonthlyBalance*/
-			{
-				TableMonthlyBalance tableMonthlyBalance = new TableMonthlyBalance(super.context);
-				int[][] existentMonths = this.getMonthsWithData(db);
-				BigDecimal currentBalance = BigDecimal.ZERO;
-				for (int[] month : existentMonths) {
-					int m = month[0], y = month[1];
-					String[][] all = this.getAllForMonth(m, y, db);
-
-					for (String[] data : all) {
-						if (data[2] != null)
-							currentBalance = currentBalance.add(Utils.parseString(data[2]));
-						if (data[3] != null)
-							currentBalance = currentBalance.subtract(Utils.parseString(data[3]));
-					}
-
-					tableMonthlyBalance.updateMonth(m, y, currentBalance.doubleValue());
-				}
-			}
-			return;
+			oldVersion = 1;
+			solvingMistake = true;
 		}
 
 		switch (oldVersion) {
@@ -92,34 +57,30 @@ public class TableGeneral extends Database {
 				db.execSQL(sql);//"copy, drop table, create new table, copy back" technique bc ALTER...DROP COLUMN isn't in SQLite
 			case 2:
 				/*Updates this table*/{
-				sql = "ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + COLUMNS[4] + " INT;";
-				db.execSQL(sql);
+				if(!solvingMistake) {
+					sql = "ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + COLUMNS[4] + " INT;";
+					db.execSQL(sql);
 
-				sql = "ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + COLUMNS[5] + " INT;";
-				db.execSQL(sql);
-
-				Cursor c = db.query(TABLE_NAME, new String[]{COLUMNS[0]}, null, null, null, null,
-						null);
-
-				c.moveToLast();
-
-				for (int i = 0; i < c.getCount(); i++) {
-					CV.put(COLUMNS[4], OLDER_THAN_UPDATE);
-					CV.put(COLUMNS[5], OLDER_THAN_UPDATE);
-					db.update(TABLE_NAME, CV, NUMBER_COLUMN + "=" + i, null);
-					CV.clear();
-					c.moveToPrevious();
+					sql = "ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + COLUMNS[5] + " INT;";
+					db.execSQL(sql);
 				}
+
+				Cursor c = db.query(TABLE_NAME, new String[]{COLUMNS[0]}, null, null, null, null, null);
+				CV.put(COLUMNS[4], OLDER_THAN_UPDATE);
+				CV.put(COLUMNS[5], OLDER_THAN_UPDATE);
+				for (int i = 0; i < c.getCount(); i++)
+					db.update(TABLE_NAME, CV, NUMBER_COLUMN + "=" + i, null);
+				CV.clear();
 				c.close();
 			}
 
 				/*Updates MonthlyBalance*/ {
 				TableMonthlyBalance tableMonthlyBalance = new TableMonthlyBalance(super.context);
-				int[][] existentMonths = this.getMonthsWithData(db);
+				int[][] existentMonths = getMonthsWithData(db);
 				BigDecimal currentBalance = BigDecimal.ZERO;
-				for (int[] month : existentMonths) {
-					int m = month[0], y = month[1];
-					String[][] all = this.getAllForMonth(m, y, db);
+				for (int[] monthYear : existentMonths) {
+					int m = monthYear[0], y = monthYear[1];
+					String[][] all = getAllForMonth(m, y, db);
 
 					for (String[] data : all) {
 						if (data[2] != null)
@@ -175,7 +136,7 @@ public class TableGeneral extends Database {
 		} else return new int[0][0];
 
 		data = new int[c.getCount()][2];
-		for(int x = 0; x < data.length; x++) {
+		for(int x = 0; x < c.getCount(); x++) {
 			if(c.getString(0) != null)
 				data[x]= new int[]{c.getInt(0), c.getInt(1)};
 			else data[x] = new int[]{-1, -1};

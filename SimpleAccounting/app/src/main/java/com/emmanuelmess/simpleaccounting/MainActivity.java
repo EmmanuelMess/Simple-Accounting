@@ -41,6 +41,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 import static com.emmanuelmess.simpleaccounting.Utils.equal;
 import static com.emmanuelmess.simpleaccounting.Utils.parseString;
 import static com.emmanuelmess.simpleaccounting.Utils.parseView;
@@ -68,6 +70,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	private int FIRST_REAL_ROW = 1;//excluding header and previous balance. HAS 2 STATES: 1 & 2
 	
 	private TableLayout table = null;
+	private View space;
+	private FloatingActionButton fab;
 	private TableGeneral tableGeneral;
 	private TableMonthlyBalance tableMonthlyBalance;
 	private LayoutInflater inflater;
@@ -151,36 +155,42 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 				else//noinspection deprecation
 					table.getViewTreeObserver().removeGlobalOnLayoutListener(this);
 
-				findViewById(R.id.space).setMinimumHeight(findViewById(R.id.fab).getHeight()
-						- findViewById(R.id.fab).getPaddingTop());
+				space = findViewById(R.id.space);
+				space.setMinimumHeight(findViewById(R.id.fab).getHeight()
+							- findViewById(R.id.fab).getPaddingTop());
 
 				loadMonth(loadMonth, loadYear);
 				dateChanged = false;//in case the activity gets destroyed
 			}
 		});
 
-		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+		fab = (FloatingActionButton) findViewById(R.id.fab);
+		if(editableMonth == TableGeneral.OLDER_THAN_UPDATE && editableYear == TableGeneral.OLDER_THAN_UPDATE) {
+			fab.setVisibility(GONE);
+			space.setVisibility(GONE);
+		}
+
 		fab.setOnClickListener(view->{
-				inflater.inflate(R.layout.newrow_main, table);
+			inflater.inflate(R.layout.newrow_main, table);
 
-				scrollView.fullScroll(View.FOCUS_DOWN);
+			scrollView.fullScroll(View.FOCUS_DOWN);
 
-				currentEditableToView();
-				if(table.getChildCount() > FIRST_REAL_ROW) {
-					updateEditableRow(table.getChildCount() - 1);
+			currentEditableToView();
+			if (table.getChildCount() > FIRST_REAL_ROW) {
+				updateEditableRow(table.getChildCount() - 1);
 
-					tableGeneral.newRowInMonth(editableMonth, editableYear);
-					rowToDBRowConversion.add(tableGeneral.getLastIndex());
-					View row = loadRow();
-					addToMonthsDB();
+				tableGeneral.newRowInMonth(editableMonth, editableYear);
+				rowToDBRowConversion.add(tableGeneral.getLastIndex());
+				View row = loadRow();
+				addToMonthsDB();
 
-					EditText date = (EditText) row.findViewById(R.id.editDate);
-					date.setText(new SimpleDateFormat("dd", Locale.getDefault()).format(new Date()));
+				EditText date = (EditText) row.findViewById(R.id.editDate);
+				date.setText(new SimpleDateFormat("dd", Locale.getDefault()).format(new Date()));
 
-					row.requestFocus();
-					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-					imm.showSoftInput(date, InputMethodManager.SHOW_IMPLICIT);
-				} else createNewRowWhenMonthLoaded = true;
+				row.requestFocus();
+				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.showSoftInput(date, InputMethodManager.SHOW_IMPLICIT);
+			} else createNewRowWhenMonthLoaded = true;
 		});
 	}
 
@@ -189,6 +199,10 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 		super.onResume();
 		if(dateChanged) {
 			loadMonth(editableMonth, editableYear);
+
+			fab.setVisibility(editableMonth == TableGeneral.OLDER_THAN_UPDATE
+					&& editableYear == TableGeneral.OLDER_THAN_UPDATE? GONE : VISIBLE);
+
 			dateChanged = false;
 		}
 	}
@@ -361,8 +375,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 				t.setText(t1.getText());
 				t1.setText("");
 
-				t1.setVisibility(View.GONE);
-				t.setVisibility(View.VISIBLE);
+				t1.setVisibility(GONE);
+				t.setVisibility(VISIBLE);
 			}
 			updateEditableRow(rowIndex);
 			return true;
@@ -403,8 +417,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 				t1.setText(t.getText());
 				t.setText("");
 
-				t.setVisibility(View.GONE);
-				t1.setVisibility(View.VISIBLE);
+				t.setVisibility(GONE);
+				t1.setVisibility(VISIBLE);
 			}
 
 			if(reloadMonthOnChangeToView){
@@ -436,7 +450,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 					rowToDBRowConversion1->loadingMonthTask.execute(), this)).execute();
 		} else {
 			monthText.setText(getString(R.string.before_update_1_2)
-					+ " " + getString(MONTH_STRINGS[updateMonth]) + "-" + updateYear);
+					+ " " + getString(MONTH_STRINGS[updateMonth]).toLowerCase() + "-" + updateYear);
 			loadingMonthTask.execute();
 		}
 	}
@@ -448,7 +462,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 		scrollView.fullScroll(View.FOCUS_DOWN);
 
-		findViewById(R.id.progressBar).setVisibility(View.GONE);
+		findViewById(R.id.progressBar).setVisibility(GONE);
 
 		loadShowcaseView(inflater, scrollView);
 
