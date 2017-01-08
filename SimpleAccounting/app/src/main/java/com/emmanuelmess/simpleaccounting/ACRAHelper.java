@@ -15,8 +15,8 @@ public class ACRAHelper {
 	public static final String LAST_ROW = "last";
 	public static final String CURRENT_ROW = "current";
 
-	public static void writeData(TableLayout t, int row) {
-		if(row-1 >= MainActivity.FIRST_REAL_ROW)
+	public static void writeData(TableLayout t, int row, MainActivity a) {
+		if(row-1 >= a.getFirstRealRow())
 			setData(LAST_ROW, t, row-1);
 
 		setData(CURRENT_ROW, t, row);
