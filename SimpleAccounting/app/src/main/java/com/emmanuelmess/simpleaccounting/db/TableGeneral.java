@@ -5,9 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+import com.emmanuelmess.simpleaccounting.Utils;
+
+import java.math.BigDecimal;
 
 import static java.lang.String.format;
 
@@ -17,9 +17,10 @@ import static java.lang.String.format;
  */
 public class TableGeneral extends Database {
 
+	public static final int OLDER_THAN_UPDATE = -2;
 	public static final String[] COLUMNS = new String[] { "DATE", "REFERENCE", "CREDIT", "DEBT", "MONTH", "YEAR"};
 
-	private static final int DATABASE_VERSION = 3;
+	private static final int DATABASE_VERSION = 4;
 	private static final String TABLE_NAME = "ACCOUNTING";
 	private static final String TABLE_CREATE = format("CREATE TABLE %1$s" +
 			" (%2$s INT, %3$s INT, %4$s TEXT, %5$s REAL, %6$s REAL, %7$s INT, %8$s INT);",
@@ -36,53 +37,57 @@ public class TableGeneral extends Database {
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		String sql;
-		switch(oldVersion){
+		final String tempTable = "temp";
+		boolean solvingMistake = false;
+
+		/*I made a mistake on update 1.1.4, this should undo that*/
+		if(oldVersion == 3) {
+			oldVersion = 1;
+			solvingMistake = true;
+		}
+
+		switch (oldVersion) {
 			case 1:
-				sql = "CREATE TEMPORARY TABLE temp(" + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + ");" +
-						"INSERT INTO temp SELECT " + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + " FROM " + TABLE_NAME + ";" +
+				sql = "CREATE TEMPORARY TABLE " + tempTable + "(" + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + ");" +
+						"INSERT INTO " + tempTable + " SELECT " + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + " FROM " + TABLE_NAME + ";" +
 						"DROP TABLE " + TABLE_NAME + ";" +
 						"CREATE TABLE " + TABLE_NAME + "(" + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + ");" +
-						"INSERT INTO " + TABLE_NAME + " SELECT " + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + " FROM temp;" +
-						"DROP TABLE temp;";
+						"INSERT INTO " + TABLE_NAME + " SELECT " + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + " FROM " + tempTable + ";" +
+						"DROP TABLE " + tempTable + ";";
 				db.execSQL(sql);//"copy, drop table, create new table, copy back" technique bc ALTER...DROP COLUMN isn't in SQLite
 			case 2:
-				sql = "ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + COLUMNS[4] + " INT;";
-				db.execSQL(sql);
+				/*Updates this table*/{
+					if(!solvingMistake) {
+						sql = "ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + COLUMNS[4] + " INT;";
+						db.execSQL(sql);
 
-				sql = "ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + COLUMNS[5] + " INT;";
-				db.execSQL(sql);
-
-				Cursor c = db.query(TABLE_NAME, new String[]{COLUMNS[0]},
-						null, null, null, null, null);
-
-				c.moveToLast();
-
-				int last = -1;
-				int month = Integer.parseInt(new SimpleDateFormat("M", Locale.getDefault()).format(new Date()))-1,
-						//YEARS ALREADY START IN 0!!!
-						year = Integer.parseInt(new SimpleDateFormat("yyyy", Locale.getDefault()).format(new Date()));
-
-				for (int i = c.getCount()-1; i >= 0; i--) {
-					if(last < c.getInt(0)) {// TODO: 12/11/2016 test
-						if (month >= 0)
-							month--;
-						else {
-							month = 12-1;
-							year--;
-						}
+						sql = "ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + COLUMNS[5] + " INT;";
+						db.execSQL(sql);
 					}
 
-					CV.put(COLUMNS[4], month);
-					CV.put(COLUMNS[5], year);
-					db.update(TABLE_NAME, CV, NUMBER_COLUMN + "=" + i, null);
+					Cursor c = db.query(TABLE_NAME, new String[]{COLUMNS[0]}, null, null, null, null, null);
+					CV.put(COLUMNS[4], OLDER_THAN_UPDATE);
+					CV.put(COLUMNS[5], OLDER_THAN_UPDATE);
+					for (int i = 0; i < c.getCount(); i++)
+						db.update(TABLE_NAME, CV, NUMBER_COLUMN + "=" + i, null);
 					CV.clear();
-
-					last = c.getInt(0);
-
-					c.moveToPrevious();
+					c.close();
 				}
 
-				c.close();
+				/*Updates MonthlyBalance*/ {
+					TableMonthlyBalance tableMonthlyBalance = new TableMonthlyBalance(super.context);
+					BigDecimal currentBalance = BigDecimal.ZERO;
+					String[][] all = getAllForMonth(OLDER_THAN_UPDATE, OLDER_THAN_UPDATE, db);
+
+					for (String[] data : all) {
+						if (data[2] != null)
+							currentBalance = currentBalance.add(Utils.parseString(data[2]));
+						if (data[3] != null)
+							currentBalance = currentBalance.subtract(Utils.parseString(data[3]));
+					}
+
+					tableMonthlyBalance.updateMonth(OLDER_THAN_UPDATE, OLDER_THAN_UPDATE, currentBalance.doubleValue());
+				}
 		}
 	}
 
@@ -113,9 +118,13 @@ public class TableGeneral extends Database {
 	}
 
 	public int[][] getMonthsWithData() {
+		return getMonthsWithData(getReadableDatabase());
+	}
+
+	private int[][] getMonthsWithData(SQLiteDatabase db) {
 		int[][] data;
 
-		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[] {COLUMNS[4], COLUMNS[5]},
+		Cursor c = db.query(TABLE_NAME, new String[] {COLUMNS[4], COLUMNS[5]},
 				null, null, COLUMNS[4], null, null);
 
 		if (c != null) {
@@ -123,7 +132,7 @@ public class TableGeneral extends Database {
 		} else return new int[0][0];
 
 		data = new int[c.getCount()][2];
-		for(int x = 0; x < data.length; x++) {
+		for(int x = 0; x < c.getCount(); x++) {
 			if(c.getString(0) != null)
 				data[x]= new int[]{c.getInt(0), c.getInt(1)};
 			else data[x] = new int[]{-1, -1};
@@ -135,9 +144,13 @@ public class TableGeneral extends Database {
 	}
 
 	public String[][] getAllForMonth(int month, int year) {
+		return getAllForMonth(month, year, getReadableDatabase());
+	}
+
+	private String[][] getAllForMonth(int month, int year, SQLiteDatabase db) {
 		String [][] data;
 
-		Cursor c = getReadableDatabase().query(TABLE_NAME, COLUMNS,
+		Cursor c = db.query(TABLE_NAME, COLUMNS,
 				SQLShort(AND, COLUMNS[4] + "=" + month, COLUMNS[5] + "=" + year),
 				null, null, null, COLUMNS[0]);
 
