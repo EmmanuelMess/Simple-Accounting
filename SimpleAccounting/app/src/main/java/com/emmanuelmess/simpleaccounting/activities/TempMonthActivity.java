@@ -28,6 +28,7 @@ import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 /**
@@ -85,19 +86,29 @@ public class TempMonthActivity extends ListActivity {
 			@Override
 			protected void onPostExecute(int[][] existingMonths) {
 				ArrayList<String[]> monthListData = new ArrayList<>();
+				boolean olderThanAlreadyPut = false;
 
 				for (int d[] : existingMonths) {
 					int m = d[0], y = d[1];
 
+					if(m == TableGeneral.OLDER_THAN_UPDATE && y == TableGeneral.OLDER_THAN_UPDATE
+							&& olderThanAlreadyPut)
+						continue;
+
 					if(m == TableGeneral.OLDER_THAN_UPDATE && y == TableGeneral.OLDER_THAN_UPDATE) {
+						olderThanAlreadyPut = true;
+
 						updateYear = preferences.getInt(MainActivity.UPDATE_YEAR_SETTING, -1);
 						updateMonth = preferences.getInt(MainActivity.UPDATE_MONTH_SETTING, -1);
 
-						monthListData.add(new String[]{getString(R.string.before_update_1_2) + updateMonth, String.valueOf(updateYear)});
-					} else
-						monthListData.add(new String[]{getString(MainActivity.MONTH_STRINGS[m]), String.valueOf(y)});
-
-					dateIntValues.add(new Integer[]{m, y});
+						monthListData.add(new String[]{getString(R.string.before_update_1_2)
+								+ " " + getString(MainActivity.MONTH_STRINGS[updateMonth]).toLowerCase(), String.valueOf(updateYear)});
+						dateIntValues.add(new Integer[]{m, y});
+					} else {
+						monthListData.add(new String[]{getString(MainActivity.MONTH_STRINGS[m]),
+								String.valueOf(y)});
+						dateIntValues.add(new Integer[]{m, y});
+					}
 				}
 
 				int currentM = Integer.parseInt(new SimpleDateFormat("M", Locale.getDefault()).format(new Date())) - 1;
@@ -105,11 +116,13 @@ public class TempMonthActivity extends ListActivity {
 				int currentY = Integer.parseInt(new SimpleDateFormat("yyyy", Locale.getDefault()).format(new Date()));
 
 				if (dateIntValues.size() == 0
-						|| !Arrays.equals(dateIntValues.get(dateIntValues.size() - 1), new Integer[]{currentM, currentY})) {
+						|| !Arrays.equals(dateIntValues.get(dateIntValues.size()-1), new Integer[]{currentM, currentY})) {
 					monthListData.add(new String[]{getString(MainActivity.MONTH_STRINGS[currentM]), String.valueOf(currentY)});
 					dateIntValues.add(new Integer[]{currentM, currentY});
 				}
 
+				Collections.reverse(monthListData);
+				Collections.reverse(dateIntValues);
 
 				monthListAdapter = new MonthListAdapter(getApplicationContext(),
 						monthListData.toArray(new String[monthListData.size()][2]));

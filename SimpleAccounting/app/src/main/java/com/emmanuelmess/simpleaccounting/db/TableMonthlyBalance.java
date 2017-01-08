@@ -12,9 +12,9 @@ import static java.lang.String.format;
  */
 public class TableMonthlyBalance extends Database {
 	private static final String[] COLUMNS = new String[] {"MONTH", "YEAR", "BALANCE"};
+	public static final String TABLE_NAME = "MONTHLY_BALANCE";
 
-	private static final int DATABASE_VERSION = 1;
-	private static final String TABLE_NAME = "MONTHLY_BALANCE";
+	private static final int DATABASE_VERSION = 2;
 	private static final String TABLE_CREATE = format("CREATE TABLE %1$s(%2$s INT, %3$s INT, %4$s INT, %5$s REAL);",
 			TABLE_NAME, NUMBER_COLUMN, COLUMNS[0], COLUMNS[1], COLUMNS[2]);
 
@@ -29,6 +29,13 @@ public class TableMonthlyBalance extends Database {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		switch(oldVersion) {
+			/*I made a mistake on update 1.1.4, this should undo that*/
+			case 1:
+				String sql = "DROP TABLE " + TableMonthlyBalance.TABLE_NAME;
+				db.execSQL(sql);
+				db.execSQL(TABLE_CREATE);
+		}
 	}
 
 	public void updateMonth(int month, int year, double balance) {
