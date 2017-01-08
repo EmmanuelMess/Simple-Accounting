@@ -445,7 +445,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 		TextView monthText = (TextView) findViewById(R.id.textMonth);
 
-		if(month != -1 && year != -2) {
+		if(month != -1 && year != TableGeneral.OLDER_THAN_UPDATE) {
 			((TextView) findViewById(R.id.textMonth)).setText(MONTH_STRINGS[month]);
 
 			(new LoadPrevBalanceAsyncTask(month, year, tableMonthlyBalance, table, inflater,
