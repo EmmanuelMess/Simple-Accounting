@@ -7,6 +7,7 @@ import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.print.PrintManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -24,6 +25,7 @@ import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.emmanuelmess.simpleaccounting.activities.TempMonthActivity;
 import com.emmanuelmess.simpleaccounting.dataloading.AsyncFinishedListener;
@@ -232,6 +234,18 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 		switch (id) {
 			case R.id.action_show_months:
 				startActivity(new Intent(this, TempMonthActivity.class));
+				return true;
+			case R.id.action_print:
+				if (table.getChildCount() > 1) {
+					if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+						PrintManager printM = (PrintManager) getSystemService((Context.PRINT_SERVICE));
+						String job = getString(R.string.app_name) + ": " + getString(MONTH_STRINGS[editableMonth]);//TODO WILL BREAK
+						printM.print(job, new PPrintDocumentAdapter(this, tableGeneral, tableMonthlyBalance, editableMonth, editableYear), null);
+					}
+				} else {
+					Toast.makeText(this, getString(R.string.nothing_to_print), Toast.LENGTH_SHORT).show();
+				}
+
 				return true;
 		}
 
