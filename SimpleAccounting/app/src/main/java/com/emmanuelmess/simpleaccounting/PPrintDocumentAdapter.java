@@ -137,39 +137,39 @@ public class PPrintDocumentAdapter extends PrintDocumentAdapter {
 					return;
 				}
 
+				int canvasEnd = pdfDocument.getPageContentRect().right;
 				Canvas c = page.getCanvas();
 				Paint p = new Paint();
 				p.setColor(Color.BLACK);
 				p.setTextSize(10);
-				
+
 				p.setTextAlign(Paint.Align.CENTER);
 				c.drawText(title, c.getWidth()/2, clipH + TOP_MARGIN/2f, p);//TODO correct centration
 
 				p.setTextAlign(Paint.Align.CENTER);
 				c.drawText(this.c.getString(R.string.date), clipW + 100, clipH + TOP_MARGIN, p);
-				c.drawText(this.c.getString(R.string.credit), clipW + 300, clipH + TOP_MARGIN, p);
-				c.drawText(this.c.getString(R.string.debit),
-						pdfDocument.getPageContentRect().right - 200, clipH + TOP_MARGIN, p);
-				c.drawText(this.c.getString(R.string.balance),
-						pdfDocument.getPageContentRect().right - 100, clipH + TOP_MARGIN, p);
 
 				p.setTextAlign(Paint.Align.LEFT);
-				c.drawText(this.c.getString(R.string.reference), clipW + 200, clipH + TOP_MARGIN, p);
+				c.drawText(this.c.getString(R.string.reference), clipW + 150, clipH + TOP_MARGIN, p);
 
 				p.setTextAlign(Paint.Align.CENTER);
+				c.drawText(this.c.getString(R.string.credit), canvasEnd - 300, clipH + TOP_MARGIN, p);
+				c.drawText(this.c.getString(R.string.debit), canvasEnd - 200, clipH + TOP_MARGIN, p);
+				c.drawText(this.c.getString(R.string.balance), canvasEnd - 100, clipH + TOP_MARGIN, p);
+
 				for(int j = i*linesPerPage, k = 1; j <= linesPerPage && j < rawToPrint.length; j++, k++) {
+					p.setTextAlign(Paint.Align.CENTER);
 					c.drawText(rawToPrint[j][0], clipW + 100, clipH + TOP_MARGIN + DISTANCE_BETWEEN_LINES*k, p);
 
 					p.setTextAlign(Paint.Align.LEFT);
-					c.drawText(rawToPrint[j][1], clipW + 200, clipH + TOP_MARGIN + DISTANCE_BETWEEN_LINES*k, p);
+					c.drawText(rawToPrint[j][1], clipW + 150, clipH + TOP_MARGIN + DISTANCE_BETWEEN_LINES*k, p);
 
 					p.setTextAlign(Paint.Align.CENTER);
-					c.drawText(rawToPrint[j][2], clipW + 300, clipH + TOP_MARGIN + DISTANCE_BETWEEN_LINES*k, p);
-					c.drawText(rawToPrint[j][3],
-							pdfDocument.getPageContentRect().right - 200,
+					c.drawText(rawToPrint[j][2], canvasEnd - 300,
 							clipH + TOP_MARGIN + DISTANCE_BETWEEN_LINES*k, p);
-					c.drawText(rawToPrint[j][4],
-							pdfDocument.getPageContentRect().right - 100,
+					c.drawText(rawToPrint[j][3], canvasEnd - 200,
+							clipH + TOP_MARGIN + DISTANCE_BETWEEN_LINES*k, p);
+					c.drawText(rawToPrint[j][4], canvasEnd - 100,
 							clipH + TOP_MARGIN + DISTANCE_BETWEEN_LINES*k, p);
 				}
 

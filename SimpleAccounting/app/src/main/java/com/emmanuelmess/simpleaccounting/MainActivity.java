@@ -246,6 +246,18 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 								new PPrintDocumentAdapter(this, table, FIRST_REAL_ROW, editableMonth, editableYear,
 										editableMonth != TableGeneral.OLDER_THAN_UPDATE? null:new int[] {updateMonth, updateYear}),
 								null);
+					} else {
+						String title;
+						if(updateYear != TableGeneral.OLDER_THAN_UPDATE)
+							title = getString(MONTH_STRINGS[editableMonth]) + "-" + updateYear + ".pdf";
+						else title = getString(R.string.before_update_1_2)
+								+ " " + getString(MainActivity.MONTH_STRINGS[updateMonth]).toLowerCase()
+								+ "-" + String.valueOf(updateYear) + ".pdf";
+
+						Intent printIntent = new Intent(this, PrintDialogActivity.class);
+						printIntent.setDataAndType(docUri, "application/pdf");
+						printIntent.putExtra("title", title);
+						startActivity(printIntent);
 					}
 				} else {
 					Toast.makeText(this, getString(R.string.nothing_to_print), Toast.LENGTH_SHORT).show();
