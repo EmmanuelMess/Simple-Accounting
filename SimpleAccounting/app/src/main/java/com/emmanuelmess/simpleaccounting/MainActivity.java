@@ -239,8 +239,13 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 				if (table.getChildCount() > 1) {
 					if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
 						PrintManager printM = (PrintManager) getSystemService((Context.PRINT_SERVICE));
-						String job = getString(R.string.app_name) + ": " + getString(MONTH_STRINGS[editableMonth]);//TODO WILL BREAK
-						printM.print(job, new PPrintDocumentAdapter(this, tableGeneral, tableMonthlyBalance, editableMonth, editableYear), null);
+
+						String job = getString(R.string.app_name) + ": " +
+								(editableMonth != TableGeneral.OLDER_THAN_UPDATE? getString(MONTH_STRINGS[editableMonth]):updateMonth);
+						printM.print(job,
+								new PPrintDocumentAdapter(this, table, FIRST_REAL_ROW, editableMonth, editableYear,
+										editableMonth != TableGeneral.OLDER_THAN_UPDATE? null:new int[] {updateMonth, updateYear}),
+								null);
 					}
 				} else {
 					Toast.makeText(this, getString(R.string.nothing_to_print), Toast.LENGTH_SHORT).show();
