@@ -6,5 +6,5 @@ package com.emmanuelmess.simpleaccounting.dataloading;
  */
 
 public interface AsyncFinishedListener<T> {
-	void OnAsyncFinished(T rowToDBRowConversion);
+	public void OnAsyncFinished (T rowToDBRowConversion);
 }

@@ -33,16 +33,10 @@ import com.emmanuelmess.simpleaccounting.dataloading.LoadMonthAsyncTask;
 import com.emmanuelmess.simpleaccounting.dataloading.LoadPrevBalanceAsyncTask;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
-import com.emmanuelmess.simpleaccounting.printing.PPrintDocumentAdapter;
-import com.emmanuelmess.simpleaccounting.printing.PrintDialogActivity;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.SimpleShowcaseEventListener;
 import com.github.amlcurran.showcaseview.targets.Target;
-import com.itextpdf.text.DocumentException;
 
-import org.acra.ACRA;
-
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -261,17 +255,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 								+ "-" + String.valueOf(updateYear) + ".pdf";
 
 						Intent printIntent = new Intent(this, PrintDialogActivity.class);
-						try {
-							printIntent.setDataAndType(
-									PrintDialogActivity.CreatePrintablePDF.create(
-											this, table, FIRST_REAL_ROW, editableMonth, editableYear,
-											new int[] {updateMonth, updateYear}),
-									"application/pdf");
-						} catch (IOException | DocumentException e) {
-							ACRA.getErrorReporter().handleException(e);
-						}
-						printIntent.putExtra(getCacheDir() + PrintHelper.createName(this,
-								editableMonth, editableYear, updateMonth, updateYear), title);
+						printIntent.setDataAndType(docUri, "application/pdf");
+						printIntent.putExtra("title", title);
 						startActivity(printIntent);
 					}
 				} else {
