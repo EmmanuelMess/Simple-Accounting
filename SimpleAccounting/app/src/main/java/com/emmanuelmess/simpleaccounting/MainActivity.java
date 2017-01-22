@@ -219,7 +219,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.toolbar, menu);
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT)
+		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.KITKAT)
 			menu.removeItem(R.id.action_print);
 		return true;
 	}
