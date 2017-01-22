@@ -1,4 +1,4 @@
-package com.emmanuelmess.simpleaccounting;
+package com.emmanuelmess.simpleaccounting.printing;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -19,12 +19,12 @@ import android.view.View;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
-import com.emmanuelmess.simpleaccounting.db.TableGeneral;
+import com.emmanuelmess.simpleaccounting.MainActivity;
+import com.emmanuelmess.simpleaccounting.PrintHelper;
+import com.emmanuelmess.simpleaccounting.R;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-
-import static com.emmanuelmess.simpleaccounting.MainActivity.MONTH_STRINGS;
 
 /**
  * @author Emmanuel
@@ -100,11 +100,7 @@ public class PPrintDocumentAdapter extends PrintDocumentAdapter {
 			//amountOfPages = (int) Math.ceil((rawToPrint.length + (prev != null? 1 : 0))/((float) linesPerPage));
 			amountOfPages = (int) Math.ceil(rawToPrint.length/((float) linesPerPage));
 
-			if(year != TableGeneral.OLDER_THAN_UPDATE)
-				title = c.getString(MONTH_STRINGS[month]) + "-" + year + ".pdf";
-			else title = c.getString(R.string.before_update_1_2)
-						+ " " + c.getString(MainActivity.MONTH_STRINGS[updateMonth]).toLowerCase()
-						+ "-" + String.valueOf(updateYear) + ".pdf";
+			title = PrintHelper.createName(c, month, year, updateMonth, updateYear);
 
 			PrintDocumentInfo info = new PrintDocumentInfo.Builder(title)
 					.setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)

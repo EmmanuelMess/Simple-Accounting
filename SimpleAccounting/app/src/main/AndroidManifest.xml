@@ -31,12 +31,23 @@
         <activity
             android:name=".activities.TempMonthActivity"
             android:label="@string/title_activity_temp_month"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+
             <!-- The meta-data element is needed for versions lower than 4.1 -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value=".MainActivity"/>
+        </activity>
+        <activity
+            android:name=".activities.AboutActivity"
+            android:label="@string/title_activity_about"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity
+            android:name=".printing.PrintDialogActivity"
+            android:label="@string/title_activity_print"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
     </application>
 
