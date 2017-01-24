@@ -232,6 +232,9 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 		int id = item.getItemId();
 
 		switch (id) {
+			case R.id.action_currency:
+				Toast.makeText(this, "To do", Toast.LENGTH_LONG).show();
+				return true;
 			case R.id.action_show_months:
 				startActivity(new Intent(this, TempMonthActivity.class));
 				return true;

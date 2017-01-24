@@ -29,4 +29,5 @@
     <string name="nothing_to_print">There\'s nothing to print!</string>
     <string name="before_update_1.2">Before</string>
     <string name="page">Page</string>
+    <string name="currency">Currency</string>
 </resources>
