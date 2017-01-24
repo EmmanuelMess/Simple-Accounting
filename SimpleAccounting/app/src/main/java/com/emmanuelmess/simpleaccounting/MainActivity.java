@@ -444,6 +444,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	}
 
 	private void loadMonth(int month, int year) {
+		findViewById(R.id.progressBar).setVisibility(VISIBLE);
+
 		FIRST_REAL_ROW = 1;
 
 		if(table.getChildCount() > 1)
