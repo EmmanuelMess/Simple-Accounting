@@ -7,6 +7,7 @@ import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.print.PrintManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -14,7 +15,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -24,6 +24,7 @@ import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.emmanuelmess.simpleaccounting.activities.TempMonthActivity;
 import com.emmanuelmess.simpleaccounting.dataloading.AsyncFinishedListener;
@@ -217,8 +218,9 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.toolbar, menu);
+		getMenuInflater().inflate(R.menu.toolbar, menu);
+		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.KITKAT)
+			menu.removeItem(R.id.action_print);
 		return true;
 	}
 
@@ -232,6 +234,23 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 		switch (id) {
 			case R.id.action_show_months:
 				startActivity(new Intent(this, TempMonthActivity.class));
+				return true;
+			case R.id.action_print:
+				if (table.getChildCount() > 1) {
+					if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+						PrintManager printM = (PrintManager) getSystemService((Context.PRINT_SERVICE));
+
+						String job = getString(R.string.app_name) + ": " +
+								(editableMonth != TableGeneral.OLDER_THAN_UPDATE? getString(MONTH_STRINGS[editableMonth]):updateMonth);
+						printM.print(job,
+								new PPrintDocumentAdapter(this, table, editableMonth, editableYear,
+										new int[] {updateMonth, updateYear}),
+								null);
+					}
+				} else {
+					Toast.makeText(this, getString(R.string.nothing_to_print), Toast.LENGTH_SHORT).show();
+				}
+
 				return true;
 		}
 
@@ -323,29 +342,25 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	}
 
 	void checkDateChanged(final int index, TableRow row) {
-		final EditText date = (EditText) row.findViewById(R.id.editDate);
+		final EditText DATE = (EditText) row.findViewById(R.id.editDate);
 
 		TextWatcher watcher = new SimpleTextWatcher() {
 			String mem = "";
 
 			@Override
 			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-				mem = s.toString();
+				if(equal(mem, ""))
+					mem = s.toString();
 			}
 
 			@Override
 			public void afterTextChanged(Editable editable) {
-				if (editableRow == index) {
-					if(!equal(mem, editable.toString())) {
-						reloadMonthOnChangeToView = true;
-					}
-				}
-
-				mem = "";
+				if (editableRow == index && !equal(mem, ""))
+					reloadMonthOnChangeToView = !equal(mem, editable.toString());
 			}
 		};
 
-		date.addTextChangedListener(watcher);
+		DATE.addTextChangedListener(watcher);
 	}
 
 	private void addToDB(View row) {
@@ -429,6 +444,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	}
 
 	private void loadMonth(int month, int year) {
+		findViewById(R.id.progressBar).setVisibility(VISIBLE);
+
 		FIRST_REAL_ROW = 1;
 
 		if(table.getChildCount() > 1)
