@@ -29,5 +29,6 @@
     <string name="print">Imprimir</string>
     <string name="nothing_to_print">No hay nada que imprimir!</string>
     <string name="before_update_1.2">Antes de</string>
+    <string name="page">Página</string>
     <string name="currency">Unidad monetaria</string>
 </resources>
