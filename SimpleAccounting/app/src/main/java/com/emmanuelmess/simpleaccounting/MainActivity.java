@@ -243,8 +243,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 						String job = getString(R.string.app_name) + ": " +
 								(editableMonth != TableGeneral.OLDER_THAN_UPDATE? getString(MONTH_STRINGS[editableMonth]):updateMonth);
 						printM.print(job,
-								new PPrintDocumentAdapter(this, table, FIRST_REAL_ROW, editableMonth, editableYear,
-										editableMonth != TableGeneral.OLDER_THAN_UPDATE? null:new int[] {updateMonth, updateYear}),
+								new PPrintDocumentAdapter(this, table, editableMonth, editableYear,
+										new int[] {updateMonth, updateYear}),
 								null);
 					}
 				} else {
