@@ -1,5 +1,6 @@
 package com.emmanuelmess.simpleaccounting;
 
+import android.util.Log;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -28,12 +29,16 @@ public class ACRAHelper {
 
 
 	private static void setData(String rowS, TableLayout t, int row) {
-		StringBuilder s = new StringBuilder();
-		TableRow r = (TableRow) t.getChildAt(row);
+		try {
+			StringBuilder s = new StringBuilder();
+			TableRow r = (TableRow) t.getChildAt(row);
 
-		for (int i = 0; i < r.getChildCount(); i++)
-			s.append(" '").append(((TextView) r.getChildAt(i)).getText()).append("',");
+			for (int i = 0; i < r.getChildCount(); i++)
+				s.append(" '").append(((TextView) r.getChildAt(i)).getText()).append("',");
 
-		ACRA.getErrorReporter().putCustomData(rowS, s.substring(1, s.lastIndexOf(",")));
+			ACRA.getErrorReporter().putCustomData(rowS, s.substring(1, s.lastIndexOf(",")));
+		} catch (Exception e) {
+			ACRA.getErrorReporter().putCustomData(rowS, Log.getStackTraceString(e));//There cannot be exception in the error reporter
+		}
 	}
 }
