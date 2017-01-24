@@ -342,29 +342,25 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	}
 
 	void checkDateChanged(final int index, TableRow row) {
-		final EditText date = (EditText) row.findViewById(R.id.editDate);
+		final EditText DATE = (EditText) row.findViewById(R.id.editDate);
 
 		TextWatcher watcher = new SimpleTextWatcher() {
 			String mem = "";
 
 			@Override
 			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-				mem = s.toString();
+				if(equal(mem, ""))
+					mem = s.toString();
 			}
 
 			@Override
 			public void afterTextChanged(Editable editable) {
-				if (editableRow == index) {
-					if(!equal(mem, editable.toString())) {
-						reloadMonthOnChangeToView = true;
-					}
-				}
-
-				mem = "";
+				if (editableRow == index && !equal(mem, ""))
+					reloadMonthOnChangeToView = !equal(mem, editable.toString());
 			}
 		};
 
-		date.addTextChangedListener(watcher);
+		DATE.addTextChangedListener(watcher);
 	}
 
 	private void addToDB(View row) {
