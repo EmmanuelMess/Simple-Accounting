@@ -4,6 +4,12 @@
       tools:context=".MainActivity">
 
     <item
+        android:id="@+id/action_currency"
+        android:icon="@drawable/ic_attach_money_black_24dp"
+        android:title="@string/currency"
+        app:showAsAction="ifRoom"/>
+
+    <item
         android:id="@+id/action_show_months"
         android:icon="@drawable/ic_web_asset_white_24dp"
         android:title="@string/show_months"
