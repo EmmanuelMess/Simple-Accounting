@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:app="http://schemas.android.com/apk/res-auto"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
               android:orientation="vertical" >
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="115dp"
+        android:layout_marginEnd="?dialogPreferredPadding"
+        android:layout_marginLeft="?dialogPreferredPadding"
+        android:layout_marginRight="?dialogPreferredPadding"
+        android:layout_marginStart="?dialogPreferredPadding">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -16,9 +21,38 @@
             android:id="@+id/scrollView"/>
     </ScrollView>
 
-    <ImageButton
+    <RelativeLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/ic_add_black_24dp"
-        android:id="@+id/add"/>
+        android:id="@+id/add"
+        android:clickable="true"
+        android:background="?android:attr/selectableItemBackground"
+        android:layout_marginStart="?dialogPreferredPadding"
+        android:layout_marginRight="?dialogPreferredPadding"
+        android:layout_marginLeft="?dialogPreferredPadding"
+        android:layout_marginEnd="?dialogPreferredPadding">
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_add_black_24dp"
+            android:background="@android:color/transparent"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:id="@+id/imageButton"/>
+
+        <TextView
+            android:text="@string/add_item"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView3"
+            android:layout_toEndOf="@+id/imageButton"
+            android:layout_alignBottom="@+id/imageButton"
+            android:textAlignment="gravity"
+            android:layout_toRightOf="@+id/imageButton"
+            android:layout_alignParentTop="true"
+            android:gravity="center_vertical|start"/>
+    </RelativeLayout>
+
 </LinearLayout>

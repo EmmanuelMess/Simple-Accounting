@@ -32,4 +32,6 @@
     <string name="page">Página</string>
     <string name="currency">Unidad monetaria</string>
     <string name="settings">Ajustes</string>
+    <string name="costumize_currencies">Personalizar unidades monetarias</string>
+    <string name="add_item">Añadir item...</string>
 </resources>

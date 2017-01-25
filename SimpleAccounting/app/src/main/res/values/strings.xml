@@ -38,4 +38,6 @@
 
     <string name="settings">Settings</string>
     <string name="pref_title_currency">Currencies</string>
+    <string name="costumize_currencies">Costumize currencies</string>
+    <string name="add_item">Add item...</string>
 </resources>

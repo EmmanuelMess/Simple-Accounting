@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ScrollView;
@@ -230,8 +231,21 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 		Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
 		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
 				R.array.spinner_list_item_array, android.R.layout.simple_spinner_item);
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 		spinner.setAdapter(adapter);
+
+		spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+				// An item was selected. You can retrieve the selected item using
+				// parent.getItemAtPosition(pos)
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {
+				// Another interface callback
+			}
+		});
 
 		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.KITKAT)
 			menu.removeItem(R.id.action_print);
@@ -246,8 +260,6 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 		int id = item.getItemId();
 
 		switch (id) {
-			case R.id.action_currency:
-				return true;
 			case R.id.action_show_months:
 				startActivity(new Intent(this, TempMonthActivity.class));
 				return true;

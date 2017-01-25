@@ -5,7 +5,6 @@
 
     <item
         android:id="@+id/action_currency"
-        android:icon="@drawable/ic_attach_money_black_24dp"
         android:title="@string/currency"
         android:background="@color/colorPrimary"
         app:actionViewClass="android.widget.Spinner"

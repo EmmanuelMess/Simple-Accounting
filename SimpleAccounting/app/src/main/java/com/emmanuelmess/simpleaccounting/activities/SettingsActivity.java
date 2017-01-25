@@ -1,8 +1,6 @@
 package com.emmanuelmess.simpleaccounting.activities;
 
 
-import android.content.Context;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -24,27 +22,7 @@ import com.emmanuelmess.simpleaccounting.R;
  * href="http://developer.android.com/guide/topics/ui/settings.html">Settings
  * API Guide</a> for more information on developing a Settings UI.
  */
-public class SettingsActivity extends AppCompatPreferenceActivity {
-	/**
-	 * A preference value change listener that updates the preference's summary
-	 * to reflect its new value.
-	 */
-	private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = (preference, value)->{
-
-		// For all other preferences, set the summary to the value's
-		// simple string representation.
-		preference.setSummary( value.toString());
-		return true;
-	};
-
-	/**
-	 * Helper method to determine if the device has an extra-large screen. For
-	 * example, 10" tablets are extra-large.
-	 */
-	private static boolean isXLargeTablet(Context context) {
-		return (context.getResources().getConfiguration().screenLayout
-				& Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_XLARGE;
-	}
+public class SettingsActivity extends AppCompatPreferenceActivity implements Preference.OnPreferenceChangeListener {
 
 	/**
 	 * Binds a preference's summary to its value. More specifically, when the
@@ -53,18 +31,16 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 	 * immediately updated upon calling this method. The exact display format is
 	 * dependent on the type of preference.
 	 *
-	 * @see #sBindPreferenceSummaryToValueListener
 	 */
-	private static void bindPreferenceSummaryToValue(Preference preference) {
+	private void bindPreferenceSummaryToValue(Preference preference) {
 		// Set the listener to watch for value changes.
-		preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
+		preference.setOnPreferenceChangeListener(this);
 
 		// Trigger the listener immediately with the preference's
 		// current value.
-		sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
-				PreferenceManager
-						.getDefaultSharedPreferences(preference.getContext())
-						.getString(preference.getKey(), ""));
+		onPreferenceChange(preference, PreferenceManager
+				.getDefaultSharedPreferences(preference.getContext())
+				.getString(preference.getKey(), ""));
 	}
 
 	@Override
@@ -126,4 +102,15 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 		bindPreferenceSummaryToValue(findPreference("currency_picker"));
 	}
 
+	/**
+	 * A preference value change listener that updates the preference's summary
+	 * to reflect its new value.
+	 */
+	@Override
+	public boolean onPreferenceChange(Preference preference, Object newValue) {
+		// For all other preferences, set the summary to the value's
+		// simple string representation.
+		preference.setSummary(newValue.toString());
+		return true;
+	}
 }

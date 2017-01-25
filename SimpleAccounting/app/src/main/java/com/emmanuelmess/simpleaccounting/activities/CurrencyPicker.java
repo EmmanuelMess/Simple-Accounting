@@ -1,6 +1,7 @@
 package com.emmanuelmess.simpleaccounting.activities;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.preference.DialogPreference;
@@ -10,6 +11,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
@@ -48,16 +50,24 @@ public class CurrencyPicker extends DialogPreference {
 
 	@Override
 	protected void onPrepareDialogBuilder(AlertDialog.Builder builder) {
-		builder.setTitle("Title");
+		builder.setTitle(R.string.costumize_currencies);
+		Dialog d = builder.create();
+		d.show();
+		d.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+				|WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+
 		super.onPrepareDialogBuilder(builder);
 	}
 
 	@Override
 	public void onBindDialogView(View view) {
+
 		view.findViewById(R.id.add).setOnClickListener(v->{
 			LinearLayout linearLayout = ((LinearLayout) view.findViewById(R.id.scrollView));
-			View item = inflater.inflate(R.layout.currencypicker_dialog_item, linearLayout);
+			inflater.inflate(R.layout.currencypicker_dialog_item, linearLayout);
+
 			int childIndex = linearLayout.getChildCount()-1;
+			View item = linearLayout.getChildAt(childIndex);
 
 			item.findViewById(R.id.move).setOnTouchListener((v1, event)->{
 				if(event.getAction() == MotionEvent.ACTION_DOWN)
@@ -70,17 +80,21 @@ public class CurrencyPicker extends DialogPreference {
 
 			EditText text = ((EditText) item.findViewById(R.id.text));
 			text.setOnFocusChangeListener((v1, hasFocus)->{
-				view.findViewById(R.id.delete).setVisibility(hasFocus? View.VISIBLE:View.INVISIBLE);
+				item.findViewById(R.id.delete)
+						.setVisibility(hasFocus? View.VISIBLE:View.INVISIBLE);
 			});
 			text.addTextChangedListener(new Utils.SimpleTextWatcher() {
 				@Override
 				public void afterTextChanged(Editable s) {
-					currentValue.set(childIndex, s.toString());
+					if(currentValue.size() > childIndex)
+						currentValue.set(childIndex, s.toString());
+					else
+						currentValue.add(childIndex, s.toString());
 				}
 			});
 
 			item.findViewById(R.id.delete).setOnClickListener((v1)->{
-				linearLayout.removeView(v);
+				linearLayout.removeView(item);
 			});
 		});
 
