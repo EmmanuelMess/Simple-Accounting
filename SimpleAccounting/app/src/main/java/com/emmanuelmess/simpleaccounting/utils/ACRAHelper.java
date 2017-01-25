@@ -1,8 +1,10 @@
-package com.emmanuelmess.simpleaccounting;
+package com.emmanuelmess.simpleaccounting.utils;
 
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+
+import com.emmanuelmess.simpleaccounting.MainActivity;
 
 import org.acra.ACRA;
 /**

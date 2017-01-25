@@ -7,6 +7,8 @@
         android:id="@+id/action_currency"
         android:icon="@drawable/ic_attach_money_black_24dp"
         android:title="@string/currency"
+        android:background="@color/colorPrimary"
+        app:actionViewClass="android.widget.Spinner"
         app:showAsAction="ifRoom"/>
 
     <item
@@ -21,9 +23,9 @@
         android:title="@string/print"
         app:showAsAction="ifRoom"/>
 
-    <!-- Settings, should always be in the overflow
+    <!-- Settings, should always be in the overflow-->
     <item android:id="@+id/action_settings"
-          android:title="@string/action_settings"
-          app:showAsAction="never"/>-->
+          android:title="@string/settings"
+          app:showAsAction="never"/>
 
 </menu>
