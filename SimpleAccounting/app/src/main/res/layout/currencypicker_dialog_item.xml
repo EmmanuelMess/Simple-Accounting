@@ -10,7 +10,7 @@
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/ic_unfold_more_black_24dp"
+        app:srcCompat="@drawable/ic_move_black_24dp"
         android:id="@+id/move"
         android:background="@android:color/transparent"
         android:scaleType="fitCenter"
