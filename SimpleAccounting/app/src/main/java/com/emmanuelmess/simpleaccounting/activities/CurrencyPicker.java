@@ -1,7 +1,6 @@
 package com.emmanuelmess.simpleaccounting.activities;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.preference.DialogPreference;
@@ -11,11 +10,12 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import com.emmanuelmess.simpleaccounting.R;
+import com.emmanuelmess.simpleaccounting.activities.views.ScrollViewWithMaxHeight;
 import com.emmanuelmess.simpleaccounting.utils.TinyDB;
 import com.emmanuelmess.simpleaccounting.utils.Utils;
 
@@ -34,6 +34,7 @@ public class CurrencyPicker extends DialogPreference {
 	private TinyDB tinyDB;
 	private ArrayList<String> currentValue = new ArrayList<>();
 	private LayoutInflater inflater;
+	private boolean firstTime = true;
 
 	public CurrencyPicker(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -51,23 +52,25 @@ public class CurrencyPicker extends DialogPreference {
 	@Override
 	protected void onPrepareDialogBuilder(AlertDialog.Builder builder) {
 		builder.setTitle(R.string.costumize_currencies);
-		Dialog d = builder.create();
-		d.show();
-		d.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-				|WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-
 		super.onPrepareDialogBuilder(builder);
 	}
 
 	@Override
 	public void onBindDialogView(View view) {
-
 		view.findViewById(R.id.add).setOnClickListener(v->{
 			LinearLayout linearLayout = ((LinearLayout) view.findViewById(R.id.scrollView));
 			inflater.inflate(R.layout.currencypicker_dialog_item, linearLayout);
 
 			int childIndex = linearLayout.getChildCount()-1;
 			View item = linearLayout.getChildAt(childIndex);
+
+			item.getLayoutParams().width = linearLayout.getWidth();
+
+			if(linearLayout.getChildCount() == 2 && firstTime) {
+				firstTime = false;
+				((ScrollViewWithMaxHeight) view.findViewById(R.id.scrollerView))
+						.setMaxHeight(linearLayout.getChildAt(0).getHeight()*4);
+			}
 
 			item.findViewById(R.id.move).setOnTouchListener((v1, event)->{
 				if(event.getAction() == MotionEvent.ACTION_DOWN)
@@ -82,6 +85,10 @@ public class CurrencyPicker extends DialogPreference {
 			text.setOnFocusChangeListener((v1, hasFocus)->{
 				item.findViewById(R.id.delete)
 						.setVisibility(hasFocus? View.VISIBLE:View.INVISIBLE);
+				if(hasFocus) {
+					InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+					imm.showSoftInput(text, InputMethodManager.SHOW_IMPLICIT);
+				}
 			});
 			text.addTextChangedListener(new Utils.SimpleTextWatcher() {
 				@Override
@@ -95,6 +102,8 @@ public class CurrencyPicker extends DialogPreference {
 
 			item.findViewById(R.id.delete).setOnClickListener((v1)->{
 				linearLayout.removeView(item);
+				if(childIndex > 0 && linearLayout.getChildAt(childIndex-1) != null)
+					linearLayout.getChildAt(childIndex-1).findViewById(R.id.text).requestFocus();
 			});
 		});
 

@@ -6,9 +6,10 @@
               android:layout_height="match_parent"
               android:orientation="vertical" >
 
-    <ScrollView
+    <com.emmanuelmess.simpleaccounting.activities.views.ScrollViewWithMaxHeight
         android:layout_width="match_parent"
-        android:layout_height="115dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/scrollerView"
         android:layout_marginEnd="?dialogPreferredPadding"
         android:layout_marginLeft="?dialogPreferredPadding"
         android:layout_marginRight="?dialogPreferredPadding"
@@ -16,10 +17,10 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical"
             android:id="@+id/scrollView"/>
-    </ScrollView>
+    </com.emmanuelmess.simpleaccounting.activities.views.ScrollViewWithMaxHeight>
 
     <RelativeLayout
         android:orientation="horizontal"

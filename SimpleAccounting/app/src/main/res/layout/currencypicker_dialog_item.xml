@@ -37,7 +37,7 @@
         android:layout_height="wrap_content"
         app:srcCompat="@drawable/ic_cancel_black_24dp"
         android:id="@+id/delete"
-        android:background="@android:color/transparent"
+        android:background="?android:attr/selectableItemBackground"
         android:visibility="invisible"
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
