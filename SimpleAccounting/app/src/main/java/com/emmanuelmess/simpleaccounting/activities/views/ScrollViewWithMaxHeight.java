@@ -17,7 +17,7 @@ public class ScrollViewWithMaxHeight extends ScrollView {
 
 	public static int WITHOUT_MAX_HEIGHT_VALUE = -1;
 
-	private int maxHeight = WITHOUT_MAX_HEIGHT_VALUE;
+	private static int maxHeight = WITHOUT_MAX_HEIGHT_VALUE;
 
 	public ScrollViewWithMaxHeight(Context context) {
 		super(context);

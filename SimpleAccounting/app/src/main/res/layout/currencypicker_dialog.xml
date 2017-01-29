@@ -10,6 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/scrollerView"
+        android:fadeScrollbars="false"
         android:layout_marginEnd="?dialogPreferredPadding"
         android:layout_marginLeft="?dialogPreferredPadding"
         android:layout_marginRight="?dialogPreferredPadding"

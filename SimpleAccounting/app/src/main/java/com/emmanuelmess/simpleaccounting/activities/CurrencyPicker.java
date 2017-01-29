@@ -3,19 +3,23 @@ package com.emmanuelmess.simpleaccounting.activities;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.preference.DialogPreference;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import com.emmanuelmess.simpleaccounting.R;
 import com.emmanuelmess.simpleaccounting.activities.views.ScrollViewWithMaxHeight;
+import com.emmanuelmess.simpleaccounting.utils.RangedStructure;
 import com.emmanuelmess.simpleaccounting.utils.TinyDB;
 import com.emmanuelmess.simpleaccounting.utils.Utils;
 
@@ -34,7 +38,7 @@ public class CurrencyPicker extends DialogPreference {
 	private TinyDB tinyDB;
 	private ArrayList<String> currentValue = new ArrayList<>();
 	private LayoutInflater inflater;
-	private boolean firstTime = true;
+	private boolean firstTimeItemHeighted = true;
 
 	public CurrencyPicker(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -57,38 +61,89 @@ public class CurrencyPicker extends DialogPreference {
 
 	@Override
 	public void onBindDialogView(View view) {
+		SparseIntArray itemPos = new SparseIntArray(1);
+		RangedStructure intPosRanges = new RangedStructure();
+
 		view.findViewById(R.id.add).setOnClickListener(v->{
+			ScrollViewWithMaxHeight scrollView = ((ScrollViewWithMaxHeight) view.findViewById(R.id.scrollerView));
 			LinearLayout linearLayout = ((LinearLayout) view.findViewById(R.id.scrollView));
 			inflater.inflate(R.layout.currencypicker_dialog_item, linearLayout);
 
 			int childIndex = linearLayout.getChildCount()-1;
 			View item = linearLayout.getChildAt(childIndex);
 
+			itemPos.append(childIndex, item.getTop());
+			intPosRanges.add(item.getTop(), item.getBottom());
+
 			item.getLayoutParams().width = linearLayout.getWidth();
 
-			if(linearLayout.getChildCount() == 2 && firstTime) {
-				firstTime = false;
-				((ScrollViewWithMaxHeight) view.findViewById(R.id.scrollerView))
-						.setMaxHeight(linearLayout.getChildAt(0).getHeight()*4);
+			if(linearLayout.getChildCount() == 2 && firstTimeItemHeighted) {
+				firstTimeItemHeighted = false;
+				scrollView.setMaxHeight(linearLayout.getChildAt(0).getHeight()*4);
 			}
 
-			item.findViewById(R.id.move).setOnTouchListener((v1, event)->{
-				if(event.getAction() == MotionEvent.ACTION_DOWN)
-					item.setMinimumHeight(5);
-				else if(event.getAction() == MotionEvent.ACTION_UP)
-					item.setMinimumHeight(0);
+			item.findViewById(R.id.move).setOnTouchListener(new View.OnTouchListener() {
+				float dY;
 
-				return false;
+				@Override
+				public boolean onTouch(View v1, MotionEvent event) {
+					switch (event.getAction()) {
+
+						case MotionEvent.ACTION_DOWN:
+							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+								item.animate()
+										.z(5)
+										.setDuration(0)
+										.start();
+
+							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+								dY = item.getY() - event.getRawY();
+							break;
+
+						case MotionEvent.ACTION_MOVE:
+							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+								float moveTo = event.getRawY() + dY;
+
+								if(moveTo < linearLayout.getY())
+									moveTo = linearLayout.getY();
+								else if(moveTo > scrollView.getTranslationY() + scrollView.getBottom() - item.getHeight())
+									moveTo = scrollView.getTranslationY() + scrollView.getBottom() - item.getHeight();
+
+								item.animate()
+										.y(moveTo)
+										.setDuration(0)
+										.start();
+
+								boolean direction = moveTo - dY > 0;
+								for(int i = childIndex; i > 0; i = (direction? i+1:i-1)) {
+									item.animate()
+											.y(itemPos.get(direction? i-1:i+1))
+											.setDuration(0)
+											.start();
+								}
+							}
+							break;
+						case MotionEvent.ACTION_UP:
+							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+								item.animate()
+										.z(0)
+										.setDuration(0)
+										.start();
+							break;
+						default:
+							return false;
+					}
+					return false;
+				}
 			});
 
 			EditText text = ((EditText) item.findViewById(R.id.text));
 			text.setOnFocusChangeListener((v1, hasFocus)->{
-				item.findViewById(R.id.delete)
-						.setVisibility(hasFocus? View.VISIBLE:View.INVISIBLE);
-				if(hasFocus) {
-					InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-					imm.showSoftInput(text, InputMethodManager.SHOW_IMPLICIT);
-				}
+				item.findViewById(R.id.delete).setVisibility(hasFocus? View.VISIBLE:View.INVISIBLE);
+
+				InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.showSoftInput(text, hasFocus? WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE:
+						InputMethodManager.RESULT_UNCHANGED_SHOWN);
 			});
 			text.addTextChangedListener(new Utils.SimpleTextWatcher() {
 				@Override
