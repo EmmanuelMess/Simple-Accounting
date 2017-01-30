@@ -12,6 +12,7 @@ import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -72,8 +73,17 @@ public class CurrencyPicker extends DialogPreference {
 			int childIndex = linearLayout.getChildCount()-1;
 			View item = linearLayout.getChildAt(childIndex);
 
-			itemPos.append(childIndex, item.getTop());
-			intPosRanges.add(item.getTop(), item.getBottom());
+			item.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+				boolean alreadyLoaded = false;
+				@Override
+				public void onGlobalLayout() {
+					if(!alreadyLoaded) {
+						itemPos.append(childIndex, item.getTop());
+						intPosRanges.add(item.getTop(), item.getBottom());
+						alreadyLoaded = true;
+					}
+				}
+			});
 
 			item.getLayoutParams().width = linearLayout.getWidth();
 
@@ -84,6 +94,10 @@ public class CurrencyPicker extends DialogPreference {
 
 			item.findViewById(R.id.move).setOnTouchListener(new View.OnTouchListener() {
 				float dY;
+
+				private void move() {
+
+				}
 
 				@Override
 				public boolean onTouch(View v1, MotionEvent event) {
@@ -97,9 +111,9 @@ public class CurrencyPicker extends DialogPreference {
 										.start();
 
 							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+								//dY = item.getY() - event.getRawY();
 								dY = item.getY() - event.getRawY();
 							break;
-
 						case MotionEvent.ACTION_MOVE:
 							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 								float moveTo = event.getRawY() + dY;
@@ -113,27 +127,30 @@ public class CurrencyPicker extends DialogPreference {
 										.y(moveTo)
 										.setDuration(0)
 										.start();
-
-								boolean direction = moveTo - dY > 0;
-								for(int i = childIndex; i > 0; i = (direction? i+1:i-1)) {
-									item.animate()
+/*
+								int overItemIndex = intPosRanges.get((int) event.getY());
+								boolean direction = childIndex > overItemIndex;
+								for(int i = childIndex + (direction? -1:+1); i != overItemIndex; i = (direction? i-1:i+1)) {
+									linearLayout.getChildAt(i).animate()
 											.y(itemPos.get(direction? i-1:i+1))
 											.setDuration(0)
 											.start();
 								}
+								*/
 							}
 							break;
 						case MotionEvent.ACTION_UP:
-							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-								item.animate()
-										.z(0)
-										.setDuration(0)
-										.start();
+							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+								float moveTo = itemPos.get(intPosRanges.get((int) (item.getY() + item.getHeight()/2f)));
+								if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+									item.animate().y(moveTo).z(0).setDuration(0).start();
+								}
+							}
 							break;
 						default:
 							return false;
 					}
-					return false;
+					return true;
 				}
 			});
 
@@ -235,6 +252,12 @@ public class CurrencyPicker extends DialogPreference {
 		}
 
 		return tinyDB.getListString(KEY);
+	}
+
+	private int getAbsoluteYInScreen(View v) {
+		int[] m = new int[] {0, 0};
+		v.getLocationOnScreen(m);
+		return m[1];
 	}
 
 }

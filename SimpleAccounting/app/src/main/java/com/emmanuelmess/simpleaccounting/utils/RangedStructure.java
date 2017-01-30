@@ -47,4 +47,12 @@ public class RangedStructure {
 		return -1;
 	}
 
+	public String toString() {
+		String s = "{";
+		for(int i = 0; i < dataStart.size(); i++)
+			s += "[" + dataStart.get(i) + "-" + dataEnd.get(i) + "], ";
+
+		return s.substring(0, s.lastIndexOf(",")) + "}";
+	}
+
 }
