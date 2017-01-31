@@ -65,119 +65,135 @@ public class CurrencyPicker extends DialogPreference {
 		SparseIntArray itemPos = new SparseIntArray(1);
 		RangedStructure itemPosRanges = new RangedStructure();
 
-		view.findViewById(R.id.add).setOnClickListener(v->{
-			ScrollViewWithMaxHeight scrollView = ((ScrollViewWithMaxHeight) view.findViewById(R.id.scrollerView));
-			LinearLayout linearLayout = ((LinearLayout) view.findViewById(R.id.scrollView));
-			inflater.inflate(R.layout.currencypicker_dialog_item, linearLayout);
+		view.findViewById(R.id.add).setOnClickListener(new View.OnClickListener() {
 
-			int childIndex = linearLayout.getChildCount()-1;
-			View item = linearLayout.getChildAt(childIndex);
+			@Override
+			public void onClick(View v) {
+				ScrollViewWithMaxHeight scrollView = ((ScrollViewWithMaxHeight) view.findViewById(R.id.scrollerView));
+				LinearLayout linearLayout = ((LinearLayout) view.findViewById(R.id.scrollView));
+				inflater.inflate(R.layout.currencypicker_dialog_item, linearLayout);
 
-			item.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-				boolean alreadyLoaded = false;
-				@Override
-				public void onGlobalLayout() {
-					if(!alreadyLoaded) {
-						itemPos.append(childIndex, item.getTop());
-						itemPosRanges.add(item.getTop(), item.getBottom());
-						alreadyLoaded = true;
+				int childIndex = linearLayout.getChildCount() - 1;
+				View item = linearLayout.getChildAt(childIndex);
+
+				item.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+					boolean alreadyLoaded = false;
+
+					@Override
+					public void onGlobalLayout() {
+						if (!alreadyLoaded) {
+							itemPos.append(childIndex, item.getTop());
+							itemPosRanges.add(item.getTop(), item.getBottom());
+							alreadyLoaded = true;
+						}
 					}
+				});
+
+				item.getLayoutParams().width = linearLayout.getWidth();
+
+				if (linearLayout.getChildCount() == 2 && firstTimeItemHeighted) {
+					firstTimeItemHeighted = false;
+					scrollView.setMaxHeight(linearLayout.getChildAt(0).getHeight()*4);
 				}
-			});
 
-			item.getLayoutParams().width = linearLayout.getWidth();
+				item.findViewById(R.id.move).setOnTouchListener(new View.OnTouchListener() {
+					float dY;
 
-			if(linearLayout.getChildCount() == 2 && firstTimeItemHeighted) {
-				firstTimeItemHeighted = false;
-				scrollView.setMaxHeight(linearLayout.getChildAt(0).getHeight()*4);
+					private void move(int getToPos, int itemIndex) {
+						if (getToPos == itemIndex) return;
+
+						boolean direction = getToPos > itemIndex;
+						int toBeMovedIndex = itemIndex + (direction? +1:-1);
+						if (toBeMovedIndex != getToPos)
+							move(getToPos, toBeMovedIndex);
+
+						swap(itemIndex, toBeMovedIndex);
+					}
+
+					@Override
+					public boolean onTouch(View v1, MotionEvent event) {
+						switch (event.getAction()) {
+
+							case MotionEvent.ACTION_DOWN:
+								ViewCompat.animate(item).z(5).setDuration(0).start();
+								dY = ViewCompat.getY(item) - event.getRawY();
+								break;
+							case MotionEvent.ACTION_MOVE:
+								float moveTo = event.getRawY() + dY;
+
+								if (moveTo < ViewCompat.getY(linearLayout))
+									moveTo = ViewCompat.getY(linearLayout);
+								else if (moveTo > ViewCompat.getTranslationY(scrollView)
+										+ scrollView.getBottom() - item.getHeight())
+									moveTo = ViewCompat.getTranslationY(scrollView)
+											+ scrollView.getBottom() - item.getHeight();
+
+								ViewCompat.animate(item).y(moveTo).setDuration(0).start();
+
+								int overItemIndex = itemPosRanges.get((int) (ViewCompat.getY(item) + item.getHeight()/2f));
+
+								move(childIndex, overItemIndex);
+
+								//reposition
+								for (int i = 0; i < linearLayout.getChildCount(); i++) {
+									if (childIndex == i) continue;
+									ViewCompat.animate(linearLayout.getChildAt(i)).z(2.5f)
+											.y(itemPos.get(i)).z(0).setDuration(0).start();
+								}
+								break;
+							case MotionEvent.ACTION_UP:
+								moveTo = itemPos.get(itemPosRanges.get((int) (ViewCompat.getY(item) + item.getHeight()/2f)));
+								ViewCompat.animate(item).y(moveTo).z(0).setDuration(0).start();
+								break;
+							default:
+								return false;
+						}
+						return true;
+					}
+				});
+
+				EditText text = ((EditText) item.findViewById(R.id.text));
+				text.setOnFocusChangeListener((v1, hasFocus)->{
+					item.findViewById(R.id.delete).setVisibility(hasFocus? View.VISIBLE:View.INVISIBLE);
+
+					InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+					imm.showSoftInput(text, hasFocus? WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE:
+							InputMethodManager.RESULT_UNCHANGED_SHOWN);
+				});
+				text.addTextChangedListener(new Utils.SimpleTextWatcher() {
+					@Override
+					public void afterTextChanged(Editable s) {
+						if (currentValue.size() > childIndex)
+							currentValue.set(childIndex, s.toString());
+						else
+							currentValue.add(childIndex, s.toString());
+					}
+				});
+
+				item.findViewById(R.id.delete).setOnClickListener((v1)->{
+					itemPos.removeAt(itemPos.size()-1);
+					itemPosRanges.remove(itemPosRanges.size()-1);
+					linearLayout.removeView(item);
+
+					if (childIndex > 0 && linearLayout.getChildAt(childIndex - 1) != null)
+						linearLayout.getChildAt(childIndex - 1).findViewById(R.id.text).requestFocus();
+
+				});
 			}
 
-			item.findViewById(R.id.move).setOnTouchListener(new View.OnTouchListener() {
-				float dY;
+			private void swap(int i1, int i2) {
+				swapItemPos(i1, i2);
+				itemPosRanges.swap(i1, i2);
+			}
 
-				private void move(int getToPos, int itemIndex) {
-					if(getToPos == itemIndex) return;
-
-					boolean direction = getToPos > itemIndex;
-					int toBeMovedIndex = itemIndex + (direction? +1:-1);
-					if(toBeMovedIndex != getToPos)
-						move(getToPos, toBeMovedIndex);
-
-					//swap
-					Integer m = itemPos.get(itemIndex);
-					itemPos.removeAt(itemIndex);
-					itemPos.append(itemIndex, itemPos.get(toBeMovedIndex));
-					itemPos.removeAt(toBeMovedIndex);
-					itemPos.append(toBeMovedIndex, m);
-
-					itemPosRanges.swap(itemIndex, toBeMovedIndex);
-				}
-
-				@Override
-				public boolean onTouch(View v1, MotionEvent event) {
-					switch (event.getAction()) {
-
-						case MotionEvent.ACTION_DOWN:
-							ViewCompat.animate(item).z(5).setDuration(0).start();
-							dY = ViewCompat.getY(item) - event.getRawY();
-							break;
-						case MotionEvent.ACTION_MOVE:
-							float moveTo = event.getRawY() + dY;
-
-							if (moveTo < ViewCompat.getY(linearLayout))
-								moveTo = ViewCompat.getY(linearLayout);
-							else if (moveTo > ViewCompat.getTranslationY(scrollView)
-									+ scrollView.getBottom() - item.getHeight())
-								moveTo = ViewCompat.getTranslationY(scrollView)
-										+ scrollView.getBottom() - item.getHeight();
-
-							ViewCompat.animate(item).y(moveTo).setDuration(0).start();
-
-							int overItemIndex = itemPosRanges.get((int) (ViewCompat.getY(item) + item.getHeight()/2f));
-
-							move(childIndex, overItemIndex);
-
-							//reposition
-							for (int i = 0; i < linearLayout.getChildCount(); i++) {
-								if (childIndex == i) continue;
-								ViewCompat.animate(linearLayout.getChildAt(i)).z(2.5f)
-										.y(itemPos.get(i)).z(0).setDuration(0).start();
-							}
-							break;
-						case MotionEvent.ACTION_UP:
-							moveTo = itemPos.get(itemPosRanges.get((int) (ViewCompat.getY(item) + item.getHeight()/2f)));
-							ViewCompat.animate(item).y(moveTo).z(0).setDuration(0).start();
-							break;
-						default:
-							return false;
-					}
-					return true;
-				}
-			});
-
-			EditText text = ((EditText) item.findViewById(R.id.text));
-			text.setOnFocusChangeListener((v1, hasFocus)->{
-				item.findViewById(R.id.delete).setVisibility(hasFocus? View.VISIBLE:View.INVISIBLE);
-
-				InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-				imm.showSoftInput(text, hasFocus? WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE:
-						InputMethodManager.RESULT_UNCHANGED_SHOWN);
-			});
-			text.addTextChangedListener(new Utils.SimpleTextWatcher() {
-				@Override
-				public void afterTextChanged(Editable s) {
-					if(currentValue.size() > childIndex)
-						currentValue.set(childIndex, s.toString());
-					else
-						currentValue.add(childIndex, s.toString());
-				}
-			});
-
-			item.findViewById(R.id.delete).setOnClickListener((v1)->{
-				linearLayout.removeView(item);
-				if(childIndex > 0 && linearLayout.getChildAt(childIndex-1) != null)
-					linearLayout.getChildAt(childIndex-1).findViewById(R.id.text).requestFocus();
-			});
+			private void swapItemPos(int i1, int i2) {
+				//swap
+				Integer m = itemPos.get(i1);
+				itemPos.removeAt(i1);
+				itemPos.append(i1, itemPos.get(i2));
+				itemPos.removeAt(i2);
+				itemPos.append(i2, m);
+			}
 		});
 
 		super.onBindDialogView(view);

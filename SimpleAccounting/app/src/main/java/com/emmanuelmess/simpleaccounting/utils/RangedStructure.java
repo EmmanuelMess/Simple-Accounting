@@ -53,6 +53,15 @@ public class RangedStructure {
 		return -1;
 	}
 
+	public void remove(int index) {
+		dataStart.remove(index);
+		dataEnd.remove(index);
+	}
+
+	public int size() {
+		return dataStart.size();
+	}
+
 	public String toString() {
 		String s = "{";
 		for(int i = 0; i < dataStart.size(); i++)
