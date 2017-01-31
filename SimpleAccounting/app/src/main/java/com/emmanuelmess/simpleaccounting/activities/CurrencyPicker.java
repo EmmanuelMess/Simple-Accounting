@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Build;
 import android.preference.DialogPreference;
+import android.support.annotation.RequiresApi;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -63,7 +64,7 @@ public class CurrencyPicker extends DialogPreference {
 	@Override
 	public void onBindDialogView(View view) {
 		SparseIntArray itemPos = new SparseIntArray(1);
-		RangedStructure intPosRanges = new RangedStructure();
+		RangedStructure itemPosRanges = new RangedStructure();
 
 		view.findViewById(R.id.add).setOnClickListener(v->{
 			ScrollViewWithMaxHeight scrollView = ((ScrollViewWithMaxHeight) view.findViewById(R.id.scrollerView));
@@ -79,7 +80,7 @@ public class CurrencyPicker extends DialogPreference {
 				public void onGlobalLayout() {
 					if(!alreadyLoaded) {
 						itemPos.append(childIndex, item.getTop());
-						intPosRanges.add(item.getTop(), item.getBottom());
+						itemPosRanges.add(item.getTop(), item.getBottom());
 						alreadyLoaded = true;
 					}
 				}
@@ -95,8 +96,23 @@ public class CurrencyPicker extends DialogPreference {
 			item.findViewById(R.id.move).setOnTouchListener(new View.OnTouchListener() {
 				float dY;
 
-				private void move() {
+				@RequiresApi(api = Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+				private void move(int getToPos, int itemIndex) {
+					if(getToPos == itemIndex) return;
 
+					boolean direction = getToPos > itemIndex;
+					int toBeMovedIndex = itemIndex + (direction? +1:-1);
+					if(toBeMovedIndex != getToPos)
+						move(getToPos, toBeMovedIndex);
+
+					//swap
+					Integer m = itemPos.get(itemIndex);
+					itemPos.removeAt(itemIndex);
+					itemPos.append(itemIndex, itemPos.get(toBeMovedIndex));
+					itemPos.removeAt(toBeMovedIndex);
+					itemPos.append(toBeMovedIndex, m);
+
+					itemPosRanges.swap(itemIndex, toBeMovedIndex);
 				}
 
 				@Override
@@ -105,17 +121,13 @@ public class CurrencyPicker extends DialogPreference {
 
 						case MotionEvent.ACTION_DOWN:
 							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-								item.animate()
-										.z(5)
-										.setDuration(0)
-										.start();
+								item.animate().z(5).setDuration(0).start();
 
 							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-								//dY = item.getY() - event.getRawY();
 								dY = item.getY() - event.getRawY();
 							break;
 						case MotionEvent.ACTION_MOVE:
-							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 								float moveTo = event.getRawY() + dY;
 
 								if(moveTo < linearLayout.getY())
@@ -123,25 +135,26 @@ public class CurrencyPicker extends DialogPreference {
 								else if(moveTo > scrollView.getTranslationY() + scrollView.getBottom() - item.getHeight())
 									moveTo = scrollView.getTranslationY() + scrollView.getBottom() - item.getHeight();
 
-								item.animate()
-										.y(moveTo)
-										.setDuration(0)
-										.start();
-/*
-								int overItemIndex = intPosRanges.get((int) event.getY());
-								boolean direction = childIndex > overItemIndex;
-								for(int i = childIndex + (direction? -1:+1); i != overItemIndex; i = (direction? i-1:i+1)) {
+								item.animate().y(moveTo).setDuration(0).start();
+
+								int overItemIndex = itemPosRanges.get((int) (item.getY() + item.getHeight()/2f));
+
+								move(childIndex, overItemIndex);
+
+								//reposition
+								for(int i = 0; i < linearLayout.getChildCount(); i++) {
+									if (childIndex == i) continue;
 									linearLayout.getChildAt(i).animate()
-											.y(itemPos.get(direction? i-1:i+1))
-											.setDuration(0)
-											.start();
+											.z(2.5f)
+											.y(itemPos.get(i))
+											.z(0)
+											.setDuration(0).start();
 								}
-								*/
 							}
 							break;
 						case MotionEvent.ACTION_UP:
 							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-								float moveTo = itemPos.get(intPosRanges.get((int) (item.getY() + item.getHeight()/2f)));
+								float moveTo = itemPos.get(itemPosRanges.get((int) (item.getY() + item.getHeight()/2f)));
 								if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 									item.animate().y(moveTo).z(0).setDuration(0).start();
 								}

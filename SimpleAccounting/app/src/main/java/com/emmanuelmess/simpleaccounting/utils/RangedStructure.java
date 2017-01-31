@@ -1,6 +1,7 @@
 package com.emmanuelmess.simpleaccounting.utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 /**
  * @author Emmanuel
  *         on 28/1/2017, at 22:19.
@@ -14,6 +15,11 @@ public class RangedStructure {
 	public void add(Integer start, Integer end) {
 		dataStart.add(start);
 		dataEnd.add(end);
+	}
+
+	public void swap(int i1, int i2) {
+		Collections.swap(dataStart, i1, i2);
+		Collections.swap(dataEnd, i1, i2);
 	}
 
 	public boolean contains(Integer check) {
