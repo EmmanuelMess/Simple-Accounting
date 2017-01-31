@@ -3,6 +3,8 @@ package com.emmanuelmess.simpleaccounting.activities.views;
 import android.content.Context;
 import android.support.annotation.IntRange;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.ScrollView;
 
 import org.acra.ACRA;
@@ -13,11 +15,13 @@ import java.util.logging.LogManager;
  *
  */
 
-public class ScrollViewWithMaxHeight extends ScrollView {
+public class ScrollViewWithMaxHeight extends ScrollView implements View.OnTouchListener {
 
 	public static int WITHOUT_MAX_HEIGHT_VALUE = -1;
 
 	private static int maxHeight = WITHOUT_MAX_HEIGHT_VALUE;
+
+	private static boolean scrollBlocked = false;
 
 	public ScrollViewWithMaxHeight(Context context) {
 		super(context);
@@ -29,6 +33,19 @@ public class ScrollViewWithMaxHeight extends ScrollView {
 
 	public ScrollViewWithMaxHeight(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
+	}
+
+	public void setScrollBlocked(boolean blocked) {
+		scrollBlocked = blocked;
+	}
+
+	public static boolean isScrollBlocked() {
+		return scrollBlocked;
+	}
+
+	@Override
+	protected void onAttachedToWindow() {
+		setOnTouchListener(this);
 	}
 
 	@Override
@@ -54,5 +71,10 @@ public class ScrollViewWithMaxHeight extends ScrollView {
 			throw new IllegalArgumentException("View height must not be < 0");
 
 		this.maxHeight = maxHeight;
+	}
+
+	@Override
+	public boolean onTouch(View v, MotionEvent event) {
+		return scrollBlocked;
 	}
 }

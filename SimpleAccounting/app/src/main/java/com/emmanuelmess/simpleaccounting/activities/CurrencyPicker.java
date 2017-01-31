@@ -3,9 +3,8 @@ package com.emmanuelmess.simpleaccounting.activities;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.os.Build;
 import android.preference.DialogPreference;
-import android.support.annotation.RequiresApi;
+import android.support.v4.view.ViewCompat;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -96,7 +95,6 @@ public class CurrencyPicker extends DialogPreference {
 			item.findViewById(R.id.move).setOnTouchListener(new View.OnTouchListener() {
 				float dY;
 
-				@RequiresApi(api = Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 				private void move(int getToPos, int itemIndex) {
 					if(getToPos == itemIndex) return;
 
@@ -120,45 +118,35 @@ public class CurrencyPicker extends DialogPreference {
 					switch (event.getAction()) {
 
 						case MotionEvent.ACTION_DOWN:
-							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-								item.animate().z(5).setDuration(0).start();
-
-							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-								dY = item.getY() - event.getRawY();
+							ViewCompat.animate(item).z(5).setDuration(0).start();
+							dY = ViewCompat.getY(item) - event.getRawY();
 							break;
 						case MotionEvent.ACTION_MOVE:
-							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-								float moveTo = event.getRawY() + dY;
+							float moveTo = event.getRawY() + dY;
 
-								if(moveTo < linearLayout.getY())
-									moveTo = linearLayout.getY();
-								else if(moveTo > scrollView.getTranslationY() + scrollView.getBottom() - item.getHeight())
-									moveTo = scrollView.getTranslationY() + scrollView.getBottom() - item.getHeight();
+							if (moveTo < ViewCompat.getY(linearLayout))
+								moveTo = ViewCompat.getY(linearLayout);
+							else if (moveTo > ViewCompat.getTranslationY(scrollView)
+									+ scrollView.getBottom() - item.getHeight())
+								moveTo = ViewCompat.getTranslationY(scrollView)
+										+ scrollView.getBottom() - item.getHeight();
 
-								item.animate().y(moveTo).setDuration(0).start();
+							ViewCompat.animate(item).y(moveTo).setDuration(0).start();
 
-								int overItemIndex = itemPosRanges.get((int) (item.getY() + item.getHeight()/2f));
+							int overItemIndex = itemPosRanges.get((int) (ViewCompat.getY(item) + item.getHeight()/2f));
 
-								move(childIndex, overItemIndex);
+							move(childIndex, overItemIndex);
 
-								//reposition
-								for(int i = 0; i < linearLayout.getChildCount(); i++) {
-									if (childIndex == i) continue;
-									linearLayout.getChildAt(i).animate()
-											.z(2.5f)
-											.y(itemPos.get(i))
-											.z(0)
-											.setDuration(0).start();
-								}
+							//reposition
+							for (int i = 0; i < linearLayout.getChildCount(); i++) {
+								if (childIndex == i) continue;
+								ViewCompat.animate(linearLayout.getChildAt(i)).z(2.5f)
+										.y(itemPos.get(i)).z(0).setDuration(0).start();
 							}
 							break;
 						case MotionEvent.ACTION_UP:
-							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-								float moveTo = itemPos.get(itemPosRanges.get((int) (item.getY() + item.getHeight()/2f)));
-								if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-									item.animate().y(moveTo).z(0).setDuration(0).start();
-								}
-							}
+							moveTo = itemPos.get(itemPosRanges.get((int) (ViewCompat.getY(item) + item.getHeight()/2f)));
+							ViewCompat.animate(item).y(moveTo).z(0).setDuration(0).start();
 							break;
 						default:
 							return false;

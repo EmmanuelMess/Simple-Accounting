@@ -26,7 +26,7 @@
     <RelativeLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="36dp"
         android:id="@+id/add"
         android:clickable="true"
         android:background="?android:attr/selectableItemBackground"
@@ -42,7 +42,10 @@
             android:background="@android:color/transparent"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:id="@+id/imageButton"/>
+            android:id="@+id/imageButton"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentTop="true"
+            android:scaleType="centerInside"/>
 
         <TextView
             android:text="@string/add_item"
@@ -54,7 +57,8 @@
             android:textAlignment="gravity"
             android:layout_toRightOf="@+id/imageButton"
             android:layout_alignParentTop="true"
-            android:gravity="center_vertical|start"/>
+            android:gravity="center_vertical|start"
+            android:textSize="14sp"/>
     </RelativeLayout>
 
 </LinearLayout>
