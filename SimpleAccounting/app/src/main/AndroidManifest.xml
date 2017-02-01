@@ -42,7 +42,6 @@
         <activity
             android:name=".activities.SettingsActivity"
             android:label="@string/settings"
-           android:windowSoftInputMode="stateAlwaysVisible"
         android:parentActivityName=".MainActivity">
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
