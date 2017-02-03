@@ -34,4 +34,6 @@
     <string name="settings">Ajustes</string>
     <string name="costumize_currencies">Personalizar unidades monetarias</string>
     <string name="add_item">Añadir item...</string>
+    <string name="pref_title_currency">Monedas</string>
+    <string name="with_no_items_deactivated">Sin items, selector no se mostrará</string>
 </resources>

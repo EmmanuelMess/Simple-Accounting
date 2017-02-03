@@ -16,6 +16,7 @@ import android.view.ViewTreeObserver;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import com.emmanuelmess.simpleaccounting.MainActivity;
 import com.emmanuelmess.simpleaccounting.R;
 import com.emmanuelmess.simpleaccounting.activities.views.ScrollViewWithMaxHeight;
 import com.emmanuelmess.simpleaccounting.utils.RangedStructure;
@@ -32,7 +33,7 @@ import java.util.Collections;
  */
 
 public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View.OnClickListener {
-	private static final String KEY = "currency_picker";
+	public static final String KEY = "currency_picker";
 	private static final ArrayList<String> DEFAULT_VALUE = new ArrayList<>();
 
 	private TinyDB tinyDB;
@@ -80,7 +81,8 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 			@Override
 			public void onGlobalLayout() {
 				if(!alreadyLoaded) {
-					load(0);
+					if(currentValue.size() != 0)
+						load(0);
 					alreadyLoaded = true;
 				}
 			}
@@ -103,7 +105,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 	protected void onSetInitialValue(boolean restorePersistedValue, Object defaultValue) {
 		if (restorePersistedValue) {
 			// Restore existing state
-			currentValue = this.getPersistedStringList(DEFAULT_VALUE);
+			currentValue = getPersistedStringList(DEFAULT_VALUE);
 		} else {
 			// Set default state from the XML attribute
 			currentValue = new ArrayList<>(Arrays.asList(TextUtils.split((String) defaultValue, "‚‗‚")));
@@ -120,7 +122,8 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 					currentValue.remove(i);
 
 			persistStringList(currentValue);
-		}
+			MainActivity.invalidateToolbar();
+		} else currentValue = getPersistedStringList(DEFAULT_VALUE);
 	}
 
 	@Override
@@ -130,8 +133,10 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 
 	@Override
 	public CharSequence getSummary() {
-		String[] myStringList = currentValue.toArray(new String[currentValue.size()]);
-		return TextUtils.join(", ", myStringList);
+		if(currentValue.size() != 0) {
+			String[] myStringList = currentValue.toArray(new String[currentValue.size()]);
+			return TextUtils.join(", ", myStringList);
+		} else return getContext().getString(R.string.with_no_items_deactivated);
 	}
 
 	/**

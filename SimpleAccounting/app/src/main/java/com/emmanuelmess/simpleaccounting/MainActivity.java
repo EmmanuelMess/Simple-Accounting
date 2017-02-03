@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.print.PrintManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.MenuItemCompat;
@@ -32,12 +31,14 @@ import android.widget.Toast;
 
 import com.emmanuelmess.simpleaccounting.activities.SettingsActivity;
 import com.emmanuelmess.simpleaccounting.activities.TempMonthActivity;
+import com.emmanuelmess.simpleaccounting.activities.dialogs.CurrencyPicker;
 import com.emmanuelmess.simpleaccounting.dataloading.AsyncFinishedListener;
 import com.emmanuelmess.simpleaccounting.dataloading.LoadMonthAsyncTask;
 import com.emmanuelmess.simpleaccounting.dataloading.LoadPrevBalanceAsyncTask;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
 import com.emmanuelmess.simpleaccounting.utils.ACRAHelper;
+import com.emmanuelmess.simpleaccounting.utils.TinyDB;
 import com.emmanuelmess.simpleaccounting.utils.Utils;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.SimpleShowcaseEventListener;
@@ -49,6 +50,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
+import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.emmanuelmess.simpleaccounting.utils.Utils.equal;
@@ -100,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	 * >=0: 'normal' (month or year) value
 	 */
 	private static int editableMonth = -1, editableYear = -1;
-	private static boolean dateChanged = false;
+	private static boolean dateChanged = false, invalidateToolbar = false;
 
 	private ArrayList<Integer> rowToDBRowConversion = new ArrayList<>();
 
@@ -112,6 +114,10 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 		editableMonth = month;
 		editableYear = year;
 		dateChanged = true;
+	}
+
+	public static void invalidateToolbar() {
+		invalidateToolbar = true;
 	}
 
 	@Override
@@ -132,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 				//YEARS ALREADY START IN 0!!!
 				Integer.parseInt(new SimpleDateFormat("yyyy", Locale.getDefault()).format(d))};
 
-		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences preferences = getDefaultSharedPreferences(this);
 
 		if (!preferences.contains(UPDATE_YEAR_SETTING)) {
 			SharedPreferences.Editor prefEditor = preferences.edit();
@@ -168,7 +174,9 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 						- findViewById(R.id.fab).getPaddingTop());
 
 				loadMonth(loadMonth, loadYear);
-				dateChanged = false;//in case the activity gets destroyed
+				//in case the activity gets destroyed
+				dateChanged = false;
+				invalidateToolbar = false;
 			}
 		});
 
@@ -213,6 +221,10 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 			dateChanged = false;
 		}
+		if(invalidateToolbar) {
+			invalidateOptionsMenu();
+			invalidateToolbar = false;
+		}
 	}
 
 	@Override
@@ -227,25 +239,31 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.toolbar, menu);
 
-		MenuItem item = menu.findItem(R.id.action_currency);
-		Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
-		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-				R.array.spinner_list_item_array, android.R.layout.simple_spinner_item);
-		adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-		spinner.setAdapter(adapter);
+		TinyDB tinyDB = new TinyDB(this);
+		ArrayList<String> currencies = tinyDB.getListString(CurrencyPicker.KEY);
 
-		spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-			@Override
-			public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-				// An item was selected. You can retrieve the selected item using
-				// parent.getItemAtPosition(pos)
-			}
+		if(currencies.size() != 0) {
+			MenuItem item = menu.findItem(R.id.action_currency);
+			Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
+			ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+					android.R.layout.simple_spinner_item, currencies.toArray(new String[currencies.size()]));
+			adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+			spinner.setAdapter(adapter);
 
-			@Override
-			public void onNothingSelected(AdapterView<?> parent) {
-				// Another interface callback
-			}
-		});
+			spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+				@Override
+				public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+					// An item was selected. You can retrieve the selected item using
+					// parent.getItemAtPosition(pos)
+					loadMonth(editableMonth, editableYear);
+				}
+
+				@Override
+				public void onNothingSelected(AdapterView<?> parent) {
+					// Another interface callback
+				}
+			});
+		} else menu.removeItem(R.id.action_currency);
 
 		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.KITKAT)
 			menu.removeItem(R.id.action_print);
