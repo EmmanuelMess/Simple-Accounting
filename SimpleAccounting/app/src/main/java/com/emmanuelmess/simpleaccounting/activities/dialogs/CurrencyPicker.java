@@ -74,7 +74,17 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 	@Override
 	protected void showDialog(Bundle state) {
 		super.showDialog(state);
-		load(0);
+		scrollView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+			boolean alreadyLoaded = false;
+
+			@Override
+			public void onGlobalLayout() {
+				if(!alreadyLoaded) {
+					load(0);
+					alreadyLoaded = true;
+				}
+			}
+		});
 	}
 
 	private void load(int i) {

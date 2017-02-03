@@ -13,6 +13,7 @@ import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 /**
@@ -80,8 +81,6 @@ public class DialogPreferenceWithKeyboard extends DialogPreference {
 		}
 
 		onPrepareDialogBuilder(mBuilder);
-
-		//getPreferenceManager().registerOnActivityDestroyListener(this); TODO wat
 
 		// Create the dialog
 		final Dialog dialog = mDialog = mBuilder.create();
