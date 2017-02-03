@@ -1,4 +1,4 @@
-package com.emmanuelmess.simpleaccounting.activities;
+package com.emmanuelmess.simpleaccounting.activities.dialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -93,7 +93,10 @@ public class DialogPreferenceWithKeyboard extends DialogPreference {
 		}
 		dialog.setOnDismissListener(this);
 		dialog.show();
-		dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+		if (needInputMethod()) {
+			dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+					| WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+		}
 	}
 
 	/**
@@ -114,6 +117,7 @@ public class DialogPreferenceWithKeyboard extends DialogPreference {
 		window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 	}
 
+	@Override
 	protected View onCreateDialogView() {
 		if (getDialogLayoutResource() == 0) {
 			return null;
@@ -121,6 +125,17 @@ public class DialogPreferenceWithKeyboard extends DialogPreference {
 
 		LayoutInflater inflater = LayoutInflater.from(mBuilder.getContext());
 		return inflater.inflate(getDialogLayoutResource(), null);
+	}
+
+	@Override
+	public void onClick(DialogInterface dialog, int which) {
+		mWhichButtonClicked = which;
+	}
+
+	@Override
+	public void onDismiss(DialogInterface dialog) {
+		mDialog = null;
+		onDialogClosed(mWhichButtonClicked == DialogInterface.BUTTON_POSITIVE);
 	}
 
 	@Override

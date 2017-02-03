@@ -1,8 +1,9 @@
-package com.emmanuelmess.simpleaccounting.activities;
+package com.emmanuelmess.simpleaccounting.activities.dialogs;
 
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.os.Bundle;
 import android.support.v4.view.ViewCompat;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -62,14 +63,25 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 		super.onPrepareDialogBuilder(builder);
 	}
 
-
 	@Override
 	public void onBindDialogView(View view) {
 		linearLayout = ((LinearLayout) view.findViewById(R.id.scrollView));
 		scrollView = ((ScrollViewWithMaxHeight) view.findViewById(R.id.scrollerView));
 		view.findViewById(R.id.add).setOnClickListener(this);
-
 		super.onBindDialogView(view);
+	}
+
+	@Override
+	protected void showDialog(Bundle state) {
+		super.showDialog(state);
+		load(0);
+	}
+
+	private void load(int i) {
+		((EditText) createItem(()->{
+			if(i+1 < currentValue.size())
+				load(i+1);
+		}).findViewById(R.id.text)).setText(currentValue.get(i));
 	}
 
 	@Override
@@ -154,14 +166,13 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 		return tinyDB.getListString(KEY);
 	}
 
-	private int getAbsoluteYInScreen(View v) {
-		int[] m = new int[]{0, 0};
-		v.getLocationOnScreen(m);
-		return m[1];
-	}
-
 	@Override
 	public void onClick(View v) {
+		currentValue.add("");
+		createItem(null);
+	}
+
+	private View createItem(OnFinishedLoadingListener loadingListener) {
 		inflater.inflate(R.layout.currencypicker_dialog_item, linearLayout);
 		View item = linearLayout.getChildAt(linearLayout.getChildCount() - 1);
 
@@ -175,6 +186,8 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 					itemPos.append(childIndex, item.getTop());
 					itemPosRanges.add(item.getTop(), item.getBottom());
 					alreadyLoaded = true;
+					if(loadingListener != null)
+						loadingListener.onFinishedLoading();
 				}
 			}
 		});
@@ -183,10 +196,8 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 
 		if (linearLayout.getChildCount() == 2 && firstTimeItemHeighted) {
 			firstTimeItemHeighted = false;
-			scrollView.setMaxHeight(linearLayout.getChildAt(0).getHeight()*4);
+			scrollView.setMaxHeight(linearLayout.getChildAt(0).getHeight()*3);
 		}
-
-		currentValue.add("");
 
 		item.findViewById(R.id.move).setOnTouchListener(new View.OnTouchListener() {
 			float dY;
@@ -268,6 +279,12 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 				linearLayout.getChildAt(childIndex - 1).findViewById(R.id.text).requestFocus();
 
 		});
+
+		return item;
+	}
+
+	private interface OnFinishedLoadingListener {
+		public void onFinishedLoading();
 	}
 
 	private void swap(int i1, int i2) {
