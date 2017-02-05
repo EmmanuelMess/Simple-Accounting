@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.text.TextUtils;
 
 /**
  * @author Emmanuel
@@ -24,12 +25,12 @@ abstract class Database extends SQLiteOpenHelper {
 
 
 	final int AND = 0, OR = 2;
-	String SQLShort(int type, String s1, String s2) {
+	String SQLShort(int type, String ...s) {
 		switch(type) {
 			case AND:
-				return s1 + " AND " + s2;
+				return TextUtils.join(" AND ", s);
 			case OR:
-				return s1 + " OR " + s2;
+				return TextUtils.join(" OR ", s);
 			default:
 				throw new IllegalArgumentException();
 		}

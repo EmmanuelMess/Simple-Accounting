@@ -102,6 +102,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	 * >=0: 'normal' (month or year) value
 	 */
 	private static int editableMonth = -1, editableYear = -1;
+	private static String editableCurrency = "";
+
 	private static boolean dateChanged = false, invalidateToolbar = false;
 
 	private ArrayList<Integer> rowToDBRowConversion = new ArrayList<>();
@@ -151,6 +153,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 		updateMonth = preferences.getInt(UPDATE_MONTH_SETTING, -1);
 
 		int loadMonth, loadYear;
+		String loadCurrency = "";
 
 		if (getIntent().hasExtra(MONTH)) {
 			Bundle b = getIntent().getExtras();
@@ -173,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 				space.setMinimumHeight(findViewById(R.id.fab).getHeight()
 						- findViewById(R.id.fab).getPaddingTop());
 
-				loadMonth(loadMonth, loadYear);
+				loadMonth(loadMonth, loadYear, loadCurrency);
 				//in case the activity gets destroyed
 				dateChanged = false;
 				invalidateToolbar = false;
@@ -195,7 +198,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 			if (table.getChildCount() > FIRST_REAL_ROW) {
 				updateEditableRow(table.getChildCount() - 1);
 
-				tableGeneral.newRowInMonth(editableMonth, editableYear);
+				tableGeneral.newRowInMonth(editableMonth, editableYear, editableCurrency);
 				rowToDBRowConversion.add(tableGeneral.getLastIndex());
 				View row = loadRow();
 				addToMonthsDB();
@@ -214,7 +217,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	protected void onResume() {
 		super.onResume();
 		if (dateChanged) {
-			loadMonth(editableMonth, editableYear);
+			loadMonth(editableMonth, editableYear, editableCurrency);
 
 			fab.setVisibility(editableMonth == TableGeneral.OLDER_THAN_UPDATE
 					&& editableYear == TableGeneral.OLDER_THAN_UPDATE? GONE:VISIBLE);
@@ -255,7 +258,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 				public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
 					// An item was selected. You can retrieve the selected item using
 					// parent.getItemAtPosition(pos)
-					loadMonth(editableMonth, editableYear);
+					loadMonth(editableMonth, editableYear, editableCurrency);
 				}
 
 				@Override
@@ -488,12 +491,12 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 			if (reloadMonthOnChangeToView) {
 				reloadMonthOnChangeToView = false;
-				loadMonth(editableMonth, editableYear);
+				loadMonth(editableMonth, editableYear, editableCurrency);
 			}
 		}
 	}
 
-	private void loadMonth(int month, int year) {
+	private void loadMonth(int month, int year, String currency) {
 		findViewById(R.id.progressBar).setVisibility(VISIBLE);
 
 		FIRST_REAL_ROW = 1;
@@ -504,11 +507,12 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 		tableGeneral.getReadableDatabase();//triggers onUpdate()
 
-		loadingMonthTask = new LoadMonthAsyncTask(month, year, tableGeneral, tableMonthlyBalance, table,
+		loadingMonthTask = new LoadMonthAsyncTask(month, year, currency, tableGeneral, tableMonthlyBalance, table,
 				inflater, this, this);
 
 		editableMonth = month;
 		editableYear = year;
+		editableCurrency = currency;
 
 		TextView monthText = (TextView) findViewById(R.id.textMonth);
 
@@ -543,7 +547,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 			currentEditableToView();
 			editableRow = table.getChildCount() - 1;
 
-			tableGeneral.newRowInMonth(editableMonth, editableYear);
+			tableGeneral.newRowInMonth(editableMonth, editableYear, editableCurrency);
 			this.rowToDBRowConversion.add(tableGeneral.getLastIndex());
 			View row = loadRow();
 			addToMonthsDB();
@@ -642,7 +646,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 	public void debugChangeDate(int month, int year) {
 		if (BuildConfig.DEBUG)
-			loadMonth(month, year);
+			loadMonth(month, year, editableCurrency);
 	}
 
 }

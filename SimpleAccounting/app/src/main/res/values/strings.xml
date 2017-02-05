@@ -41,4 +41,6 @@
     <string name="costumize_currencies">Costumize currencies</string>
     <string name="add_item">Add item...</string>
     <string name="with_no_items_deactivated">No items, selector won\'t show</string>
+    <string name="delete_data">Delete all tables using this currency?</string>
+    <string name="delete">Delete</string>
 </resources>

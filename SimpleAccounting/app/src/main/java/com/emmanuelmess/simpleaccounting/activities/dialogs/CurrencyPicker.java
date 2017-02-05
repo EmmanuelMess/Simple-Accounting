@@ -42,7 +42,10 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 	private boolean firstTimeItemHeighted = true;
 	private SparseIntArray itemPos = new SparseIntArray(1);
 	private RangedStructure itemPosRanges = new RangedStructure();
+	private ArrayList<Boolean> isItemNew = new ArrayList<>();
 	private LinearLayout linearLayout;
+	private View deleteConfirmation;
+	private View add;
 	private ScrollViewWithMaxHeight scrollView;
 
 	public CurrencyPicker(Context context, AttributeSet attrs) {
@@ -68,16 +71,25 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 	public void onBindDialogView(View view) {
 		linearLayout = ((LinearLayout) view.findViewById(R.id.scrollView));
 		scrollView = ((ScrollViewWithMaxHeight) view.findViewById(R.id.scrollerView));
-		view.findViewById(R.id.add).setOnClickListener(this);
+		add = view.findViewById(R.id.add);
+		deleteConfirmation = view.findViewById(R.id.deleteConfirmation);
+		deleteConfirmation.findViewById(R.id.cancel).setOnClickListener(v->{
+			deleteConfirmation.setVisibility(View.GONE);
+			scrollView.setVisibility(View.VISIBLE);
+			add.setVisibility(View.VISIBLE);
+		});
+		add.setOnClickListener(this);
 		super.onBindDialogView(view);
 	}
 
 	@Override
 	protected void showDialog(Bundle state) {
 		super.showDialog(state);
+		for(String s : currentValue)
+			isItemNew.add(false);
+
 		scrollView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
 			boolean alreadyLoaded = false;
-
 			@Override
 			public void onGlobalLayout() {
 				if(!alreadyLoaded) {
@@ -200,6 +212,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 				if (!alreadyLoaded) {
 					itemPos.append(childIndex, item.getTop());
 					itemPosRanges.add(item.getTop(), item.getBottom());
+					isItemNew.add(true);
 					alreadyLoaded = true;
 					if(loadingListener != null)
 						loadingListener.onFinishedLoading();
@@ -284,18 +297,38 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 
 		item.findViewById(R.id.delete).setOnClickListener((v1)->{
 			int childIndex = getChildIndex(item);
-
-			currentValue.remove(childIndex);
-			itemPos.removeAt(itemPos.size() - 1);
-			itemPosRanges.remove(itemPosRanges.size() - 1);
-			linearLayout.removeView(item);
-
-			if (childIndex > 0 && linearLayout.getChildAt(childIndex - 1) != null)
-				linearLayout.getChildAt(childIndex - 1).findViewById(R.id.text).requestFocus();
-
+			if(isItemNew.get(childIndex)) {
+				removeItem(item, childIndex);
+			} else {
+				animateDeleteConfirmation(item, childIndex);
+			}
 		});
 
 		return item;
+	}
+
+	private void animateDeleteConfirmation(View item, int childIndex) {
+		scrollView.setVisibility(View.GONE);
+		add.setVisibility(View.GONE);
+		deleteConfirmation.setVisibility(View.VISIBLE);
+		deleteConfirmation.requestFocus();
+		deleteConfirmation.findViewById(R.id.deleteData).setOnClickListener(v->{
+			removeItem(item, childIndex);
+			deleteConfirmation.setVisibility(View.GONE);
+			scrollView.setVisibility(View.VISIBLE);
+			add.setVisibility(View.VISIBLE);
+		});
+	}
+
+	private void removeItem(View item, int childIndex) {
+		currentValue.remove(childIndex);
+		isItemNew.remove(childIndex);
+		itemPos.removeAt(itemPos.size() - 1);
+		itemPosRanges.remove(itemPosRanges.size() - 1);
+		linearLayout.removeView(item);
+
+		if (childIndex > 0 && linearLayout.getChildAt(childIndex - 1) != null)
+			linearLayout.getChildAt(childIndex - 1).findViewById(R.id.text).requestFocus();
 	}
 
 	private interface OnFinishedLoadingListener {
@@ -304,6 +337,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 
 	private void swap(int i1, int i2) {
 		Collections.swap(currentValue, i1, i2);
+		Collections.swap(isItemNew, i1, i2);
 
 		Integer m = itemPos.get(i1);
 		itemPos.removeAt(i1);

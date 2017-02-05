@@ -4,17 +4,19 @@
               xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:orientation="vertical" >
+              android:orientation="vertical"
+              android:paddingBottom="?dialogPreferredPadding"
+              android:paddingEnd="?dialogPreferredPadding"
+              android:paddingLeft="?dialogPreferredPadding"
+              android:paddingRight="?dialogPreferredPadding"
+              android:weightSum="1">
 
     <com.emmanuelmess.simpleaccounting.activities.views.ScrollViewWithMaxHeight
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/scrollerView"
         android:fadeScrollbars="false"
-        android:layout_marginEnd="?dialogPreferredPadding"
-        android:layout_marginLeft="?dialogPreferredPadding"
-        android:layout_marginRight="?dialogPreferredPadding"
-        android:layout_marginStart="?dialogPreferredPadding">
+        >
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -30,10 +32,7 @@
         android:id="@+id/add"
         android:clickable="true"
         android:background="?android:attr/selectableItemBackground"
-        android:layout_marginStart="?dialogPreferredPadding"
-        android:layout_marginRight="?dialogPreferredPadding"
-        android:layout_marginLeft="?dialogPreferredPadding"
-        android:layout_marginEnd="?dialogPreferredPadding">
+        >
 
         <ImageButton
             android:layout_width="wrap_content"
@@ -59,6 +58,56 @@
             android:layout_alignParentTop="true"
             android:gravity="center_vertical|start"
             android:textSize="14sp"/>
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:visibility="gone"
+        android:id="@+id/deleteConfirmation"
+        android:orientation="vertical"
+        android:gravity="center"
+        >
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textView"
+            android:layout_alignLeft="@+id/textView"
+            android:layout_alignStart="@+id/textView"
+            android:layout_alignRight="@+id/textView"
+            android:layout_alignEnd="@+id/textView">
+
+            <Button
+                android:text="@string/delete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/deleteData"
+                android:textSize="12sp"
+                android:layout_weight="1"/>
+
+            <Button
+                android:text="@android:string/cancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/cancel"
+                android:textSize="12sp"
+                android:layout_weight="1"/>
+        </LinearLayout>
+
+        <TextView
+            android:text="@string/delete_data"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView"
+            android:padding="5dp"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="@dimen/title"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"/>
+
     </RelativeLayout>
 
 </LinearLayout>

@@ -9,6 +9,7 @@ import com.emmanuelmess.simpleaccounting.utils.Utils;
 
 import java.math.BigDecimal;
 
+import static com.emmanuelmess.simpleaccounting.R.string.currency;
 import static java.lang.String.format;
 
 /**
@@ -18,13 +19,13 @@ import static java.lang.String.format;
 public class TableGeneral extends Database {
 
 	public static final int OLDER_THAN_UPDATE = -2;
-	public static final String[] COLUMNS = new String[] { "DATE", "REFERENCE", "CREDIT", "DEBT", "MONTH", "YEAR"};
+	public static final String[] COLUMNS = new String[] { "DATE", "REFERENCE", "CREDIT", "DEBT", "MONTH", "YEAR", "CURRENCY"};
 
-	private static final int DATABASE_VERSION = 4;
+	private static final int DATABASE_VERSION = 5;
 	private static final String TABLE_NAME = "ACCOUNTING";
 	private static final String TABLE_CREATE = format("CREATE TABLE %1$s" +
-			" (%2$s INT, %3$s INT, %4$s TEXT, %5$s REAL, %6$s REAL, %7$s INT, %8$s INT);",
-			TABLE_NAME, NUMBER_COLUMN, COLUMNS[0], COLUMNS[1], COLUMNS[2], COLUMNS[3], COLUMNS[4], COLUMNS[5]);
+			" (%2$s INT, %3$s INT, %4$s TEXT, %5$s REAL, %6$s REAL, %7$s INT, %8$s INT, %9$s TEXT);",
+			TABLE_NAME, NUMBER_COLUMN, COLUMNS[0], COLUMNS[1], COLUMNS[2], COLUMNS[3], COLUMNS[4], COLUMNS[5], COLUMNS[6]);
 	private final ContentValues CV = new ContentValues();
 
 	public TableGeneral(Context context) {super(context, TABLE_NAME, null, DATABASE_VERSION);}
@@ -77,8 +78,26 @@ public class TableGeneral extends Database {
 				/*Updates MonthlyBalance*/ {
 					TableMonthlyBalance tableMonthlyBalance = new TableMonthlyBalance(super.context);
 					BigDecimal currentBalance = BigDecimal.ZERO;
-					String[][] all = getAllForMonth(OLDER_THAN_UPDATE, OLDER_THAN_UPDATE, db);
+					String [][] all;
+					{
+						Cursor c = db.query(TABLE_NAME, COLUMNS,
+								SQLShort(AND, COLUMNS[4] + "=" + OLDER_THAN_UPDATE,
+										COLUMNS[5] + "=" + OLDER_THAN_UPDATE,
+										COLUMNS[6] + "=" + currency),
+								null, null, null, COLUMNS[0]);
 
+						if (c != null) {
+							c.moveToFirst();
+							all = new String[c.getCount()][COLUMNS.length];
+							for (int x = 0; x < all.length; x++) {
+								for (int y = 0; y < COLUMNS.length; y++) {
+									all[x][y] = c.getString(y);
+								}
+								c.moveToNext();
+							}
+							c.close();
+						} else all = new String[0][0];
+					}
 					for (String[] data : all) {
 						if (data[2] != null)
 							currentBalance = currentBalance.add(Utils.parseString(data[2]));
@@ -88,6 +107,15 @@ public class TableGeneral extends Database {
 
 					tableMonthlyBalance.updateMonth(OLDER_THAN_UPDATE, OLDER_THAN_UPDATE, currentBalance.doubleValue());
 				}
+			case 4:
+				sql = "ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + COLUMNS[6] + " TEXT;";
+				db.execSQL(sql);
+				Cursor c = db.query(TABLE_NAME, new String[]{COLUMNS[0]}, null, null, null, null, null);
+				CV.put(COLUMNS[6], "");
+				for (int i = 0; i < c.getCount(); i++)
+					db.update(TABLE_NAME, CV, NUMBER_COLUMN + "=" + i, null);
+				CV.clear();
+				c.close();
 		}
 	}
 
@@ -97,7 +125,7 @@ public class TableGeneral extends Database {
 		CV.clear();
 	}
 
-	public void newRowInMonth(int month, int year) {
+	public void newRowInMonth(int month, int year, String currency) {
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[]{NUMBER_COLUMN},
 				null, null, null, null, null);
 		int i;
@@ -113,6 +141,7 @@ public class TableGeneral extends Database {
 		CV.put(NUMBER_COLUMN, i);
 		CV.put(COLUMNS[4], month);
 		CV.put(COLUMNS[5], year);
+		CV.put(COLUMNS[6], currency);
 		getWritableDatabase().insert(TABLE_NAME, null, CV);
 		CV.clear();
 	}
@@ -143,15 +172,15 @@ public class TableGeneral extends Database {
 		return data;
 	}
 
-	public String[][] getAllForMonth(int month, int year) {
-		return getAllForMonth(month, year, getReadableDatabase());
+	public String[][] getAllForMonth(int month, int year, String currency) {
+		return getAllForMonth(month, year, currency, getReadableDatabase());
 	}
 
-	private String[][] getAllForMonth(int month, int year, SQLiteDatabase db) {
+	private String[][] getAllForMonth(int month, int year, String currency, SQLiteDatabase db) {
 		String [][] data;
 
 		Cursor c = db.query(TABLE_NAME, COLUMNS,
-				SQLShort(AND, COLUMNS[4] + "=" + month, COLUMNS[5] + "=" + year),
+				SQLShort(AND, COLUMNS[4] + "=" + month, COLUMNS[5] + "=" + year, COLUMNS[6] + "='" + currency + "'"),
 				null, null, null, COLUMNS[0]);
 
 		if (c != null) {
@@ -170,11 +199,12 @@ public class TableGeneral extends Database {
 		return data;
 	}
 
-	public int[] getIndexesForMonth(int month, int year) {
+	public int[] getIndexesForMonth(int month, int year, String currency) {
 		int[] data;
 
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[]{NUMBER_COLUMN},
-				format("%1$s = %2$s AND %3$s = %4$s", COLUMNS[4], month, COLUMNS[5], year),
+				format("%1$s = %2$s AND %3$s = %4$s AND %5$s = '%6$s'", COLUMNS[4], month, COLUMNS[5],
+						year, COLUMNS[6], currency),
 				null, null, null, COLUMNS[0]);
 
 		if (c != null) {
