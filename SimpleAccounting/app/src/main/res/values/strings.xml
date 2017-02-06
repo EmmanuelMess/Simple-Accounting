@@ -6,7 +6,7 @@
     <string name="debit">Debit</string>
     <string name="balance">Balance</string>
     <string name="total">Total</string>
-    <string name="crash_toast_text">The app has crashed, you can help!</string>
+    <string name="crash_toast_text">The app has closed unexpectedly, an error report has been sent</string>
     <string name="loading">Loading...</string>
     <string name="showcase_main_title">Tap and hold to edit</string>
     <string name="showcase_example_ref">Supermarket</string>
@@ -29,4 +29,5 @@
     <string name="nothing_to_print">There\'s nothing to print!</string>
     <string name="before_update_1.2">Before</string>
     <string name="page">Page</string>
+    <string name="currency">Currency</string>
 </resources>

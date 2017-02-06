@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="balance">Balance</string>
-    <string name="crash_toast_text">La app crasheó, vos podes ayudar!</string>
+    <string name="crash_toast_text">La app se cerro inesperadamente, se ha enviado un reporte de error</string>
     <string name="credit">Credito</string>
     <string name="date">Dia</string>
     <string name="debit">Debito</string>
@@ -30,4 +30,5 @@
     <string name="nothing_to_print">No hay nada que imprimir!</string>
     <string name="before_update_1.2">Antes de</string>
     <string name="page">Página</string>
+    <string name="currency">Unidad monetaria</string>
 </resources>
