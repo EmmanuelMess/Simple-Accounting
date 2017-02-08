@@ -524,8 +524,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 	private void loadShowcaseView(LayoutInflater inflater, ScrollView scrollView) {
 		SharedPreferences myPrefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-		boolean isFirstRun = myPrefs.getBoolean(PREFS_FIRST_RUN, false);
-		if (isFirstRun) {//|| BuildConfig.DEBUG) {
+		boolean isFirstRun = myPrefs.getBoolean(PREFS_FIRST_RUN, true);
+		if (isFirstRun) { //|| BuildConfig.DEBUG) {
 
 			final int rowToEdit = FIRST_REAL_ROW;
 
