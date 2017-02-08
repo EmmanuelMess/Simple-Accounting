@@ -484,7 +484,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 		loadShowcaseView(inflater, scrollView);
 
-		if(createNewRowWhenMonthLoaded) {
+		if(createNewRowWhenMonthLoaded && table != null) {
 			inflater.inflate(R.layout.newrow_main, table);
 
 			scrollView.fullScroll(View.FOCUS_DOWN);
