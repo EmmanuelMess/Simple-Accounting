@@ -399,9 +399,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	}
 
 	private void currentEditableToView() {
-		if (editableRow != -1) {
-			View row = table.getChildAt(editableRow);
-
+		View row = table.getChildAt(editableRow);
+		if (row != null && editableRow >= 0) {//TODO change to editableRow != -1 if this is problematic
 			for (int i = 0; i < EDIT_IDS.length - 1; i++) {
 				if(editedColumn[i]) {
 					String t = ((EditText) row.findViewById(EDIT_IDS[i])).getText().toString();
