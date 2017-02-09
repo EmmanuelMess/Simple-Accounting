@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
+import static android.view.View.GONE;
+
 /**
  * @author Emmanuel
  *         on 24/1/2017, at 22:55.
@@ -74,7 +76,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 		add = view.findViewById(R.id.add);
 		deleteConfirmation = view.findViewById(R.id.deleteConfirmation);
 		deleteConfirmation.findViewById(R.id.cancel).setOnClickListener(v->{
-			deleteConfirmation.setVisibility(View.GONE);
+			deleteConfirmation.setVisibility(GONE);
 			scrollView.setVisibility(View.VISIBLE);
 			add.setVisibility(View.VISIBLE);
 		});
@@ -93,6 +95,8 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 			@Override
 			public void onGlobalLayout() {
 				if(!alreadyLoaded) {
+					deleteConfirmation.getLayoutParams().width = scrollView.getWidth();
+					deleteConfirmation.setVisibility(GONE);
 					if(currentValue.size() != 0)
 						load(0);
 					alreadyLoaded = true;
@@ -308,13 +312,13 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 	}
 
 	private void animateDeleteConfirmation(View item, int childIndex) {
-		scrollView.setVisibility(View.GONE);
-		add.setVisibility(View.GONE);
+		scrollView.setVisibility(GONE);
+		add.setVisibility(GONE);
 		deleteConfirmation.setVisibility(View.VISIBLE);
 		deleteConfirmation.requestFocus();
 		deleteConfirmation.findViewById(R.id.deleteData).setOnClickListener(v->{
 			removeItem(item, childIndex);
-			deleteConfirmation.setVisibility(View.GONE);
+			deleteConfirmation.setVisibility(GONE);
 			scrollView.setVisibility(View.VISIBLE);
 			add.setVisibility(View.VISIBLE);
 		});
