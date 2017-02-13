@@ -78,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	public static final int[] TEXT_IDS = {R.id.textDate, R.id.textRef, R.id.textCredit, R.id.textDebit};
 
 	private int FIRST_REAL_ROW = 1;//excluding header and previous balance. HAS 2 STATES: 1 & 2
+	private int DEFAULT_CURRENCY = 0;
 
 	private TableLayout table = null;
 	private View space;
@@ -258,7 +259,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 				public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
 					// An item was selected. You can retrieve the selected item using
 					// parent.getItemAtPosition(pos)
-					loadMonth(editableMonth, editableYear, editableCurrency);
+					if(pos == DEFAULT_CURRENCY)
+						loadMonth(editableMonth, editableYear, editableCurrency);
 				}
 
 				@Override

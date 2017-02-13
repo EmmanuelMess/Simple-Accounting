@@ -38,4 +38,6 @@
     <string name="with_no_items_deactivated">Sin items, el selector no se mostrará</string>
     <string name="delete_data">Eliminar balances en esta moneda?</string>
     <string name="delete">Eliminar</string>
+    <string name="default_ext">Predeterminado</string>
+    <string name="default_short">PRED</string>
 </resources>

@@ -71,6 +71,18 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 
 	@Override
 	public void onBindDialogView(View view) {
+		EditText textDefault = ((EditText) view.findViewById(R.id.textDefault));
+
+		if(currentValue.size() > 0)
+			textDefault.setText(Utils.equal(currentValue.get(0), getContext().getString(R.string.default_short))? currentValue.get(0):"");
+		else currentValue.add("");
+		textDefault.addTextChangedListener(new Utils.SimpleTextWatcher() {
+			@Override
+			public void afterTextChanged(Editable s) {
+				currentValue.set(0, s.toString());
+			}
+		});
+
 		linearLayout = ((LinearLayout) view.findViewById(R.id.scrollView));
 		scrollView = ((ScrollViewWithMaxHeight) view.findViewById(R.id.scrollerView));
 		add = view.findViewById(R.id.add);
@@ -97,8 +109,8 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 				if(!alreadyLoaded) {
 					deleteConfirmation.getLayoutParams().width = scrollView.getWidth();
 					deleteConfirmation.setVisibility(GONE);
-					if(currentValue.size() != 0)
-						load(0);
+					if(currentValue.size() > 1)
+						load(1);
 					alreadyLoaded = true;
 				}
 			}
@@ -133,9 +145,14 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 	protected void onDialogClosed(boolean positiveResult) {
 		// When the user selects "OK", persist the new value
 		if (positiveResult) {
-			for (int i = 0; i < currentValue.size(); i++)
+			for (int i = 1; i < currentValue.size(); i++)
 				if (Utils.equal(currentValue.get(i).replace(" ", ""), ""))
 					currentValue.remove(i);
+
+			if(currentValue.size() == 1 && Utils.equal(currentValue.get(0).replace(" ", ""), ""))
+				currentValue.remove(0);
+			else if(Utils.equal(currentValue.get(0).replace(" ", ""), ""))
+				currentValue.set(0, getContext().getString(R.string.default_short));
 
 			persistStringList(currentValue);
 			MainActivity.invalidateToolbar();
@@ -232,7 +249,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 		}
 
 		item.findViewById(R.id.move).setOnTouchListener(new View.OnTouchListener() {
-			float dY;
+			float dy;
 
 			private void move(int getToPos, int itemIndex) {
 				if (getToPos == itemIndex) return;
@@ -252,10 +269,10 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 				switch (event.getAction()) {
 					case MotionEvent.ACTION_DOWN:
 						ViewCompat.animate(item).z(5).setDuration(0).start();
-						dY = ViewCompat.getY(item) - event.getRawY();
+						dy = ViewCompat.getY(item) - event.getRawY();
 						break;
 					case MotionEvent.ACTION_MOVE:
-						float moveTo = event.getRawY() + dY;
+						float moveTo = event.getRawY() + dy;
 
 						if (moveTo < ViewCompat.getY(linearLayout))
 							moveTo = ViewCompat.getY(linearLayout);
@@ -295,7 +312,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 		text.addTextChangedListener(new Utils.SimpleTextWatcher() {
 			@Override
 			public void afterTextChanged(Editable s) {
-				currentValue.set(getChildIndex(item), s.toString());
+				currentValue.set(getChildIndex(item)+1, s.toString());
 			}
 		});
 
@@ -325,7 +342,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 	}
 
 	private void removeItem(View item, int childIndex) {
-		currentValue.remove(childIndex);
+		currentValue.remove(childIndex+1);
 		isItemNew.remove(childIndex);
 		itemPos.removeAt(itemPos.size() - 1);
 		itemPosRanges.remove(itemPosRanges.size() - 1);

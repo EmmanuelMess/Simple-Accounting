@@ -11,6 +11,24 @@
               android:paddingRight="?dialogPreferredPadding"
               android:weightSum="1">
 
+    <RelativeLayout android:layout_width="match_parent"
+                    android:layout_height="36dp"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="2dp"
+                    android:paddingStart="24dp"
+                    android:paddingLeft="24dp">
+
+            <EditText
+                android:layout_height="match_parent"
+                android:id="@+id/textDefault"
+                android:layout_width="match_parent"
+                android:inputType="text"
+                android:textAlignment="gravity"
+                android:gravity="center_vertical|start"
+                android:background="@android:color/transparent"
+                android:hint="@string/default_ext"/>
+        </RelativeLayout>
+
     <com.emmanuelmess.simpleaccounting.activities.views.ScrollViewWithMaxHeight
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
