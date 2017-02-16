@@ -581,7 +581,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	}
   
   private void updateEditableRow(int value) {
-		if(value == -1)
+		if(value == -1 || table == null)
 			ACRAHelper.reset();
 		else
 			ACRAHelper.writeData(table, editableMonth, editableYear);
