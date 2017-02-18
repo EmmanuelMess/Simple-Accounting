@@ -455,9 +455,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	}
 
 	private void currentEditableToView() {
-		if (editableRow != -1) {
-			View row = table.getChildAt(editableRow);
-
+		View row = table.getChildAt(editableRow);
+		if (row != null && editableRow >= 0) {//TODO change to editableRow != -1 if this is problematic
 			for (int i = 0; i < EDIT_IDS.length - 1; i++) {
 				if (editedColumn[i]) {
 					String t = ((EditText) row.findViewById(EDIT_IDS[i])).getText().toString();
@@ -542,7 +541,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 		loadShowcaseView(inflater, scrollView);
 
-		if (createNewRowWhenMonthLoaded) {
+		if(createNewRowWhenMonthLoaded && table != null) {
 			inflater.inflate(R.layout.newrow_main, table);
 
 			scrollView.fullScroll(View.FOCUS_DOWN);
@@ -581,8 +580,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 	private void loadShowcaseView(LayoutInflater inflater, ScrollView scrollView) {
 		SharedPreferences myPrefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-		boolean isFirstRun = myPrefs.getBoolean(PREFS_FIRST_RUN, false);
-		if (isFirstRun) {//|| BuildConfig.DEBUG) {
+		boolean isFirstRun = myPrefs.getBoolean(PREFS_FIRST_RUN, true);
+		if (isFirstRun) { //|| BuildConfig.DEBUG) {
 
 			final int rowToEdit = FIRST_REAL_ROW;
 
@@ -638,11 +637,11 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 		}
 	}
 
-	private void updateEditableRow(int value) {
-		if (value == -1)
+  private void updateEditableRow(int value) {
+		if(value == -1 || table == null)
 			ACRAHelper.reset();
 		else
-			ACRAHelper.writeData(table, value, this);
+			ACRAHelper.writeData(table, editableMonth, editableYear);
 
 		editableRow = value;
 	}

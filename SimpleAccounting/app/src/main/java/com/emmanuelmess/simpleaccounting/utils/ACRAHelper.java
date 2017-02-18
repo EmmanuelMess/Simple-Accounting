@@ -1,5 +1,6 @@
 package com.emmanuelmess.simpleaccounting.utils;
 
+import android.view.View;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -14,14 +15,10 @@ import org.acra.ACRA;
 
 public class ACRAHelper {
 
-	public static final String LAST_ROW = "last";
-	public static final String CURRENT_ROW = "current";
+	public static final String ROWS = "rows";
 
-	public static void writeData(TableLayout t, int row, MainActivity a) {
-		if(row-1 >= a.getFirstRealRow())
-			setData(LAST_ROW, t, row-1);
-
-		setData(CURRENT_ROW, t, row);
+	public static void writeData(TableLayout t, int year, int month) {
+		setData(t, year, month);
 	}
 
 	public static void reset() {
@@ -29,13 +26,19 @@ public class ACRAHelper {
 	}
 
 
-	private static void setData(String rowS, TableLayout t, int row) {
+	private static void setData(TableLayout t, int year, int month) {
 		StringBuilder s = new StringBuilder();
-		TableRow r = (TableRow) t.getChildAt(row);
 
-		for (int i = 0; i < r.getChildCount(); i++)
-			s.append(" '").append(((TextView) r.getChildAt(i)).getText()).append("',");
+		s.append("Year: ").append(year).append("\nMonth: ").append(month);
 
-		ACRA.getErrorReporter().putCustomData(rowS, s.substring(1, s.lastIndexOf(",")));
+		for(int i = 0; i < t.getChildCount(); i++) {
+			TableRow r = (TableRow) t.getChildAt(i);
+
+			for (int j = 0; j < r.getChildCount(); j++)
+				if(r.getChildAt(j).getVisibility() == View.VISIBLE)
+					s.append(" [").append(((TextView) r.getChildAt(j)).getText().length()).append("],");
+
+			ACRA.getErrorReporter().putCustomData(ROWS, s.substring(1, s.lastIndexOf(",")));
+		}
 	}
 }
