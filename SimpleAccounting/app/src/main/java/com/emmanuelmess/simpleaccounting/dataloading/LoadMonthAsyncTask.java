@@ -51,8 +51,8 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 	protected void onPreExecute() {
 		if(table.getChildCount() - mainActivity.getFirstRealRow() > 0)
 			throw new IllegalArgumentException("Table already contains "
-					+ (table.getChildCount() - mainActivity.getFirstRealRow()) + " elements: \n" +
-			table.toString());
+					+ (table.getChildCount() - mainActivity.getFirstRealRow()) + " elements; " +
+					"delete all rows before excecuting LoadMonthAsyncTask!");
 	}
 
 	@Override

@@ -74,7 +74,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 		EditText textDefault = ((EditText) view.findViewById(R.id.textDefault));
 
 		if(currentValue.size() > 0)
-			textDefault.setText(Utils.equal(currentValue.get(0), getContext().getString(R.string.default_short))? currentValue.get(0):"");
+			textDefault.setText(Utils.equal(currentValue.get(0), getContext().getString(R.string.default_short))? "":currentValue.get(0));
 		else currentValue.add("");
 		textDefault.addTextChangedListener(new Utils.SimpleTextWatcher() {
 			@Override
@@ -145,14 +145,16 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 	protected void onDialogClosed(boolean positiveResult) {
 		// When the user selects "OK", persist the new value
 		if (positiveResult) {
-			for (int i = 1; i < currentValue.size(); i++)
+			for (int i = 1; i < currentValue.size(); i++) // STARTS on 1 to save default
 				if (Utils.equal(currentValue.get(i).replace(" ", ""), ""))
 					currentValue.remove(i);
 
-			if(currentValue.size() == 1 && Utils.equal(currentValue.get(0).replace(" ", ""), ""))
-				currentValue.remove(0);
-			else if(Utils.equal(currentValue.get(0).replace(" ", ""), ""))
-				currentValue.set(0, getContext().getString(R.string.default_short));
+			if(Utils.equal(currentValue.get(0).replace(" ", ""), "")) {
+				if(currentValue.size() == 1)
+					currentValue.remove(0);
+				else
+					currentValue.set(0, getContext().getString(R.string.default_short));
+			}
 
 			persistStringList(currentValue);
 			MainActivity.invalidateToolbar();
@@ -318,11 +320,10 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 
 		item.findViewById(R.id.delete).setOnClickListener((v1)->{
 			int childIndex = getChildIndex(item);
-			if(isItemNew.get(childIndex)) {
+			if(isItemNew.get(childIndex))
 				removeItem(item, childIndex);
-			} else {
+			else
 				animateDeleteConfirmation(item, childIndex);
-			}
 		});
 
 		return item;

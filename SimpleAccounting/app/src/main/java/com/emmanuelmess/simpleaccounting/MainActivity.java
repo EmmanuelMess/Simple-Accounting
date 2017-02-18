@@ -249,18 +249,19 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 		if(currencies.size() != 0) {
 			MenuItem item = menu.findItem(R.id.action_currency);
 			Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
-			ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-					android.R.layout.simple_spinner_item, currencies.toArray(new String[currencies.size()]));
+			ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.simple_spinner_item,
+					currencies.toArray(new String[currencies.size()]));
 			adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 			spinner.setAdapter(adapter);
-
 			spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 				@Override
 				public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-					// An item was selected. You can retrieve the selected item using
-					// parent.getItemAtPosition(pos)
 					if(pos == DEFAULT_CURRENCY)
-						loadMonth(editableMonth, editableYear, editableCurrency);
+						editableCurrency = "";
+					else
+						editableCurrency = ((TextView) view).getText().toString();
+
+					loadMonth(editableMonth, editableYear, editableCurrency);
 				}
 
 				@Override
