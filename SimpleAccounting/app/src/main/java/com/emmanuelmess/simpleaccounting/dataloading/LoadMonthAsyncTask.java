@@ -8,7 +8,7 @@ import android.widget.TextView;
 
 import com.emmanuelmess.simpleaccounting.MainActivity;
 import com.emmanuelmess.simpleaccounting.R;
-import com.emmanuelmess.simpleaccounting.Utils;
+import com.emmanuelmess.simpleaccounting.utils.Utils;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
 
@@ -23,6 +23,7 @@ import java.util.ArrayList;
 public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 
 	private int month, year;
+	private String currency;
 	private TableGeneral tableGeneral;
 	private TableMonthlyBalance tableMonthlyBalance;
 	private TableLayout table;
@@ -32,11 +33,12 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 	private MainActivity mainActivity;
 	private static boolean alreadyLoading = false;
 
-	public LoadMonthAsyncTask(int m, int y, TableGeneral dbG, TableMonthlyBalance db, TableLayout t,
+	public LoadMonthAsyncTask(int m, int y, String c, TableGeneral dbG, TableMonthlyBalance db, TableLayout t,
 	                          LayoutInflater i, AsyncFinishedListener<ArrayList<Integer>> l,
 	                          MainActivity a) {
 		month = m;
 		year = y;
+		currency = c;
 		tableGeneral = dbG;
 		tableMonthlyBalance = db;
 		table = t;
@@ -49,8 +51,8 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 	protected void onPreExecute() {
 		if(table.getChildCount() - mainActivity.getFirstRealRow() > 0)
 			throw new IllegalArgumentException("Table already contains "
-					+ (table.getChildCount() - mainActivity.getFirstRealRow()) + " elements: \n" +
-			table.toString());
+					+ (table.getChildCount() - mainActivity.getFirstRealRow()) + " elements; " +
+					"delete all rows before excecuting LoadMonthAsyncTask!");
 	}
 
 	@Override
@@ -59,12 +61,12 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 			alreadyLoading = true;
 		else throw new IllegalStateException("Already loading month: " + year + "-" + (month+1));
 
-		int[] data = tableGeneral.getIndexesForMonth(month, year);
+		int[] data = tableGeneral.getIndexesForMonth(month, year, currency);
 
 		for(int m : data)
 			rowToDBRowConversion.add(m);
 
-		return tableGeneral.getAllForMonth(month, year);
+		return tableGeneral.getAllForMonth(month, year, currency);
 	}
 
 	@Override

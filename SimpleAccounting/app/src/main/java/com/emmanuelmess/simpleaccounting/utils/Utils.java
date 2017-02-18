@@ -1,6 +1,8 @@
-package com.emmanuelmess.simpleaccounting;
+package com.emmanuelmess.simpleaccounting.utils;
 
 import android.os.Build;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.widget.TextView;
 
 import java.math.BigDecimal;
@@ -28,6 +30,18 @@ public class Utils {
 
 	public static boolean equal(Object o1, Object o2) {
 		return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && Objects.equals(o1, o2)) || o1.equals(o2);
+	}
+
+	public static class SimpleTextWatcher implements TextWatcher {
+
+		@Override
+		public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+		@Override
+		public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+		@Override
+		public void afterTextChanged(Editable editable) {}
 	}
 
 }
