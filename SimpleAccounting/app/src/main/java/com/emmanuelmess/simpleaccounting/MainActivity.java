@@ -296,7 +296,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 								(editableMonth != TableGeneral.OLDER_THAN_UPDATE? getString(MONTH_STRINGS[editableMonth]):updateMonth);
 						printM.print(job,
 								new PPrintDocumentAdapter(this, table, editableMonth, editableYear,
-										new int[]{updateMonth, updateYear}),
+										editableCurrency, new int[]{updateMonth, updateYear}),
 								null);
 					}
 				} else {
