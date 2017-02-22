@@ -263,7 +263,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 					else
 						editableCurrency = ((TextView) view).getText().toString();
 
-					currencyName = Utils.equal(editableCurrency, "")? ((TextView) view).getText().toString():editableCurrency;
+					currencyName = Utils.equal(editableCurrency, "")?
+							((TextView) view).getText().toString():editableCurrency;//repeated code at end of lambda
 
 					loadMonth(editableMonth, editableYear, editableCurrency);
 				}
