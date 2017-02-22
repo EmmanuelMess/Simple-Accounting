@@ -108,7 +108,7 @@ public class PPrintDocumentAdapter extends PrintDocumentAdapter {
 						+ " " + context.getString(MainActivity.MONTH_STRINGS[updateMonth]).toLowerCase()
 						+ "-" + String.valueOf(updateYear);
 
-			if(!Utils.equal(title, ""))
+			if(!Utils.equal(currency, ""))
 				title += " [" + currency + "]";
 
 			PrintDocumentInfo info = new PrintDocumentInfo.Builder(title + ".pdf")

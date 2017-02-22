@@ -103,7 +103,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	 * >=0: 'normal' (month or year) value
 	 */
 	private static int editableMonth = -1, editableYear = -1;
-	private static String editableCurrency = "";
+	private static String editableCurrency = "";//same as currencyName, except when it is the default in that case it is ""
+	private static String currencyName = "";// the string the user entered on PreferenceActivity
 
 	private static boolean dateChanged = false, invalidateToolbar = false;
 
@@ -262,6 +263,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 					else
 						editableCurrency = ((TextView) view).getText().toString();
 
+					currencyName = Utils.equal(editableCurrency, "")? ((TextView) view).getText().toString():editableCurrency;
+
 					loadMonth(editableMonth, editableYear, editableCurrency);
 				}
 
@@ -270,6 +273,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 					// Another interface callback
 				}
 			});
+
+			currencyName = Utils.equal(editableCurrency, "")? currencies.get(0):editableCurrency;
 		} else menu.removeItem(R.id.action_currency);
 
 		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.KITKAT)
@@ -297,7 +302,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 								(editableMonth != TableGeneral.OLDER_THAN_UPDATE? getString(MONTH_STRINGS[editableMonth]):updateMonth);
 						printM.print(job,
 								new PPrintDocumentAdapter(this, table, editableMonth, editableYear,
-										editableCurrency, new int[]{updateMonth, updateYear}),
+										currencyName, new int[]{updateMonth, updateYear}),
 								null);
 					}
 				} else {
