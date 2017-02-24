@@ -18,7 +18,7 @@ import android.widget.LinearLayout;
 
 import com.emmanuelmess.simpleaccounting.MainActivity;
 import com.emmanuelmess.simpleaccounting.R;
-import com.emmanuelmess.simpleaccounting.activities.views.ScrollViewWithMaxHeight;
+import com.emmanuelmess.simpleaccounting.activities.views.LockableScrollView;
 import com.emmanuelmess.simpleaccounting.utils.RangedStructure;
 import com.emmanuelmess.simpleaccounting.utils.TinyDB;
 import com.emmanuelmess.simpleaccounting.utils.Utils;
@@ -48,7 +48,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 	private LinearLayout linearLayout;
 	private View deleteConfirmation;
 	private View add;
-	private ScrollViewWithMaxHeight scrollView;
+	private LockableScrollView scrollView;
 
 	public CurrencyPicker(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -84,7 +84,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 		});
 
 		linearLayout = ((LinearLayout) view.findViewById(R.id.scrollView));
-		scrollView = ((ScrollViewWithMaxHeight) view.findViewById(R.id.scrollerView));
+		scrollView = ((LockableScrollView) view.findViewById(R.id.scrollerView));
 		add = view.findViewById(R.id.add);
 		deleteConfirmation = view.findViewById(R.id.deleteConfirmation);
 		deleteConfirmation.findViewById(R.id.cancel).setOnClickListener(v->{
@@ -272,6 +272,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 					case MotionEvent.ACTION_DOWN:
 						ViewCompat.animate(item).z(5).setDuration(0).start();
 						dy = ViewCompat.getY(item) - event.getRawY();
+						scrollView.setScrollingEnabled(false);
 						break;
 					case MotionEvent.ACTION_MOVE:
 						float moveTo = event.getRawY() + dy;
@@ -297,6 +298,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 						}
 						break;
 					case MotionEvent.ACTION_UP:
+						scrollView.setScrollingEnabled(true);
 						moveTo = itemPos.get(itemPosRanges.get((int) (ViewCompat.getY(item) + item.getHeight()/2f)));
 						ViewCompat.animate(item).y(moveTo).z(0).setDuration(0).start();
 						break;

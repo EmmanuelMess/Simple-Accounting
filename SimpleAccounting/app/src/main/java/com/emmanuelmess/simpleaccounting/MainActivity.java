@@ -192,6 +192,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 		}
 
 		fab.setOnClickListener(view->{
+
+
 			inflater.inflate(R.layout.newrow_main, table);
 
 			scrollView.fullScroll(View.FOCUS_DOWN);
@@ -516,8 +518,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 		tableGeneral.getReadableDatabase();//triggers onUpdate()
 
-		loadingMonthTask = new LoadMonthAsyncTask(month, year, currency, tableGeneral,
-				tableMonthlyBalance, table, inflater, this, this);
+		loadingMonthTask = new LoadMonthAsyncTask(month, year, currency, tableGeneral, table,
+				inflater, this, this);
 
 		editableMonth = month;
 		editableYear = year;
