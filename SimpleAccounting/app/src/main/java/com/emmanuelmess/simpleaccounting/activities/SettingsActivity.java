@@ -1,6 +1,7 @@
 package com.emmanuelmess.simpleaccounting.activities;
 
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -10,6 +11,7 @@ import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
 
 import com.emmanuelmess.simpleaccounting.R;
+import com.emmanuelmess.simpleaccounting.utils.Utils;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -36,11 +38,15 @@ public class SettingsActivity extends AppCompatPreferenceActivity implements Pre
 		// Set the listener to watch for value changes.
 		preference.setOnPreferenceChangeListener(this);
 
+		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(
+				preference.getContext());
+
+		if(Utils.equal(preference.getKey(), "pref_invertcreditdebit"))
 		// Trigger the listener immediately with the preference's
 		// current value.
-		onPreferenceChange(preference, PreferenceManager
-				.getDefaultSharedPreferences(preference.getContext())
-				.getString(preference.getKey(), ""));
+			onPreferenceChange(preference, sharedPref.getBoolean(preference.getKey(), false));
+		else
+			onPreferenceChange(preference, sharedPref.getString(preference.getKey(), ""));
 	}
 
 	@Override
@@ -99,7 +105,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity implements Pre
 
 		// Bind the summaries of EditText/List/Dialog/Ringtone preferences to their values. When their values change,
 		// their summaries are updated to reflect the new value, per the Android Design guidelines.
-		bindPreferenceSummaryToValue(findPreference("currency_picker"));
+		bindPreferenceSummaryToValue(findPreference("pref_invertcreditdebit"));
+		bindPreferenceSummaryToValue(findPreference("pref_currencypicker"));
 	}
 
 	/**
@@ -110,7 +117,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity implements Pre
 	public boolean onPreferenceChange(Preference preference, Object newValue) {
 		// For all other preferences, set the summary to the value's
 		// simple string representation.
-		preference.setSummary(newValue.toString());
+		//preference.setSummary(newValue.toString());
 		return true;
 	}
 }

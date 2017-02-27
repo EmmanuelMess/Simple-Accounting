@@ -2,6 +2,11 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <com.emmanuelmess.simpleaccounting.activities.dialogs.CurrencyPicker
         android:defaultValue=""
-        android:key="currency_picker"
+        android:key="pref_currencypicker"
         android:title="@string/pref_title_currency"/>
+    <SwitchPreference
+        android:key="pref_invertcreditdebit"
+        android:title="Invert credit and debit"
+        android:summary="Credit and debit interchange places in table"
+        android:defaultValue="false" />
 </PreferenceScreen>
