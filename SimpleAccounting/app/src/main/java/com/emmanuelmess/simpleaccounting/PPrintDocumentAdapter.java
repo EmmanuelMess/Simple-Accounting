@@ -20,6 +20,7 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
+import com.emmanuelmess.simpleaccounting.utils.Utils;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -41,6 +42,7 @@ public class PPrintDocumentAdapter extends PrintDocumentAdapter {
 	private Context context;
 	private TableLayout table;
 	private int month, year;
+	private String currency;
 	private int updateMonth, updateYear;
 	private String[][] rawToPrint;
 	private PrintedPdfDocument pdfDocument;
@@ -49,13 +51,14 @@ public class PPrintDocumentAdapter extends PrintDocumentAdapter {
 	private int linesPerPage, amountOfPages;
 	private boolean[] writtenPages;
 
-	public PPrintDocumentAdapter(Context c, TableLayout t, int m, int y, int[] updateDate) {
+	public PPrintDocumentAdapter(Context c, TableLayout t, int m, int y, String currency, int[] updateDate) {
 		super();
 
 		context = c;
 		table = t;
 		month = m;
 		year = y;
+		this.currency = currency;
 		if(updateDate != null) {
 			updateMonth = updateDate[0];
 			updateYear = updateDate[1];
@@ -104,6 +107,9 @@ public class PPrintDocumentAdapter extends PrintDocumentAdapter {
 			else title = context.getString(R.string.before_update_1_2)
 						+ " " + context.getString(MainActivity.MONTH_STRINGS[updateMonth]).toLowerCase()
 						+ "-" + String.valueOf(updateYear);
+
+			if(!Utils.equal(currency, ""))
+				title += " [" + currency + "]";
 
 			PrintDocumentInfo info = new PrintDocumentInfo.Builder(title + ".pdf")
 					.setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)

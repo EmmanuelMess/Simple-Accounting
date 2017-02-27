@@ -8,9 +8,8 @@ import android.widget.TextView;
 
 import com.emmanuelmess.simpleaccounting.MainActivity;
 import com.emmanuelmess.simpleaccounting.R;
-import com.emmanuelmess.simpleaccounting.utils.Utils;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
-import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
+import com.emmanuelmess.simpleaccounting.utils.Utils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -25,7 +24,6 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 	private int month, year;
 	private String currency;
 	private TableGeneral tableGeneral;
-	private TableMonthlyBalance tableMonthlyBalance;
 	private TableLayout table;
 	private LayoutInflater inflater;
 	private ArrayList<Integer> rowToDBRowConversion = new ArrayList<>();
@@ -34,14 +32,13 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 	private boolean invertCreditDebit = false;
 	private static boolean alreadyLoading = false;
 
-	public LoadMonthAsyncTask(int m, int y, String c, TableGeneral dbG, TableMonthlyBalance db, TableLayout t,
+	public LoadMonthAsyncTask(int m, int y, String c, TableGeneral dbG, TableLayout t,
 	                          LayoutInflater i, AsyncFinishedListener<ArrayList<Integer>> l,
 	                          MainActivity a, boolean invert) {
 		month = m;
 		year = y;
 		currency = c;
 		tableGeneral = dbG;
-		tableMonthlyBalance = db;
 		table = t;
 		inflater = i;
 		listener = l;

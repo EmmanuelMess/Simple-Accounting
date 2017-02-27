@@ -15,13 +15,11 @@ import java.util.logging.LogManager;
  *
  */
 
-public class ScrollViewWithMaxHeight extends ScrollView implements View.OnTouchListener {
+public class ScrollViewWithMaxHeight extends ScrollView {
 
 	public static int WITHOUT_MAX_HEIGHT_VALUE = -1;
 
 	private static int maxHeight = WITHOUT_MAX_HEIGHT_VALUE;
-
-	private static boolean scrollBlocked = false;
 
 	public ScrollViewWithMaxHeight(Context context) {
 		super(context);
@@ -33,19 +31,6 @@ public class ScrollViewWithMaxHeight extends ScrollView implements View.OnTouchL
 
 	public ScrollViewWithMaxHeight(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
-	}
-
-	public void setScrollBlocked(boolean blocked) {
-		scrollBlocked = blocked;
-	}
-
-	public static boolean isScrollBlocked() {
-		return scrollBlocked;
-	}
-
-	@Override
-	protected void onAttachedToWindow() {
-		setOnTouchListener(this);
 	}
 
 	@Override
@@ -70,11 +55,7 @@ public class ScrollViewWithMaxHeight extends ScrollView implements View.OnTouchL
 		if(maxHeight < 0)
 			throw new IllegalArgumentException("View height must not be < 0");
 
-		this.maxHeight = maxHeight;
+		ScrollViewWithMaxHeight.maxHeight = maxHeight;
 	}
 
-	@Override
-	public boolean onTouch(View v, MotionEvent event) {
-		return scrollBlocked;
-	}
 }
