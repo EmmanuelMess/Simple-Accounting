@@ -23,7 +23,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ScrollView;
-import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -32,6 +31,7 @@ import android.widget.Toast;
 import com.emmanuelmess.simpleaccounting.activities.SettingsActivity;
 import com.emmanuelmess.simpleaccounting.activities.TempMonthActivity;
 import com.emmanuelmess.simpleaccounting.activities.dialogs.CurrencyPicker;
+import com.emmanuelmess.simpleaccounting.activities.views.SpinnerNoUnwantedOnClick;
 import com.emmanuelmess.simpleaccounting.dataloading.AsyncFinishedListener;
 import com.emmanuelmess.simpleaccounting.dataloading.LoadMonthAsyncTask;
 import com.emmanuelmess.simpleaccounting.dataloading.LoadPrevBalanceAsyncTask;
@@ -103,7 +103,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	 * >=0: 'normal' (month or year) value
 	 */
 	private static int editableMonth = -1, editableYear = -1;
-	private static String editableCurrency = "";
+	private static String editableCurrency = "";//same as currencyName, except when it is the default in that case it is ""
+	private static String currencyName = "";// the string the user entered on PreferenceActivity
 
 	private static boolean dateChanged = false, invalidateToolbar = false;
 
@@ -191,6 +192,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 		}
 
 		fab.setOnClickListener(view->{
+
+
 			inflater.inflate(R.layout.newrow_main, table);
 
 			scrollView.fullScroll(View.FOCUS_DOWN);
@@ -225,7 +228,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 			dateChanged = false;
 		}
-		if(invalidateToolbar) {
+		if (invalidateToolbar) {
 			invalidateOptionsMenu();
 			invalidateToolbar = false;
 		}
@@ -246,9 +249,10 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 		TinyDB tinyDB = new TinyDB(this);
 		ArrayList<String> currencies = tinyDB.getListString(CurrencyPicker.KEY);
 
-		if(currencies.size() != 0) {
+		if (currencies.size() != 0) {
 			MenuItem item = menu.findItem(R.id.action_currency);
-			Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
+			SpinnerNoUnwantedOnClick spinner =
+					new SpinnerNoUnwantedOnClick(MenuItemCompat.getActionView(item));
 			ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.simple_spinner_item,
 					currencies.toArray(new String[currencies.size()]));
 			adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
@@ -256,10 +260,13 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 			spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 				@Override
 				public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-					if(pos == DEFAULT_CURRENCY)
+					if (pos == DEFAULT_CURRENCY)
 						editableCurrency = "";
 					else
 						editableCurrency = ((TextView) view).getText().toString();
+
+					currencyName = Utils.equal(editableCurrency, "")?
+							((TextView) view).getText().toString():editableCurrency;//repeated code at end of lambda
 
 					loadMonth(editableMonth, editableYear, editableCurrency);
 				}
@@ -269,6 +276,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 					// Another interface callback
 				}
 			});
+
+			currencyName = Utils.equal(editableCurrency, "")? currencies.get(0):editableCurrency;
 		} else menu.removeItem(R.id.action_currency);
 
 		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.KITKAT)
@@ -296,7 +305,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 								(editableMonth != TableGeneral.OLDER_THAN_UPDATE? getString(MONTH_STRINGS[editableMonth]):updateMonth);
 						printM.print(job,
 								new PPrintDocumentAdapter(this, table, editableMonth, editableYear,
-										new int[]{updateMonth, updateYear}),
+										currencyName, new int[]{updateMonth, updateYear}),
 								null);
 					}
 				} else {
@@ -509,7 +518,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 		tableGeneral.getReadableDatabase();//triggers onUpdate()
 
-		loadingMonthTask = new LoadMonthAsyncTask(month, year, currency, tableGeneral, tableMonthlyBalance, table,
+		loadingMonthTask = new LoadMonthAsyncTask(month, year, currency, tableGeneral, table,
 				inflater, this, this);
 
 		editableMonth = month;
@@ -541,7 +550,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 		loadShowcaseView(inflater, scrollView);
 
-		if(createNewRowWhenMonthLoaded && table != null) {
+		if (createNewRowWhenMonthLoaded && table != null) {
 			inflater.inflate(R.layout.newrow_main, table);
 
 			scrollView.fullScroll(View.FOCUS_DOWN);
@@ -637,8 +646,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 		}
 	}
 
-  private void updateEditableRow(int value) {
-		if(value == -1 || table == null)
+	private void updateEditableRow(int value) {
+		if (value == -1 || table == null)
 			ACRAHelper.reset();
 		else
 			ACRAHelper.writeData(table, editableMonth, editableYear);

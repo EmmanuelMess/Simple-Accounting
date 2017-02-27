@@ -29,7 +29,7 @@
                 android:hint="@string/default_ext"/>
         </RelativeLayout>
 
-    <com.emmanuelmess.simpleaccounting.activities.views.ScrollViewWithMaxHeight
+    <com.emmanuelmess.simpleaccounting.activities.views.LockableScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/scrollerView"
@@ -41,7 +41,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:id="@+id/scrollView"/>
-    </com.emmanuelmess.simpleaccounting.activities.views.ScrollViewWithMaxHeight>
+    </com.emmanuelmess.simpleaccounting.activities.views.LockableScrollView>
 
     <RelativeLayout
         android:orientation="horizontal"
@@ -49,8 +49,7 @@
         android:layout_height="36dp"
         android:id="@+id/add"
         android:clickable="true"
-        android:background="?android:attr/selectableItemBackground"
-        >
+        android:background="?android:attr/selectableItemBackground">
 
         <ImageButton
             android:layout_width="wrap_content"
