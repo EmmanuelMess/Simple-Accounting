@@ -53,6 +53,7 @@ import java.util.Locale;
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+import static com.emmanuelmess.simpleaccounting.activities.SettingsActivity.INVERT_CREDIT_DEBIT_SETTING;
 import static com.emmanuelmess.simpleaccounting.utils.Utils.equal;
 import static com.emmanuelmess.simpleaccounting.utils.Utils.parseString;
 import static com.emmanuelmess.simpleaccounting.utils.Utils.parseView;
@@ -74,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 	private final String PREFS_NAME = "shared prefs", PREFS_FIRST_RUN = "first_run";
 
+	//THESE COULD NOT BE IN ORDER (because of posible inversion between credit and debit)
 	public static final int[] EDIT_IDS = {R.id.editDate, R.id.editRef, R.id.editCredit, R.id.editDebit, R.id.textBalance};
 	public static final int[] TEXT_IDS = {R.id.textDate, R.id.textRef, R.id.textCredit, R.id.textDebit};
 
@@ -90,9 +92,11 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	private AsyncTask<Void, Void, String[][]> loadingMonthTask = null;
 
 	private int updateYear, updateMonth;
+	private static boolean invertCreditDebit = false;
 
 	//pointer to row being edited STARTS IN 1
 	private int editableRow = -1;
+
 	private boolean editedColumn[] = new boolean[4];
 
 	/**
@@ -105,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	private static int editableMonth = -1, editableYear = -1;
 	private static String editableCurrency = "";
 
-	private static boolean dateChanged = false, invalidateToolbar = false;
+	private static boolean invalidateTable = false, invalidateToolbar = false, invalidateTableHeader = false;
 
 	private ArrayList<Integer> rowToDBRowConversion = new ArrayList<>();
 
@@ -116,11 +120,21 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	public static void setDate(int month, int year) {
 		editableMonth = month;
 		editableYear = year;
-		dateChanged = true;
+		invalidateTable = true;
 	}
 
 	public static void invalidateToolbar() {
 		invalidateToolbar = true;
+	}
+	public static void invalidateTable() {
+		invalidateTable = true;
+	}
+
+	public static void invalidateTableHeader(boolean invertCreditDebit) {
+		if (MainActivity.invertCreditDebit != invertCreditDebit) {
+			MainActivity.invertCreditDebit = invertCreditDebit;
+			invalidateTableHeader = true;
+		}
 	}
 
 	@Override
@@ -153,6 +167,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 		updateYear = preferences.getInt(UPDATE_YEAR_SETTING, -1);
 		updateMonth = preferences.getInt(UPDATE_MONTH_SETTING, -1);
 
+		invalidateTableHeader(preferences.getBoolean(INVERT_CREDIT_DEBIT_SETTING, false));
+
 		int loadMonth, loadYear;
 		String loadCurrency = "";
 
@@ -179,7 +195,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 				loadMonth(loadMonth, loadYear, loadCurrency);
 				//in case the activity gets destroyed
-				dateChanged = false;
+				invalidateTable = false;
 				invalidateToolbar = false;
 			}
 		});
@@ -191,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 		}
 
 		fab.setOnClickListener(view->{
-			inflater.inflate(R.layout.newrow_main, table);
+			inflateNewRow();
 
 			scrollView.fullScroll(View.FOCUS_DOWN);
 
@@ -217,15 +233,27 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	@Override
 	protected void onResume() {
 		super.onResume();
-		if (dateChanged) {
+		if (invalidateTableHeader) {
+			int tempId = 0;
+
+			table.findViewById(R.id.credit).setId(tempId);
+			table.findViewById(R.id.debit).setId(R.id.credit);
+			table.findViewById(tempId).setId(R.id.debit);
+
+			((TextView) findViewById(R.id.credit)).setText(R.string.credit);
+			((TextView) findViewById(R.id.debit)).setText(R.string.debit);
+
+			invalidateTableHeader = false;
+		}
+		if (invalidateTable && (loadingMonthTask == null || loadingMonthTask.getStatus() == AsyncTask.Status.RUNNING)) {
 			loadMonth(editableMonth, editableYear, editableCurrency);
 
 			fab.setVisibility(editableMonth == TableGeneral.OLDER_THAN_UPDATE
 					&& editableYear == TableGeneral.OLDER_THAN_UPDATE? GONE:VISIBLE);
 
-			dateChanged = false;
+			invalidateTable = false;
 		}
-		if(invalidateToolbar) {
+		if (invalidateToolbar) {
 			invalidateOptionsMenu();
 			invalidateToolbar = false;
 		}
@@ -246,7 +274,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 		TinyDB tinyDB = new TinyDB(this);
 		ArrayList<String> currencies = tinyDB.getListString(CurrencyPicker.KEY);
 
-		if(currencies.size() != 0) {
+		if (currencies.size() != 0) {
 			MenuItem item = menu.findItem(R.id.action_currency);
 			Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
 			ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.simple_spinner_item,
@@ -256,7 +284,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 			spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 				@Override
 				public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-					if(pos == DEFAULT_CURRENCY)
+					if (pos == DEFAULT_CURRENCY)
 						editableCurrency = "";
 					else
 						editableCurrency = ((TextView) view).getText().toString();
@@ -335,8 +363,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 		final EditText debit = (EditText) row.findViewById(R.id.editDebit),
 				credit = (EditText) row.findViewById(R.id.editCredit);
 
-		final TextView lastBalance = index > 1? (TextView) table.getChildAt(index - 1).findViewById(R.id.textBalance):null;
-		final TextView balance = (TextView) row.findViewById(R.id.textBalance);
+		TextView lastBalance = index > 1? (TextView) table.getChildAt(index - 1).findViewById(R.id.textBalance):null;
+		TextView balance = (TextView) row.findViewById(R.id.textBalance);
 
 		TextWatcher watcher = new Utils.SimpleTextWatcher() {
 			@Override
@@ -509,8 +537,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 		tableGeneral.getReadableDatabase();//triggers onUpdate()
 
-		loadingMonthTask = new LoadMonthAsyncTask(month, year, currency, tableGeneral, tableMonthlyBalance, table,
-				inflater, this, this);
+		loadingMonthTask = new LoadMonthAsyncTask(month, year, currency, tableGeneral,
+				tableMonthlyBalance, table, inflater, this, this, invertCreditDebit);
 
 		editableMonth = month;
 		editableYear = year;
@@ -541,7 +569,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 
 		loadShowcaseView(inflater, scrollView);
 
-		if(createNewRowWhenMonthLoaded && table != null) {
+		if (createNewRowWhenMonthLoaded && table != null) {
 			inflater.inflate(R.layout.newrow_main, table);
 
 			scrollView.fullScroll(View.FOCUS_DOWN);
@@ -586,7 +614,7 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 			final int rowToEdit = FIRST_REAL_ROW;
 
 			if (table.getChildAt(rowToEdit) == null) {
-				inflater.inflate(R.layout.newrow_main, table);
+				inflateNewRow();
 
 				scrollView.fullScroll(View.FOCUS_DOWN);
 
@@ -637,8 +665,21 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 		}
 	}
 
-  private void updateEditableRow(int value) {
-		if(value == -1 || table == null)
+	private void inflateNewRow() {
+		inflater.inflate(R.layout.newrow_main, table);
+
+		if (invertCreditDebit) {
+			View r = table.getChildAt(table.getChildCount() - 1);
+
+			r.findViewById(R.id.textCredit).setId(R.id.textDebit);
+			r.findViewById(R.id.textDebit).setId(R.id.textCredit);
+			r.findViewById(R.id.editCredit).setId(R.id.editDebit);
+			r.findViewById(R.id.editDebit).setId(R.id.editCredit);
+		}
+	}
+
+	private void updateEditableRow(int value) {
+		if (value == -1 || table == null)
 			ACRAHelper.reset();
 		else
 			ACRAHelper.writeData(table, editableMonth, editableYear);

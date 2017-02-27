@@ -8,5 +8,8 @@
         android:key="pref_invertcreditdebit"
         android:title="Invert credit and debit"
         android:summary="Credit and debit interchange places in table"
-        android:defaultValue="false" />
+    android:defaultValue="false" />
+    <Preference
+        android:title="About"
+        android:summary="v1.3.3"/>
 </PreferenceScreen>

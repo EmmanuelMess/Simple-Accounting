@@ -10,6 +10,7 @@ import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
 
+import com.emmanuelmess.simpleaccounting.MainActivity;
 import com.emmanuelmess.simpleaccounting.R;
 import com.emmanuelmess.simpleaccounting.utils.Utils;
 
@@ -26,6 +27,9 @@ import com.emmanuelmess.simpleaccounting.utils.Utils;
  */
 public class SettingsActivity extends AppCompatPreferenceActivity implements Preference.OnPreferenceChangeListener {
 
+	public static final String INVERT_CREDIT_DEBIT_SETTING = "pref_invertcreditdebit";
+	public static final String CURRENCY_PICKER_SETTING = "pref_currencypicker";
+
 	/**
 	 * Binds a preference's summary to its value. More specifically, when the
 	 * preference's value is changed, its summary (line of text below the
@@ -41,11 +45,14 @@ public class SettingsActivity extends AppCompatPreferenceActivity implements Pre
 		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(
 				preference.getContext());
 
-		if(Utils.equal(preference.getKey(), "pref_invertcreditdebit"))
-		// Trigger the listener immediately with the preference's
-		// current value.
-			onPreferenceChange(preference, sharedPref.getBoolean(preference.getKey(), false));
-		else
+		if(Utils.equal(preference.getKey(), INVERT_CREDIT_DEBIT_SETTING)) {
+			// Trigger the listener immediately with the preference's
+			// current value.
+			boolean newValue = sharedPref.getBoolean(preference.getKey(), false);
+			onPreferenceChange(preference, newValue);
+			MainActivity.invalidateTableHeader(newValue);
+
+		} else
 			onPreferenceChange(preference, sharedPref.getString(preference.getKey(), ""));
 	}
 
@@ -105,8 +112,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity implements Pre
 
 		// Bind the summaries of EditText/List/Dialog/Ringtone preferences to their values. When their values change,
 		// their summaries are updated to reflect the new value, per the Android Design guidelines.
-		bindPreferenceSummaryToValue(findPreference("pref_invertcreditdebit"));
-		bindPreferenceSummaryToValue(findPreference("pref_currencypicker"));
+		bindPreferenceSummaryToValue(findPreference(INVERT_CREDIT_DEBIT_SETTING));
+		bindPreferenceSummaryToValue(findPreference(CURRENCY_PICKER_SETTING));
 	}
 
 	/**
@@ -115,9 +122,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity implements Pre
 	 */
 	@Override
 	public boolean onPreferenceChange(Preference preference, Object newValue) {
-		// For all other preferences, set the summary to the value's
-		// simple string representation.
-		//preference.setSummary(newValue.toString());
 		return true;
 	}
 }

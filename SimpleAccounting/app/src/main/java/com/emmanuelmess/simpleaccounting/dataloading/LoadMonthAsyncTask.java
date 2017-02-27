@@ -31,11 +31,12 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 	private ArrayList<Integer> rowToDBRowConversion = new ArrayList<>();
 	private AsyncFinishedListener<ArrayList<Integer>> listener;
 	private MainActivity mainActivity;
+	private boolean invertCreditDebit = false;
 	private static boolean alreadyLoading = false;
 
 	public LoadMonthAsyncTask(int m, int y, String c, TableGeneral dbG, TableMonthlyBalance db, TableLayout t,
 	                          LayoutInflater i, AsyncFinishedListener<ArrayList<Integer>> l,
-	                          MainActivity a) {
+	                          MainActivity a, boolean invert) {
 		month = m;
 		year = y;
 		currency = c;
@@ -45,6 +46,7 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 		inflater = i;
 		listener = l;
 		mainActivity = a;
+		invertCreditDebit = invert;
 	}
 
 	@Override
@@ -84,10 +86,13 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
 
 			View row = mainActivity.loadRow();
 
-			for (int j = 0; j < MainActivity.TEXT_IDS.length; j++) {
-				row.findViewById(MainActivity.EDIT_IDS[j]).setVisibility(View.GONE);
+			int[] textIds = MainActivity.TEXT_IDS;
+			int[] editIds = MainActivity.EDIT_IDS;
 
-				TextView t = (TextView) row.findViewById(MainActivity.TEXT_IDS[j]);
+			for (int j = 0; j < textIds.length; j++) {
+				row.findViewById(editIds[j]).setVisibility(View.GONE);
+
+				TextView t = (TextView) row.findViewById(textIds[j]);
 				t.setVisibility(View.VISIBLE);
 				t.setText(dbRow[j]);
 			}
