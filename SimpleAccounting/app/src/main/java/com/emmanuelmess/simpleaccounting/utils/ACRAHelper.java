@@ -5,7 +5,7 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import com.emmanuelmess.simpleaccounting.MainActivity;
+import com.emmanuelmess.simpleaccounting.BuildConfig;
 
 import org.acra.ACRA;
 /**
@@ -22,23 +22,24 @@ public class ACRAHelper {
 	}
 
 	public static void reset() {
-		ACRA.getErrorReporter().clearCustomData();
+		if (!BuildConfig.DEBUG) ACRA.getErrorReporter().clearCustomData();
 	}
 
-
 	private static void setData(TableLayout t, int year, int month) {
-		StringBuilder s = new StringBuilder();
+		if (!BuildConfig.DEBUG) {
+			StringBuilder s = new StringBuilder();
 
-		s.append("Year: ").append(year).append("\nMonth: ").append(month);
+			s.append("Year: ").append(year).append("\nMonth: ").append(month);
 
-		for(int i = 0; i < t.getChildCount(); i++) {
-			TableRow r = (TableRow) t.getChildAt(i);
+			for (int i = 0; i < t.getChildCount(); i++) {
+				TableRow r = (TableRow) t.getChildAt(i);
 
-			for (int j = 0; j < r.getChildCount(); j++)
-				if(r.getChildAt(j).getVisibility() == View.VISIBLE)
-					s.append(" [").append(((TextView) r.getChildAt(j)).getText().length()).append("],");
+				for (int j = 0; j < r.getChildCount(); j++)
+					if (r.getChildAt(j).getVisibility() == View.VISIBLE)
+						s.append(" [").append(((TextView) r.getChildAt(j)).getText().length()).append("],");
 
-			ACRA.getErrorReporter().putCustomData(ROWS, s.substring(1, s.lastIndexOf(",")));
+				ACRA.getErrorReporter().putCustomData(ROWS, s.substring(1, s.lastIndexOf(",")));
+			}
 		}
 	}
 }

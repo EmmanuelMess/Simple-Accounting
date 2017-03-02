@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -62,7 +63,8 @@ import static com.emmanuelmess.simpleaccounting.utils.Utils.parseViewToString;
 /**
  * @author Emmanuel
  */
-public class MainActivity extends AppCompatActivity implements AsyncFinishedListener<ArrayList<Integer>> {
+public class MainActivity extends AppCompatActivity
+		implements AsyncFinishedListener<Pair<String[][], ArrayList<Integer>>> {
 
 	public static final String UPDATE_YEAR_SETTING = "update 1.2 year";
 	public static final String UPDATE_MONTH_SETTING = "update 1.2 month";
@@ -89,7 +91,8 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	private TableMonthlyBalance tableMonthlyBalance;
 	private LayoutInflater inflater;
 	private ScrollView scrollView;
-	private AsyncTask<Void, Void, String[][]> loadingMonthTask = null;
+	private AsyncTask<Void, Void, Pair<String[][], ArrayList<Integer>>> loadingMonthTask = null;
+	private AsyncTask<Void, Void, Double> loadPrevBalance = null;
 
 	private int updateYear, updateMonth;
 	private static boolean invertCreditDebit = false;
@@ -533,40 +536,108 @@ public class MainActivity extends AppCompatActivity implements AsyncFinishedList
 	}
 
 	private void loadMonth(int month, int year, String currency) {
-		findViewById(R.id.progressBar).setVisibility(VISIBLE);
+		if(!LoadMonthAsyncTask.isAlreadyLoading()) {
+			findViewById(R.id.progressBar).setVisibility(VISIBLE);
 
-		FIRST_REAL_ROW = 1;
+			FIRST_REAL_ROW = 1;
 
-		if (table.getChildCount() > 1)
-			for (int i = table.getChildCount() - 1; i > 0; i--)
-				table.removeViewAt(i);
+			if (table.getChildCount() > 1)
+				for (int i = table.getChildCount() - 1; i > 0; i--)
+					table.removeViewAt(i);
 
-		tableGeneral.getReadableDatabase();//triggers onUpdate()
+			tableGeneral.getReadableDatabase();//triggers onUpdate()
 
-		loadingMonthTask = new LoadMonthAsyncTask(month, year, currency, tableGeneral,
-				tableMonthlyBalance, table, inflater, this, this, invertCreditDebit);
+			loadingMonthTask = new LoadMonthAsyncTask(month, year, currency, tableGeneral, this,
+					invertCreditDebit);
 
-		editableMonth = month;
-		editableYear = year;
-		editableCurrency = currency;
+			editableMonth = month;
+			editableYear = year;
+			editableCurrency = currency;
 
-		TextView monthText = (TextView) findViewById(R.id.textMonth);
+			TextView monthText = (TextView) findViewById(R.id.textMonth);
 
-		if (month != -1 && year != TableGeneral.OLDER_THAN_UPDATE) {
-			((TextView) findViewById(R.id.textMonth)).setText(MONTH_STRINGS[month]);
+			if (month != -1 && year != TableGeneral.OLDER_THAN_UPDATE) {
+				((TextView) findViewById(R.id.textMonth)).setText(MONTH_STRINGS[month]);
 
-			(new LoadPrevBalanceAsyncTask(month, year, tableMonthlyBalance, table, inflater,
-					rowToDBRowConversion1->loadingMonthTask.execute(), this)).execute();
-		} else {
-			monthText.setText(getString(R.string.before_update_1_2)
-					+ " " + getString(MONTH_STRINGS[updateMonth]).toLowerCase() + "-" + updateYear);
-			loadingMonthTask.execute();
+				loadPrevBalance = new LoadPrevBalanceAsyncTask(month, year, tableMonthlyBalance,
+						(lastMonthData) -> {
+							if (lastMonthData != null) {
+								inflater.inflate(R.layout.newrow_main, table);
+
+								int rowViewIndex = table.getChildCount() - 1;
+								TableRow row = (TableRow) table.getChildAt(rowViewIndex);
+
+								for (int j = 0; j < TEXT_IDS.length; j++) {
+									row.findViewById(EDIT_IDS[j]).setVisibility(View.GONE);
+									row.findViewById(TEXT_IDS[j]).setVisibility(View.VISIBLE);
+								}
+
+								((TextView) row.findViewById(R.id.textRef)).setText(R.string.previous_balance);
+								((TextView) row.findViewById(R.id.textCredit)).setText("");
+								((TextView) row.findViewById(R.id.textDebit)).setText("");
+
+								TextView t = (TextView) row.findViewById(R.id.textBalance);
+								String s = "$ " + String.valueOf(lastMonthData);
+								t.setText(s);
+								setFirstRealRow(2);
+							}
+							loadingMonthTask.execute();
+						});
+
+				loadPrevBalance.execute();
+			} else {
+				monthText.setText(getString(R.string.before_update_1_2)
+						+ " " + getString(MONTH_STRINGS[updateMonth]).toLowerCase() + "-" + updateYear);
+				loadingMonthTask.execute();
+			}
+		} else if(editableMonth != month || editableYear != year || !Utils.equal(editableCurrency, currency)) {
+			loadPrevBalance.cancel(true);
+			loadingMonthTask.cancel(true);
 		}
 	}
 
 	@Override
-	public void OnAsyncFinished(ArrayList<Integer> rowToDBRowConversion) {
-		this.rowToDBRowConversion = rowToDBRowConversion;
+	public void OnAsyncFinished(Pair<String[][], ArrayList<Integer>> dbRowsPairedRowToDBConversion) {
+		if(table.getChildCount() - getFirstRealRow() > 0)
+			throw new IllegalArgumentException("Table already contains "
+					+ (table.getChildCount() - getFirstRealRow()) + " elements; " +
+					"delete all rows before executing LoadMonthAsyncTask!");
+
+		BigDecimal memBalance = BigDecimal.ZERO;
+
+		if (getFirstRealRow() == 2) {
+			memBalance = memBalance.add(Utils.parseString(
+					((TextView) table.getChildAt(1).findViewById(R.id.textBalance))
+							.getText().toString().substring(2)));
+		}
+
+		for (String[] dbRow : dbRowsPairedRowToDBConversion.first) {
+			inflater.inflate(R.layout.newrow_main, table);
+
+			View row = loadRow();
+
+			int[] textIds = MainActivity.TEXT_IDS;
+			int[] editIds = MainActivity.EDIT_IDS;
+
+			for (int j = 0; j < textIds.length; j++) {
+				row.findViewById(editIds[j]).setVisibility(View.GONE);
+
+				TextView t = (TextView) row.findViewById(textIds[j]);
+				t.setVisibility(View.VISIBLE);
+				t.setText(dbRow[j]);
+			}
+
+			TextView t = (TextView) row.findViewById(R.id.textBalance);
+			if (dbRow[2] != null)
+				memBalance = memBalance.add(Utils.parseString(dbRow[2]));
+			if (dbRow[3] != null)
+				memBalance = memBalance.subtract(Utils.parseString(dbRow[3]));
+
+			String s = "$ " + String.valueOf(memBalance);
+			t.setText(s);
+		}
+
+		this.rowToDBRowConversion = dbRowsPairedRowToDBConversion.second;
 		addToMonthsDB();
 
 		scrollView.fullScroll(View.FOCUS_DOWN);
