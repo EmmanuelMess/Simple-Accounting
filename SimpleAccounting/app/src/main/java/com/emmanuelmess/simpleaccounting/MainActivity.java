@@ -130,9 +130,6 @@ public class MainActivity extends AppCompatActivity
 	public static void invalidateToolbar() {
 		invalidateToolbar = true;
 	}
-	public static void invalidateTable() {
-		invalidateTable = true;
-	}
 
 	public static void invalidateTableHeader(boolean invertCreditDebit) {
 		if (MainActivity.invertCreditDebit != invertCreditDebit) {
@@ -170,8 +167,6 @@ public class MainActivity extends AppCompatActivity
 
 		updateYear = preferences.getInt(UPDATE_YEAR_SETTING, -1);
 		updateMonth = preferences.getInt(UPDATE_MONTH_SETTING, -1);
-
-		invalidateTableHeader(preferences.getBoolean(INVERT_CREDIT_DEBIT_SETTING, false));
 
 		int loadMonth, loadYear;
 		String loadCurrency = "";
@@ -236,17 +231,22 @@ public class MainActivity extends AppCompatActivity
 	@Override
 	protected void onResume() {
 		super.onResume();
-		if (invalidateTableHeader) {
-			int tempId = 0;
+		if (invertCreditDebit !=
+				getDefaultSharedPreferences(this).getBoolean(INVERT_CREDIT_DEBIT_SETTING, false)) {
 
-			table.findViewById(R.id.credit).setId(tempId);
-			table.findViewById(R.id.debit).setId(R.id.credit);
-			table.findViewById(tempId).setId(R.id.debit);
+			invertCreditDebit =
+					getDefaultSharedPreferences(this).getBoolean(INVERT_CREDIT_DEBIT_SETTING, false);
 
-			((TextView) findViewById(R.id.credit)).setText(R.string.credit);
-			((TextView) findViewById(R.id.debit)).setText(R.string.debit);
+			if(invertCreditDebit) {
+				int tempId = 0;
 
-			invalidateTableHeader = false;
+				table.findViewById(R.id.credit).setId(tempId);
+				table.findViewById(R.id.debit).setId(R.id.credit);
+				table.findViewById(tempId).setId(R.id.debit);
+
+				((TextView) findViewById(R.id.credit)).setText(R.string.credit);
+				((TextView) findViewById(R.id.debit)).setText(R.string.debit);
+			}
 		}
 		if (invalidateTable && (loadingMonthTask == null || loadingMonthTask.getStatus() == AsyncTask.Status.RUNNING)) {
 			loadMonth(editableMonth, editableYear, editableCurrency);
@@ -612,7 +612,7 @@ public class MainActivity extends AppCompatActivity
 		}
 
 		for (String[] dbRow : dbRowsPairedRowToDBConversion.first) {
-			inflater.inflate(R.layout.newrow_main, table);
+			inflateNewRow();
 
 			View row = loadRow();
 
@@ -647,7 +647,7 @@ public class MainActivity extends AppCompatActivity
 		loadShowcaseView(inflater, scrollView);
 
 		if (createNewRowWhenMonthLoaded && table != null) {
-			inflater.inflate(R.layout.newrow_main, table);
+			inflateNewRow();
 
 			scrollView.fullScroll(View.FOCUS_DOWN);
 
@@ -748,10 +748,16 @@ public class MainActivity extends AppCompatActivity
 		if (invertCreditDebit) {
 			View r = table.getChildAt(table.getChildCount() - 1);
 
-			r.findViewById(R.id.textCredit).setId(R.id.textDebit);
+			r.findViewById(R.id.textCredit).setId(0);
 			r.findViewById(R.id.textDebit).setId(R.id.textCredit);
-			r.findViewById(R.id.editCredit).setId(R.id.editDebit);
+			r.findViewById(0).setId(R.id.textDebit);
+
+			r.findViewById(R.id.editCredit).setId(0);
 			r.findViewById(R.id.editDebit).setId(R.id.editCredit);
+			r.findViewById(0).setId(R.id.editDebit);
+
+			((EditText) r.findViewById(R.id.editCredit)).setHint(R.string.credit);
+			((EditText) r.findViewById(R.id.editDebit)).setHint(R.string.debit);
 		}
 	}
 
