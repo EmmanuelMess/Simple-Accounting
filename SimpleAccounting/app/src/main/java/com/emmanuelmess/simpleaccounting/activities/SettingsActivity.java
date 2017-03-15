@@ -48,11 +48,10 @@ public class SettingsActivity extends AppCompatPreferenceActivity implements Pre
 		if(Utils.equal(preference.getKey(), INVERT_CREDIT_DEBIT_SETTING)) {
 			// Trigger the listener immediately with the preference's
 			// current value.
-			boolean newValue = sharedPref.getBoolean(preference.getKey(), false);
+			boolean newValue = sharedPref.getBoolean(INVERT_CREDIT_DEBIT_SETTING, false);
 			onPreferenceChange(preference, newValue);
 			MainActivity.invalidateTableHeader(newValue);
-
-		} else
+		} else if(!Utils.equal(preference.getKey(), INVERT_CREDIT_DEBIT_SETTING))
 			onPreferenceChange(preference, sharedPref.getString(preference.getKey(), ""));
 	}
 

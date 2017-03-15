@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <com.emmanuelmess.simpleaccounting.activities.dialogs.CurrencyPicker
-        android:defaultValue=""
         android:key="pref_currencypicker"
         android:title="@string/pref_title_currency"/>
     <SwitchPreference
         android:key="pref_invertcreditdebit"
-        android:title="Invert credit and debit"
-        android:summary="Credit and debit interchange places in table"
-    android:defaultValue="false" />
+        android:title="@string/pref_title_invertcreditdebit"
+        android:summary="@string/pref_summary_invertcreditdebit"
+        android:defaultValue="false" />
     <Preference
-        android:title="About"
-        android:summary="v1.3.3"/>
+        android:title="Version"
+        android:summary="@string/app_ver"/>
 </PreferenceScreen>

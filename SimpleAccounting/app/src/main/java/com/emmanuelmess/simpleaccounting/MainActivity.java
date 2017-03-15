@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity
 	private static String editableCurrency = "";//same as currencyName, except when it is the default in that case it is ""
 	private static String currencyName = "";// the string the user entered on PreferenceActivity
 
-	private static boolean invalidateTable = false, invalidateToolbar = false, invalidateTableHeader = false;
+	private static boolean invalidateTable = false, invalidateToolbar = false;
 
 	private ArrayList<Integer> rowToDBRowConversion = new ArrayList<>();
 
@@ -132,10 +132,8 @@ public class MainActivity extends AppCompatActivity
 	}
 
 	public static void invalidateTableHeader(boolean invertCreditDebit) {
-		if (MainActivity.invertCreditDebit != invertCreditDebit) {
+		if (MainActivity.invertCreditDebit != invertCreditDebit)
 			MainActivity.invertCreditDebit = invertCreditDebit;
-			invalidateTableHeader = true;
-		}
 	}
 
 	@Override

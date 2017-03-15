@@ -40,4 +40,7 @@
     <string name="delete">Eliminar</string>
     <string name="default_ext">Predeterminado</string>
     <string name="default_short">PRED</string>
+    <string name="version">Versión</string>
+    <string name="pref_title_invertcreditdebit">Invertir debito y credito</string>
+    <string name="pref_summary_invertcreditdebit">Credito y debito intercambian lugares en la tabla</string>
 </resources>

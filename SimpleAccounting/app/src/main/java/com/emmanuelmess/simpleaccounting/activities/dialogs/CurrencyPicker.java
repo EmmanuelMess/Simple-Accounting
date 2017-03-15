@@ -40,6 +40,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 
 	private TinyDB tinyDB;
 	private ArrayList<String> currentValue = new ArrayList<>();
+	private boolean hasValueChanged = true;
 	private LayoutInflater inflater;
 	private boolean firstTimeItemHeighted = true;
 	private SparseIntArray itemPos = new SparseIntArray(1);
@@ -55,6 +56,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 
 		tinyDB = new TinyDB(context);
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
 
 		setDialogLayoutResource(R.layout.currencypicker_dialog);
 		setPositiveButtonText(android.R.string.ok);
@@ -137,6 +139,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 		} else {
 			// Set default state from the XML attribute
 			currentValue = new ArrayList<>(Arrays.asList(TextUtils.split((String) defaultValue, "‚‗‚")));
+			hasValueChanged = true;
 			persistStringList(currentValue);
 		}
 	}
@@ -157,6 +160,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 			}
 
 			persistStringList(currentValue);
+			hasValueChanged = true;
 			MainActivity.invalidateToolbar();
 		} else currentValue = getPersistedStringList(DEFAULT_VALUE);
 	}
@@ -168,6 +172,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 
 	@Override
 	public CharSequence getSummary() {
+		currentValue = getPersistedStringList(DEFAULT_VALUE);
 		if(currentValue.size() != 0) {
 			String[] myStringList = currentValue.toArray(new String[currentValue.size()]);
 			return TextUtils.join(", ", myStringList);
@@ -211,9 +216,10 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 	private ArrayList<String> getPersistedStringList(ArrayList<String> defaultValue) {
 		if (!shouldPersist()) {
 			return defaultValue;
-		}
-
-		return tinyDB.getListString(KEY);
+		} else if(hasValueChanged) {
+			hasValueChanged = false;
+			return tinyDB.getListString(KEY);
+		} else return currentValue;
 	}
 
 	@Override
@@ -267,6 +273,8 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 			@Override
 			public boolean onTouch(View v1, MotionEvent event) {
 				int childIndex = getChildIndex(item);
+
+				hasValueChanged = true;
 
 				switch (event.getAction()) {
 					case MotionEvent.ACTION_DOWN:
@@ -353,6 +361,8 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 
 		if (childIndex > 0 && linearLayout.getChildAt(childIndex - 1) != null)
 			linearLayout.getChildAt(childIndex - 1).findViewById(R.id.text).requestFocus();
+
+		hasValueChanged = true;
 	}
 
 	private interface OnFinishedLoadingListener {
