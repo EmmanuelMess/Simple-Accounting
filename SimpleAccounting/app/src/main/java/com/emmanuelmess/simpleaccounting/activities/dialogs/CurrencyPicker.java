@@ -397,7 +397,6 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 	private void swap(int i1, int i2) {
 		Collections.swap(currentValue, i1+1, i2+1);//+1 to account for the default elem
 		Collections.swap(isItemNew, i1+1, i2+1);//+1 to account for the default elem
-		// TODO: 19/3/2017 isItemNew with 7 elem instead of 3
 
 		Integer m = itemPos.get(i1);
 		itemPos.removeAt(i1);
