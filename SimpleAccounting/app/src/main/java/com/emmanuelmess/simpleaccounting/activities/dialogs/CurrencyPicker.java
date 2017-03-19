@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.emmanuelmess.simpleaccounting.MainActivity;
 import com.emmanuelmess.simpleaccounting.R;
@@ -28,6 +29,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 
 /**
  * @author Emmanuel
@@ -49,6 +51,8 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 	private LinearLayout linearLayout;
 	private View deleteConfirmation;
 	private View add;
+	private EditText textDefault;
+	private TextView textItemToDelete;
 	private LockableScrollView scrollView;
 
 	public CurrencyPicker(Context context, AttributeSet attrs) {
@@ -73,7 +77,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 
 	@Override
 	public void onBindDialogView(View view) {
-		EditText textDefault = ((EditText) view.findViewById(R.id.textDefault));
+		textDefault = ((EditText) view.findViewById(R.id.textDefault));
 
 		if(currentValue.size() > 0)
 			textDefault.setText(Utils.equal(currentValue.get(0), getContext().getString(R.string.default_short))? "":currentValue.get(0));
@@ -85,14 +89,15 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 			}
 		});
 
+		textItemToDelete = (TextView) view.findViewById(R.id.textItemToDelete);
 		linearLayout = ((LinearLayout) view.findViewById(R.id.scrollView));
 		scrollView = ((LockableScrollView) view.findViewById(R.id.scrollerView));
 		add = view.findViewById(R.id.add);
 		deleteConfirmation = view.findViewById(R.id.deleteConfirmation);
 		deleteConfirmation.findViewById(R.id.cancel).setOnClickListener(v->{
 			deleteConfirmation.setVisibility(GONE);
-			scrollView.setVisibility(View.VISIBLE);
-			add.setVisibility(View.VISIBLE);
+			scrollView.setVisibility(VISIBLE);
+			add.setVisibility(VISIBLE);
 		});
 		add.setOnClickListener(this);
 		super.onBindDialogView(view);
@@ -325,7 +330,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 
 		EditText text = ((EditText) item.findViewById(R.id.text));
 		text.setOnFocusChangeListener((v1, hasFocus)->{
-			item.findViewById(R.id.delete).setVisibility(hasFocus? View.VISIBLE:View.INVISIBLE);
+			item.findViewById(R.id.delete).setVisibility(hasFocus? VISIBLE:View.INVISIBLE);
 		});
 		text.addTextChangedListener(new Utils.SimpleTextWatcher() {
 			@Override
@@ -346,16 +351,32 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 	}
 
 	private void animateDeleteConfirmation(View item, int childIndex) {
+		textDefault.setVisibility(GONE);
 		scrollView.setVisibility(GONE);
 		add.setVisibility(GONE);
-		deleteConfirmation.setVisibility(View.VISIBLE);
+
+		textItemToDelete.setText(currentValue.get(childIndex+1));
+		textItemToDelete.setVisibility(VISIBLE);
+
+		deleteConfirmation.setVisibility(VISIBLE);
 		deleteConfirmation.requestFocus();
 		deleteConfirmation.findViewById(R.id.deleteData).setOnClickListener(v->{
 			removeItem(item, childIndex);
-			deleteConfirmation.setVisibility(GONE);
-			scrollView.setVisibility(View.VISIBLE);
-			add.setVisibility(View.VISIBLE);
+			invisibilizeDeleteConfirmation();
 		});
+		deleteConfirmation.findViewById(R.id.cancel).setOnClickListener(v->{
+			invisibilizeDeleteConfirmation();
+		});
+	}
+
+	private void invisibilizeDeleteConfirmation() {
+		deleteConfirmation.setVisibility(GONE);
+		textItemToDelete.setVisibility(GONE);
+		textItemToDelete.setText("");
+
+		textDefault.setVisibility(VISIBLE);
+		scrollView.setVisibility(VISIBLE);
+		add.setVisibility(VISIBLE);
 	}
 
 	private void removeItem(View item, int childIndex) {

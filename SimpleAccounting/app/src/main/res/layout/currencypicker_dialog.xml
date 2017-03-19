@@ -27,7 +27,16 @@
                 android:gravity="center_vertical|start"
                 android:background="@android:color/transparent"
                 android:hint="@string/default_ext"/>
-        </RelativeLayout>
+
+        <TextView
+                android:layout_height="match_parent"
+                android:id="@+id/textItemToDelete"
+                android:layout_width="match_parent"
+                android:textAlignment="gravity"
+                android:gravity="center_vertical|start"
+                android:background="@android:color/transparent"
+                android:visibility="gone"/>
+    </RelativeLayout>
 
     <com.emmanuelmess.simpleaccounting.activities.views.LockableScrollView
         android:layout_width="match_parent"
