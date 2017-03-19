@@ -161,8 +161,13 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 
 			persistStringList(currentValue);
 			hasValueChanged = true;
+			notifyChanged();
 			MainActivity.invalidateToolbar();
 		} else currentValue = getPersistedStringList(DEFAULT_VALUE);
+
+		itemPos.clear();
+		itemPosRanges.clear();
+		isItemNew.clear();
 	}
 
 	@Override
@@ -216,10 +221,10 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 	private ArrayList<String> getPersistedStringList(ArrayList<String> defaultValue) {
 		if (!shouldPersist()) {
 			return defaultValue;
-		} else if(hasValueChanged) {
-			hasValueChanged = false;
+		} else //if(hasValueChanged) {
+		//	hasValueChanged = false;
 			return tinyDB.getListString(KEY);
-		} else return currentValue;
+		//} else return currentValue;
 	}
 
 	@Override
@@ -259,17 +264,6 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 		item.findViewById(R.id.move).setOnTouchListener(new View.OnTouchListener() {
 			float dy;
 
-			private void move(int getToPos, int itemIndex) {
-				if (getToPos == itemIndex) return;
-
-				boolean direction = getToPos > itemIndex;
-				int toBeMovedIndex = itemIndex + (direction? +1:-1);
-				if (toBeMovedIndex != getToPos)
-					move(getToPos, toBeMovedIndex);
-
-				swap(itemIndex, toBeMovedIndex);
-			}
-
 			@Override
 			public boolean onTouch(View v1, MotionEvent event) {
 				int childIndex = getChildIndex(item);
@@ -294,7 +288,8 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 
 						ViewCompat.animate(item).y(moveTo).setDuration(0).start();
 
-						int overItemIndex = itemPosRanges.get((int) (ViewCompat.getY(item) + item.getHeight()/2f));
+						int overItemIndex = itemPosRanges.get((int) (ViewCompat.getY(item)
+								+ item.getHeight()/2f));
 
 						move(childIndex, overItemIndex);
 
@@ -314,6 +309,17 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 						return false;
 				}
 				return true;
+			}
+
+			private void move(int getToPos, int itemIndex) {
+				if (getToPos == itemIndex) return;
+
+				boolean direction = getToPos > itemIndex;
+				int toBeMovedIndex = itemIndex + (direction? +1:-1);
+				if (toBeMovedIndex != getToPos)
+					move(getToPos, toBeMovedIndex);
+
+				swap(itemIndex, toBeMovedIndex);
 			}
 		});
 
@@ -361,17 +367,16 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 
 		if (childIndex > 0 && linearLayout.getChildAt(childIndex - 1) != null)
 			linearLayout.getChildAt(childIndex - 1).findViewById(R.id.text).requestFocus();
-
-		hasValueChanged = true;
 	}
 
 	private interface OnFinishedLoadingListener {
-		public void onFinishedLoading();
+		void onFinishedLoading();
 	}
 
 	private void swap(int i1, int i2) {
-		Collections.swap(currentValue, i1, i2);
-		Collections.swap(isItemNew, i1, i2);
+		Collections.swap(currentValue, i1+1, i2+1);//+1 to account for the default elem
+		Collections.swap(isItemNew, i1+1, i2+1);//+1 to account for the default elem
+		// TODO: 19/3/2017 isItemNew with 7 elem instead of 3
 
 		Integer m = itemPos.get(i1);
 		itemPos.removeAt(i1);
