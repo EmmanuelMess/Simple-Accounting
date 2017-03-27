@@ -51,7 +51,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity implements Pre
 			boolean newValue = sharedPref.getBoolean(INVERT_CREDIT_DEBIT_SETTING, false);
 			onPreferenceChange(preference, newValue);
 			MainActivity.invalidateTableHeader(newValue);
-		} else if(!Utils.equal(preference.getKey(), INVERT_CREDIT_DEBIT_SETTING))
+		} else
 			onPreferenceChange(preference, sharedPref.getString(preference.getKey(), ""));
 	}
 
