@@ -105,7 +105,7 @@ public class TableGeneral extends Database {
 							currentBalance = currentBalance.subtract(Utils.parseString(data[3]));
 					}
 
-					tableMonthlyBalance.updateMonth(OLDER_THAN_UPDATE, OLDER_THAN_UPDATE, currentBalance.doubleValue());
+					tableMonthlyBalance.updateMonth(OLDER_THAN_UPDATE, OLDER_THAN_UPDATE, "", currentBalance.doubleValue());
 				}
 			case 4:
 				sql = "ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + COLUMNS[6] + " TEXT;";

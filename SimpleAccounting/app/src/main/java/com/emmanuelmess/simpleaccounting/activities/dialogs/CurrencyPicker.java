@@ -83,7 +83,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 			textDefault.setText(Utils.equal(currentValue.get(0), getContext().getString(R.string.default_short))? "":currentValue.get(0));
 		else
 			currentValue.add("");
-		hasValueChanged = true;
+		//hasValueChanged = true;
 
 		textDefault.addTextChangedListener(new Utils.SimpleTextWatcher() {
 			@Override
@@ -239,7 +239,6 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 	@Override
 	public void onClick(View v) {
 		currentValue.add("");
-		hasValueChanged = true;
 		createItem(null);
 	}
 

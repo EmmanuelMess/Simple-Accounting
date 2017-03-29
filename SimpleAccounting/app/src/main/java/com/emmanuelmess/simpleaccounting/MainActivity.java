@@ -557,7 +557,7 @@ public class MainActivity extends AppCompatActivity
 			if (month != -1 && year != TableGeneral.OLDER_THAN_UPDATE) {
 				((TextView) findViewById(R.id.textMonth)).setText(MONTH_STRINGS[month]);
 
-				loadPrevBalance = new LoadPrevBalanceAsyncTask(month, year, tableMonthlyBalance,
+				loadPrevBalance = new LoadPrevBalanceAsyncTask(month, year, editableCurrency, tableMonthlyBalance,
 						(lastMonthData) -> {
 							if (lastMonthData != null) {
 								inflater.inflate(R.layout.newrow_main, table);
@@ -674,7 +674,8 @@ public class MainActivity extends AppCompatActivity
 			TextWatcher watcher = new Utils.SimpleTextWatcher() {
 				@Override
 				public void afterTextChanged(Editable editable) {
-					tableMonthlyBalance.updateMonth(editableMonth, editableYear, Double.parseDouble(editable.toString().substring(1)));
+					tableMonthlyBalance.updateMonth(editableMonth, editableYear, editableCurrency,
+							Double.parseDouble(editable.toString().substring(1)));
 				}
 			};
 			((TextView) row.findViewById(R.id.textBalance)).addTextChangedListener(watcher);
