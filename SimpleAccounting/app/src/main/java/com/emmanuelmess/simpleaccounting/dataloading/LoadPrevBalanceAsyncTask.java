@@ -26,6 +26,11 @@ public class LoadPrevBalanceAsyncTask extends AsyncTask<Void, Void, Double> {
 	}
 
 	@Override
+	protected void onPreExecute() {
+		tableMonthlyBalance.getReadableDatabase();//updates the database, calls onUpgrade()
+	}
+
+	@Override
 	protected Double doInBackground(Void... v) {
 		return tableMonthlyBalance.getBalanceLastMonthWithData(month, year, currency);
 	}

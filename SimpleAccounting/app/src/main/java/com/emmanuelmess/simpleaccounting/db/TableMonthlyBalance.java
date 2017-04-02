@@ -14,7 +14,7 @@ public class TableMonthlyBalance extends Database {
 	private static final String[] COLUMNS = new String[] {"MONTH", "YEAR", "CURRENCY", "BALANCE"};
 	public static final String TABLE_NAME = "MONTHLY_BALANCE";
 
-	private static final int DATABASE_VERSION = 3;
+	private static final int DATABASE_VERSION = 4;
 	private static final String TABLE_CREATE = format("CREATE TABLE %1$s(%2$s INT, %3$s INT, %4$s INT, %5$s TEXT, %6$s REAL);",
 			TABLE_NAME, NUMBER_COLUMN, COLUMNS[0], COLUMNS[1], COLUMNS[2], COLUMNS[3]);
 
@@ -36,14 +36,8 @@ public class TableMonthlyBalance extends Database {
 				db.execSQL(sql);
 				db.execSQL(TABLE_CREATE);
 			case 2:
-				final String tempTable = "temp";
-				sql = "CREATE TEMPORARY TABLE " + tempTable + "(" + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + ");" +
-						"INSERT INTO " + tempTable + " SELECT " + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[3] + " FROM " + TABLE_NAME + ";" +
-						"DROP TABLE " + TABLE_NAME + ";" +
-						"CREATE TABLE " + TABLE_NAME + "(" + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + ");" +
-						"INSERT INTO " + TABLE_NAME + " SELECT " + COLUMNS[0] + "," + COLUMNS[1] + "," + COLUMNS[2] + "," + COLUMNS[3] + " FROM " + tempTable + ";" +
-						"DROP TABLE " + tempTable + ";";
-				db.execSQL(sql);//"copy, drop table, create new table, copy back" technique bc ALTER...DROP COLUMN isn't in SQLite
+				sql = "ALTER TABLE " + TABLE_NAME + " ADD " + COLUMNS[2] + " TEXT " + "AFTER " + COLUMNS[1] + ";";
+				db.execSQL(sql);
 		}
 	}
 
@@ -58,8 +52,6 @@ public class TableMonthlyBalance extends Database {
 	}
 
 	public Double getBalanceLastMonthWithData(int month, int year, String currency) {
-		getReadableDatabase();//updates the database, calls onUpgrade()
-
 		double data = 0;
 
 		String condMonth = SQLShort(AND, format("%1$s<%2$s" , COLUMNS[0], month), format("%1$s=%2$s" , COLUMNS[1] , year)),
