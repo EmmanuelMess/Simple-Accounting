@@ -11,8 +11,9 @@ import static java.lang.String.format;
  *         on 14/11/2016, at 16:52.
  */
 public class TableMonthlyBalance extends Database {
+	//Beware the columns in this array may not be in the real order
 	private static final String[] COLUMNS = new String[] {"MONTH", "YEAR", "CURRENCY", "BALANCE"};
-	public static final String TABLE_NAME = "MONTHLY_BALANCE";
+	private static final String TABLE_NAME = "MONTHLY_BALANCE";
 
 	private static final int DATABASE_VERSION = 4;
 	private static final String TABLE_CREATE = format("CREATE TABLE %1$s(%2$s INT, %3$s INT, %4$s INT, %5$s TEXT, %6$s REAL);",
@@ -36,7 +37,7 @@ public class TableMonthlyBalance extends Database {
 				db.execSQL(sql);
 				db.execSQL(TABLE_CREATE);
 			case 2:
-				sql = "ALTER TABLE " + TABLE_NAME + " ADD " + COLUMNS[2] + " TEXT " + "AFTER " + COLUMNS[1] + ";";
+				sql = "ALTER TABLE " + TABLE_NAME + " ADD " + COLUMNS[2] + " TEXT;";
 				db.execSQL(sql);
 		}
 	}
