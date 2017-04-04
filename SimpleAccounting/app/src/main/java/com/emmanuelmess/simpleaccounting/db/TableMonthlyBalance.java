@@ -37,7 +37,7 @@ public class TableMonthlyBalance extends Database {
 				db.execSQL(sql);
 				db.execSQL(TABLE_CREATE);
 			case 2:
-				sql = "ALTER TABLE " + TABLE_NAME + " ADD " + COLUMNS[2] + " TEXT;";
+				sql = "ALTER TABLE " + TABLE_NAME + " ADD " + COLUMNS[2] + " TEXT default '';";
 				db.execSQL(sql);
 		}
 	}
