@@ -38,11 +38,12 @@ import static android.view.View.VISIBLE;
 
 public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View.OnClickListener {
 	public static final String KEY = "currency_picker";
+
 	private static final ArrayList<String> DEFAULT_VALUE = new ArrayList<>();
+	private static boolean hasValueChanged = true;
+	private static ArrayList<String> currentValue = new ArrayList<>();
 
 	private TinyDB tinyDB;
-	private ArrayList<String> currentValue = new ArrayList<>();
-	private static boolean hasValueChanged = true;
 	private LayoutInflater inflater;
 	private boolean firstTimeItemHeighted = true;
 	private SparseIntArray itemPos = new SparseIntArray(1);
@@ -67,6 +68,20 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 		setNegativeButtonText(android.R.string.cancel);
 
 		setDialogIcon(null);
+	}
+
+	@Override
+	protected Object onGetDefaultValue(TypedArray a, int index) {
+		return a.getString(index);
+	}
+
+	@Override
+	public CharSequence getSummary() {
+		currentValue = getPersistedStringList(DEFAULT_VALUE);
+		if(currentValue.size() != 0) {
+			String[] myStringList = currentValue.toArray(new String[currentValue.size()]);
+			return TextUtils.join(", ", myStringList);
+		} else return getContext().getString(R.string.with_no_items_deactivated);
 	}
 
 	@Override
@@ -176,20 +191,6 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 		itemPosRanges.clear();
 		isItemNew.clear();
 		hasValueChanged = true;
-	}
-
-	@Override
-	protected Object onGetDefaultValue(TypedArray a, int index) {
-		return a.getString(index);
-	}
-
-	@Override
-	public CharSequence getSummary() {
-		currentValue = getPersistedStringList(DEFAULT_VALUE);
-		if(currentValue.size() != 0) {
-			String[] myStringList = currentValue.toArray(new String[currentValue.size()]);
-			return TextUtils.join(", ", myStringList);
-		} else return getContext().getString(R.string.with_no_items_deactivated);
 	}
 
 	/**
