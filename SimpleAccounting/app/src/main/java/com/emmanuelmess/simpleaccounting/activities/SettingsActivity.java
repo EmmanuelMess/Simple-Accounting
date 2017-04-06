@@ -1,6 +1,5 @@
 package com.emmanuelmess.simpleaccounting.activities;
 
-
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;

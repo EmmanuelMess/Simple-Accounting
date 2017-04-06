@@ -232,19 +232,17 @@ public class MainActivity extends AppCompatActivity
 		if (invertCreditDebit !=
 				getDefaultSharedPreferences(this).getBoolean(INVERT_CREDIT_DEBIT_SETTING, false)) {
 
+			int tempId = 0;
+
+			table.findViewById(R.id.credit).setId(tempId);
+			table.findViewById(R.id.debit).setId(R.id.credit);
+			table.findViewById(tempId).setId(R.id.debit);
+
+			((TextView) findViewById(R.id.credit)).setText(R.string.credit);
+			((TextView) findViewById(R.id.debit)).setText(R.string.debit);
+
 			invertCreditDebit =
 					getDefaultSharedPreferences(this).getBoolean(INVERT_CREDIT_DEBIT_SETTING, false);
-
-			if(invertCreditDebit) {
-				int tempId = 0;
-
-				table.findViewById(R.id.credit).setId(tempId);
-				table.findViewById(R.id.debit).setId(R.id.credit);
-				table.findViewById(tempId).setId(R.id.debit);
-
-				((TextView) findViewById(R.id.credit)).setText(R.string.credit);
-				((TextView) findViewById(R.id.debit)).setText(R.string.debit);
-			}
 		}
 		if (invalidateTable && (loadingMonthTask == null || loadingMonthTask.getStatus() != AsyncTask.Status.RUNNING)) {
 			loadMonth(editableMonth, editableYear, editableCurrency);
