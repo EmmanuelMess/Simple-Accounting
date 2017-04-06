@@ -246,7 +246,7 @@ public class MainActivity extends AppCompatActivity
 				((TextView) findViewById(R.id.debit)).setText(R.string.debit);
 			}
 		}
-		if (invalidateTable && (loadingMonthTask == null || loadingMonthTask.getStatus() == AsyncTask.Status.RUNNING)) {
+		if (invalidateTable && (loadingMonthTask == null || loadingMonthTask.getStatus() != AsyncTask.Status.RUNNING)) {
 			loadMonth(editableMonth, editableYear, editableCurrency);
 
 			fab.setVisibility(editableMonth == TableGeneral.OLDER_THAN_UPDATE
