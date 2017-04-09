@@ -767,9 +767,4 @@ public class MainActivity extends AppCompatActivity
 		editableRow = value;
 	}
 
-	public void debugChangeDate(int month, int year) {
-		if (BuildConfig.DEBUG)
-			loadMonth(month, year, editableCurrency);
-	}
-
 }
