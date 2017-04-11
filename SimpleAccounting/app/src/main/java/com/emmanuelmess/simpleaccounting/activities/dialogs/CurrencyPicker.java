@@ -39,10 +39,9 @@ import static android.view.View.VISIBLE;
 public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View.OnClickListener {
 	public static final String KEY = "currency_picker";
 
-	private static final ArrayList<String> DEFAULT_VALUE = new ArrayList<>();
-	private static boolean hasValueChanged = true;
-	private static ArrayList<String> currentValue = new ArrayList<>();
+	private final ArrayList<String> DEFAULT_VALUE = new ArrayList<>();
 
+	private ArrayList<String> currentValue = new ArrayList<>();
 	private TinyDB tinyDB;
 	private LayoutInflater inflater;
 	private boolean firstTimeItemHeighted = true;
@@ -77,9 +76,9 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 
 	@Override
 	public CharSequence getSummary() {
-		currentValue = getPersistedStringList(DEFAULT_VALUE);
-		if(currentValue.size() != 0) {
-			String[] myStringList = currentValue.toArray(new String[currentValue.size()]);
+		ArrayList<String> v = getPersistedStringList(DEFAULT_VALUE);
+		if(v.size() != 0) {
+			String[] myStringList = v.toArray(new String[v.size()]);
 			return TextUtils.join(", ", myStringList);
 		} else return getContext().getString(R.string.with_no_items_deactivated);
 	}
@@ -92,19 +91,18 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 
 	@Override
 	public void onBindDialogView(View view) {
+		currentValue = getPersistedStringList(DEFAULT_VALUE);
 		textDefault = ((EditText) view.findViewById(R.id.textDefault));
 
 		if(currentValue.size() > 0)
 			textDefault.setText(Utils.equal(currentValue.get(0), getContext().getString(R.string.default_short))? "":currentValue.get(0));
 		else
 			currentValue.add("");
-		//hasValueChanged = true;
 
 		textDefault.addTextChangedListener(new Utils.SimpleTextWatcher() {
 			@Override
 			public void afterTextChanged(Editable s) {
 				currentValue.set(0, s.toString());
-				hasValueChanged = true;
 			}
 		});
 
@@ -190,7 +188,6 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 		itemPos.clear();
 		itemPosRanges.clear();
 		isItemNew.clear();
-		hasValueChanged = true;
 	}
 
 	/**
@@ -210,7 +207,6 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 				return true;
 			}
 
-			hasValueChanged = true;
 			tinyDB.putListString(KEY, value);
 			return true;
 		}
@@ -229,12 +225,8 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 	 * @see #persistInt(int)
 	 */
 	private ArrayList<String> getPersistedStringList(ArrayList<String> defaultValue) {
-		if (!shouldPersist()) {
-			return defaultValue;
-		} else if(hasValueChanged) {
-			hasValueChanged = false;
-			return tinyDB.getListString(KEY);
-		} else return currentValue;
+		if (!shouldPersist()) return defaultValue;
+		else return tinyDB.getListString(KEY);
 	}
 
 	@Override

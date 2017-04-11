@@ -72,8 +72,7 @@ public class MainActivity extends AppCompatActivity
 	public static final String MONTH = "month", YEAR = "year";
 
 	public static int[] MONTH_STRINGS = new int[]{R.string.january, R.string.february, R.string.march, R.string.april, R.string.may,
-			R.string.june, R.string.july, R.string.august, R.string.september, R.string.october,
-			R.string.november, R.string.december};
+			R.string.june, R.string.july, R.string.august, R.string.september, R.string.october, R.string.november, R.string.december};
 
 	private final String PREFS_NAME = "shared prefs", PREFS_FIRST_RUN = "first_run";
 
