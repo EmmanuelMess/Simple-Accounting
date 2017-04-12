@@ -80,6 +80,8 @@ public class MainActivity extends AppCompatActivity
 	public static final int[] EDIT_IDS = {R.id.editDate, R.id.editRef, R.id.editCredit, R.id.editDebit, R.id.textBalance};
 	public static final int[] TEXT_IDS = {R.id.textDate, R.id.textRef, R.id.textCredit, R.id.textDebit};
 
+	private static boolean invertCreditDebit = false;
+
 	private int FIRST_REAL_ROW = 1;//excluding header and previous balance. HAS 2 STATES: 1 & 2
 	private int DEFAULT_CURRENCY = 0;
 
@@ -94,7 +96,6 @@ public class MainActivity extends AppCompatActivity
 	private AsyncTask<Void, Void, Double> loadPrevBalance = null;
 
 	private int updateYear, updateMonth;
-	private static boolean invertCreditDebit = false;
 
 	//pointer to row being edited STARTS IN 1
 	private int editableRow = -1;
@@ -162,8 +163,8 @@ public class MainActivity extends AppCompatActivity
 			prefEditor.apply();
 		}
 
-		updateYear = preferences.getInt(UPDATE_YEAR_SETTING, -1);
 		updateMonth = preferences.getInt(UPDATE_MONTH_SETTING, -1);
+		updateYear = preferences.getInt(UPDATE_YEAR_SETTING, -1);
 
 		int loadMonth, loadYear;
 		String loadCurrency = "";
@@ -197,7 +198,7 @@ public class MainActivity extends AppCompatActivity
 		});
 
 		fab = (FloatingActionButton) findViewById(R.id.fab);
-		if (editableMonth == TableGeneral.OLDER_THAN_UPDATE && editableYear == TableGeneral.OLDER_THAN_UPDATE) {
+		if (isSelectedMonthOlderThanUpdate()) {
 			fab.setVisibility(GONE);
 			space.setVisibility(GONE);
 		}
@@ -246,8 +247,7 @@ public class MainActivity extends AppCompatActivity
 		if (invalidateTable && (loadingMonthTask == null || loadingMonthTask.getStatus() != AsyncTask.Status.RUNNING)) {
 			loadMonth(editableMonth, editableYear, editableCurrency);
 
-			fab.setVisibility(editableMonth == TableGeneral.OLDER_THAN_UPDATE
-					&& editableYear == TableGeneral.OLDER_THAN_UPDATE? GONE:VISIBLE);
+			fab.setVisibility(isSelectedMonthOlderThanUpdate()? GONE:VISIBLE);
 
 			invalidateTable = false;
 		}
@@ -272,7 +272,7 @@ public class MainActivity extends AppCompatActivity
 		TinyDB tinyDB = new TinyDB(this);
 		ArrayList<String> currencies = tinyDB.getListString(CurrencyPicker.KEY);
 
-		if (currencies.size() != 0) {
+		if (currencies.size() != 0 && !isSelectedMonthOlderThanUpdate()) {
 			MenuItem item = menu.findItem(R.id.action_currency);
 			SpinnerNoUnwantedOnClick spinner =
 					new SpinnerNoUnwantedOnClick(MenuItemCompat.getActionView(item));
@@ -301,7 +301,11 @@ public class MainActivity extends AppCompatActivity
 			});
 
 			currencyName = Utils.equal(editableCurrency, "")? currencies.get(0):editableCurrency;
-		} else menu.removeItem(R.id.action_currency);
+		} else {
+			menu.removeItem(R.id.action_currency);
+
+			if(isSelectedMonthOlderThanUpdate()) editableCurrency = "";//make sure
+		}
 
 		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.KITKAT)
 			menu.removeItem(R.id.action_print);
@@ -325,7 +329,8 @@ public class MainActivity extends AppCompatActivity
 						PrintManager printM = (PrintManager) getSystemService((Context.PRINT_SERVICE));
 
 						String job = getString(R.string.app_name) + ": " +
-								(editableMonth != TableGeneral.OLDER_THAN_UPDATE? getString(MONTH_STRINGS[editableMonth]):updateMonth);
+								(!isSelectedMonthOlderThanUpdate()?
+										getString(MONTH_STRINGS[editableMonth]):getString(MONTH_STRINGS[updateMonth]));
 						printM.print(job,
 								new PPrintDocumentAdapter(this, table, editableMonth, editableYear,
 										currencyName, new int[]{updateMonth, updateYear}),
@@ -551,7 +556,7 @@ public class MainActivity extends AppCompatActivity
 
 			TextView monthText = (TextView) findViewById(R.id.textMonth);
 
-			if (month != -1 && year != TableGeneral.OLDER_THAN_UPDATE) {
+			if (month != -1 && !isSelectedMonthOlderThanUpdate()) {
 				((TextView) findViewById(R.id.textMonth)).setText(MONTH_STRINGS[month]);
 
 				loadPrevBalance = new LoadPrevBalanceAsyncTask(month, year, editableCurrency, tableMonthlyBalance,
@@ -764,6 +769,16 @@ public class MainActivity extends AppCompatActivity
 			ACRAHelper.writeData(table, editableMonth, editableYear);
 
 		editableRow = value;
+	}
+
+	/**
+	 * The user should NEVER be allowed to edit in any way if this is true
+	 *
+	 * @return if the month selected is older than the update that added month selection
+	 */
+	private boolean isSelectedMonthOlderThanUpdate() {
+		return editableMonth == TableGeneral.OLDER_THAN_UPDATE
+				|| editableYear == TableGeneral.OLDER_THAN_UPDATE;
 	}
 
 }

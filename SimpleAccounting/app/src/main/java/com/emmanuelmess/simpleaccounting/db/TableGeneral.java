@@ -19,13 +19,15 @@ import static java.lang.String.format;
 public class TableGeneral extends Database {
 
 	public static final int OLDER_THAN_UPDATE = -2;
-	public static final String[] COLUMNS = new String[] { "DATE", "REFERENCE", "CREDIT", "DEBT", "MONTH", "YEAR", "CURRENCY"};
+	public static final String[] COLUMNS = new String[] {"DATE", "REFERENCE", "CREDIT", "DEBT",
+			"MONTH", "YEAR", "CURRENCY"};
 
 	private static final int DATABASE_VERSION = 5;
 	private static final String TABLE_NAME = "ACCOUNTING";
 	private static final String TABLE_CREATE = format("CREATE TABLE %1$s" +
 			" (%2$s INT, %3$s INT, %4$s TEXT, %5$s REAL, %6$s REAL, %7$s INT, %8$s INT, %9$s TEXT);",
-			TABLE_NAME, NUMBER_COLUMN, COLUMNS[0], COLUMNS[1], COLUMNS[2], COLUMNS[3], COLUMNS[4], COLUMNS[5], COLUMNS[6]);
+			TABLE_NAME, NUMBER_COLUMN, COLUMNS[0], COLUMNS[1], COLUMNS[2], COLUMNS[3], COLUMNS[4],
+			COLUMNS[5], COLUMNS[6]);
 	private final ContentValues CV = new ContentValues();
 
 	public TableGeneral(Context context) {super(context, TABLE_NAME, null, DATABASE_VERSION);}
