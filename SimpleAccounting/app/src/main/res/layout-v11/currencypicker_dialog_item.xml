@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- As tested in API 10 the background in the Dialog Adapter is BLACK, so the text HAS to be WHITE -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="36dp"
                 android:paddingTop="2dp"
-                android:paddingBottom="2dp">
+                android:paddingBottom="2dp"
+                android:background="@color/white">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -18,7 +18,7 @@
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:srcCompat="@drawable/ic_move_white_24dp"
+            app:srcCompat="@drawable/ic_move_black_24dp"
             android:id="@+id/move"
             android:background="@android:color/transparent"
             android:scaleType="centerInside"
@@ -39,20 +39,21 @@
             android:layout_toRightOf="@+id/delete"
             android:layout_toLeftOf="@+id/move"
             android:layout_toStartOf="@+id/delete"
-            android:layout_toEndOf="@+id/move"
-            android:textColor="@color/colorTextWhite"/>
+            android:layout_toEndOf="@+id/move"/>
 
         <ImageButton
             android:layout_width="48dp"
             android:layout_height="wrap_content"
-            app:srcCompat="@drawable/ic_cancel_white_24dp"
+            app:srcCompat="@drawable/ic_cancel_black_24dp"
             android:id="@+id/delete"
+            android:background="?android:attr/selectableItemBackground"
             android:visibility="invisible"
             android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
-            android:scaleType="centerInside"/>
+            android:scaleType="centerInside"
+            />
     </RelativeLayout>
 
 </RelativeLayout>

@@ -13,7 +13,6 @@ import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 /**
@@ -22,6 +21,7 @@ import android.view.WindowManager;
  */
 
 public class DialogPreferenceWithKeyboard extends DialogPreference {
+	private Context mContext;
 	private AlertDialog.Builder mBuilder;
 	private Dialog mDialog;
 	private int mWhichButtonClicked;
@@ -29,19 +29,23 @@ public class DialogPreferenceWithKeyboard extends DialogPreference {
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 	public DialogPreferenceWithKeyboard(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
 		super(context, attrs, defStyleAttr, defStyleRes);
+		mContext = context;
 	}
 
 	public DialogPreferenceWithKeyboard(Context context, AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
+		mContext = context;
 	}
 
 	public DialogPreferenceWithKeyboard(Context context, AttributeSet attrs) {
 		super(context, attrs);
+		mContext = context;
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 	public DialogPreferenceWithKeyboard(Context context) {
 		super(context);
+		mContext = context;
 	}
 
 	/**
@@ -122,7 +126,7 @@ public class DialogPreferenceWithKeyboard extends DialogPreference {
 			return null;
 		}
 
-		LayoutInflater inflater = LayoutInflater.from(mBuilder.getContext());
+		LayoutInflater inflater = LayoutInflater.from(mContext);
 		return inflater.inflate(getDialogLayoutResource(), null);
 	}
 
