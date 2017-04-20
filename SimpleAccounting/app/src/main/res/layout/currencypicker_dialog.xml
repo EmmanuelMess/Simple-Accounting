@@ -18,27 +18,27 @@
                     android:paddingStart="24dp"
                     android:paddingLeft="24dp">
 
-            <EditText
-                android:layout_height="match_parent"
-                android:id="@+id/textDefault"
-                android:layout_width="match_parent"
-                android:inputType="text"
-                android:textAlignment="gravity"
-                android:gravity="center_vertical|start"
-                android:background="@android:color/transparent"
-                android:hint="@string/default_ext"
-                android:textColor="@color/colorTextWhite"
-                android:textColorHint="@color/colorTextWhite"/>
+        <EditText
+            android:layout_height="match_parent"
+            android:id="@+id/textDefault"
+            android:layout_width="match_parent"
+            android:inputType="text"
+            android:textAlignment="gravity"
+            android:gravity="center_vertical|start"
+            android:background="@android:color/transparent"
+            android:hint="@string/default_ext"
+            android:textColor="@color/colorTextWhite"
+            android:textColorHint="@color/colorTextWhite"/>
 
         <TextView
-                android:layout_height="match_parent"
-                android:id="@+id/textItemToDelete"
-                android:layout_width="match_parent"
-                android:textAlignment="gravity"
-                android:gravity="center_vertical|start"
-                android:background="@android:color/transparent"
-                android:visibility="gone"
-                android:textColor="@color/colorTextWhite"/>
+            android:layout_height="match_parent"
+            android:id="@+id/textItemToDelete"
+            android:layout_width="match_parent"
+            android:textAlignment="gravity"
+            android:gravity="center_vertical|start"
+            android:background="@android:color/transparent"
+            android:visibility="gone"
+            android:textColor="@color/colorTextWhite"/>
     </RelativeLayout>
 
     <com.emmanuelmess.simpleaccounting.activities.views.LockableScrollView

@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+
 /**
  * @author Emmanuel
  *         on 1/2/2017, at 14:23.

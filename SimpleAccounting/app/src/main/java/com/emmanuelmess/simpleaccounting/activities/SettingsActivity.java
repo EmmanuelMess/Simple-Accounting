@@ -38,20 +38,22 @@ public class SettingsActivity extends AppCompatPreferenceActivity implements Pre
 	 *
 	 */
 	private void bindPreferenceSummaryToValue(Preference preference) {
-		// Set the listener to watch for value changes.
-		preference.setOnPreferenceChangeListener(this);
+		if(preference != null) {//API < 14 doesn't have the currency item
+			// Set the listener to watch for value changes.
+			preference.setOnPreferenceChangeListener(this);
 
-		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(
-				preference.getContext());
+			SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(
+					preference.getContext());
 
-		if(Utils.equal(preference.getKey(), INVERT_CREDIT_DEBIT_SETTING)) {
-			// Trigger the listener immediately with the preference's
-			// current value.
-			boolean newValue = sharedPref.getBoolean(INVERT_CREDIT_DEBIT_SETTING, false);
-			onPreferenceChange(preference, newValue);
-			MainActivity.invalidateTableHeader(newValue);
-		} else
-			onPreferenceChange(preference, sharedPref.getString(preference.getKey(), ""));
+			if (Utils.equal(preference.getKey(), INVERT_CREDIT_DEBIT_SETTING)) {
+				// Trigger the listener immediately with the preference's
+				// current value.
+				boolean newValue = sharedPref.getBoolean(INVERT_CREDIT_DEBIT_SETTING, false);
+				onPreferenceChange(preference, newValue);
+				MainActivity.invalidateTableHeader(newValue);
+			} else
+				onPreferenceChange(preference, sharedPref.getString(preference.getKey(), ""));
+		}
 	}
 
 	@Override

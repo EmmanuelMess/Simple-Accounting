@@ -1,12 +1,17 @@
 package com.emmanuelmess.simpleaccounting.utils;
 
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.annotation.ColorRes;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.TextView;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.Objects;
+
 /**
  * @author Emmanuel
  *         on 2/12/2016, at 16:45.
@@ -42,6 +47,25 @@ public class Utils {
 
 		@Override
 		public void afterTextChanged(Editable editable) {}
+	}
+
+	public static int getBackgroundColor(Drawable drawable, @ColorRes int defaultColor) {
+		if(Build.VERSION.SDK_INT >= 21)
+			return defaultColor;//Other method will fail
+
+		if (Build.VERSION.SDK_INT >= 11 && drawable instanceof ColorDrawable)
+			return ((ColorDrawable) drawable).getColor();
+
+		try {
+			Field field = drawable.getClass().getDeclaredField("mState");
+			field.setAccessible(true);
+			Object object = field.get(drawable);
+			field = object.getClass().getDeclaredField("mUseColor");
+			field.setAccessible(true);
+			return field.getInt(object);
+		} catch (Exception e) {
+			return defaultColor;
+		}
 	}
 
 }

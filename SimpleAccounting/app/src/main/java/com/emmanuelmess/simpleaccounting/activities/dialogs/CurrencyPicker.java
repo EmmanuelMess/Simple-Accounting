@@ -55,6 +55,8 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 	private TextView textItemToDelete;
 	private LockableScrollView scrollView;
 
+	private int dialogBackground;
+
 	public CurrencyPicker(Context context, AttributeSet attrs) {
 		super(context, attrs);
 
@@ -123,6 +125,9 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 	@Override
 	protected void showDialog(Bundle state) {
 		super.showDialog(state);
+		dialogBackground =
+				Utils.getBackgroundColor(getDialog().getWindow().getDecorView().getBackground(), -1);
+
 		for(String s : currentValue)
 			isItemNew.add(false);
 
@@ -246,6 +251,8 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 			@Override
 			public void onGlobalLayout() {
 				if (!alreadyLoaded) {
+					if(dialogBackground != -1)
+						item.setBackgroundColor(dialogBackground);
 					itemPos.append(childIndex, item.getTop());
 					itemPosRanges.add(item.getTop(), item.getBottom());
 					isItemNew.add(true);
