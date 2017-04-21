@@ -15,31 +15,17 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true">
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@drawable/ic_move_black_24dp"
-            android:id="@+id/move"
-            android:background="@android:color/transparent"
-            android:scaleType="centerInside"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentBottom="true"/>
 
         <EditText
             android:layout_height="match_parent"
             android:id="@+id/text"
             android:layout_width="match_parent"
             android:inputType="text"
-            android:layout_alignBottom="@+id/move"
             android:textAlignment="gravity"
             android:gravity="center_vertical|start"
             android:background="@android:color/transparent"
-            android:layout_toRightOf="@+id/delete"
-            android:layout_toLeftOf="@+id/move"
-            android:layout_toStartOf="@+id/delete"
-            android:layout_toEndOf="@+id/move"/>
+            android:layout_toLeftOf="@+id/delete"
+            android:layout_toStartOf="@+id/delete"/>
 
         <ImageButton
             android:layout_width="48dp"

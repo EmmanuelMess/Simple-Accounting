@@ -3,6 +3,7 @@ package com.emmanuelmess.simpleaccounting.activities.dialogs;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.view.ViewCompat;
 import android.text.Editable;
@@ -270,6 +271,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 			scrollView.setMaxHeight(linearLayout.getChildAt(0).getHeight()*3);
 		}
 
+		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
 		item.findViewById(R.id.move).setOnTouchListener(new View.OnTouchListener() {
 			float dy;
 
@@ -329,6 +331,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 				swap(itemIndex, toBeMovedIndex);
 			}
 		});
+
 
 		EditText text = ((EditText) item.findViewById(R.id.text));
 		text.setOnFocusChangeListener((v1, hasFocus)->{
