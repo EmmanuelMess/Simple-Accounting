@@ -43,4 +43,5 @@
     <string name="version">Versión</string>
     <string name="pref_title_invertcreditdebit">Invertir debito y credito</string>
     <string name="pref_summary_invertcreditdebit">Credito y debito intercambian lugares en la tabla</string>
+    <string name="item_hint">Ingrese u. monet.</string>
 </resources>

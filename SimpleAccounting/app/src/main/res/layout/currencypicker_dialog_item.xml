@@ -19,12 +19,14 @@
         <EditText
             android:layout_height="match_parent"
             android:id="@+id/text"
+            android:hint="@string/item_hint"
             android:layout_width="match_parent"
             android:inputType="text"
             android:textAlignment="gravity"
             android:gravity="center_vertical|start"
             android:background="@android:color/transparent"
-            android:textColor="@color/colorTextWhite"/>
+            android:textColor="@color/colorTextWhite"
+            android:textColorHint="@color/colorTextHintWhite"/>
 
         <ImageButton
             android:layout_width="48dp"

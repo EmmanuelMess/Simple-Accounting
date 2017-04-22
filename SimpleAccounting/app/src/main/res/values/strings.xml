@@ -49,4 +49,5 @@
     <string name="app_ver" translatable="false">1.4</string>
     <string name="pref_title_invertcreditdebit">Invert credit and debit</string>
     <string name="pref_summary_invertcreditdebit">Credit and debit interchange places in table</string>
+    <string name="item_hint">Set currency</string>
 </resources>

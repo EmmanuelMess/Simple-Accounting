@@ -129,7 +129,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 		dialogBackground =
 				Utils.getBackgroundColor(getDialog().getWindow().getDecorView().getBackground(), -1);
 
-		for(String s : currentValue)
+		for(int i = 1; i < currentValue.size(); i++)
 			isItemNew.add(false);
 
 		scrollView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -175,6 +175,8 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 	protected void onDialogClosed(boolean positiveResult) {
 		// When the user selects "OK", persist the new value
 		if (positiveResult) {
+			//TODO clean all deleted items from db
+
 			for (int i = 1; i < currentValue.size(); i++) // STARTS on 1 to save default
 				if (Utils.equal(currentValue.get(i).replace(" ", ""), ""))
 					currentValue.remove(i);
