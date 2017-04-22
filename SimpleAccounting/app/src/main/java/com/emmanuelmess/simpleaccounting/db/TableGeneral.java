@@ -233,4 +233,9 @@ public class TableGeneral extends Database {
 		return data;
 	}
 
+	public void deleteAllForCurrency(String currency) {
+		String cond = format("%1$s=%2$s" , COLUMNS[6], "'" + currency + "'");
+		getWritableDatabase().delete(TABLE_NAME, cond, null);
+	}
+
 }

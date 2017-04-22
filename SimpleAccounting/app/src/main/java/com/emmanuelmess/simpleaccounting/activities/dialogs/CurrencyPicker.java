@@ -21,6 +21,8 @@ import android.widget.TextView;
 import com.emmanuelmess.simpleaccounting.MainActivity;
 import com.emmanuelmess.simpleaccounting.R;
 import com.emmanuelmess.simpleaccounting.activities.views.LockableScrollView;
+import com.emmanuelmess.simpleaccounting.db.TableGeneral;
+import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
 import com.emmanuelmess.simpleaccounting.utils.RangedStructure;
 import com.emmanuelmess.simpleaccounting.utils.TinyDB;
 import com.emmanuelmess.simpleaccounting.utils.Utils;
@@ -49,6 +51,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 	private SparseIntArray itemPos = new SparseIntArray(1);
 	private RangedStructure itemPosRanges = new RangedStructure();
 	private ArrayList<Boolean> isItemNew = new ArrayList<>();
+	private ArrayList<String> deleteElements = new ArrayList<>();
 	private LinearLayout linearLayout;
 	private View deleteConfirmation;
 	private View add;
@@ -176,6 +179,12 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 		// When the user selects "OK", persist the new value
 		if (positiveResult) {
 			//TODO clean all deleted items from db
+			TableGeneral tableGeneral = new TableGeneral(getContext());//DO NOT change the order of table creation!
+			TableMonthlyBalance tableMonthlyBalance = new TableMonthlyBalance(getContext());
+			for(String s : deleteElements) {
+				tableGeneral.deleteAllForCurrency(s);
+				tableMonthlyBalance.deleteAllForCurrency(s);
+			}
 
 			for (int i = 1; i < currentValue.size(); i++) // STARTS on 1 to save default
 				if (Utils.equal(currentValue.get(i).replace(" ", ""), ""))
@@ -273,66 +282,67 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 			scrollView.setMaxHeight(linearLayout.getChildAt(0).getHeight()*3);
 		}
 
-		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-		item.findViewById(R.id.move).setOnTouchListener(new View.OnTouchListener() {
-			float dy;
+		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+			item.findViewById(R.id.move).setOnTouchListener(new View.OnTouchListener() {
+				float dy;
 
-			@Override
-			public boolean onTouch(View v1, MotionEvent event) {
-				int childIndex = getChildIndex(item);
+				@Override
+				public boolean onTouch(View v1, MotionEvent event) {
+					int childIndex = getChildIndex(item);
 
-				switch (event.getAction()) {
-					case MotionEvent.ACTION_DOWN:
-						ViewCompat.animate(item).z(5).setDuration(0).start();
-						dy = ViewCompat.getY(item) - event.getRawY();
-						scrollView.setScrollingEnabled(false);
-						break;
-					case MotionEvent.ACTION_MOVE:
-						float moveTo = event.getRawY() + dy;
+					switch (event.getAction()) {
+						case MotionEvent.ACTION_DOWN:
+							ViewCompat.animate(item).z(5).setDuration(0).start();
+							dy = ViewCompat.getY(item) - event.getRawY();
+							scrollView.setScrollingEnabled(false);
+							break;
+						case MotionEvent.ACTION_MOVE:
+							float moveTo = event.getRawY() + dy;
 
-						if (moveTo < ViewCompat.getY(linearLayout))
-							moveTo = ViewCompat.getY(linearLayout);
-						else if (moveTo > ViewCompat.getTranslationY(scrollView)
-								+ scrollView.getBottom() - item.getHeight())
-							moveTo = ViewCompat.getTranslationY(scrollView)
-									+ scrollView.getBottom() - item.getHeight();
+							if (moveTo < ViewCompat.getY(linearLayout))
+								moveTo = ViewCompat.getY(linearLayout);
+							else if (moveTo > ViewCompat.getTranslationY(scrollView)
+									+ scrollView.getBottom() - item.getHeight())
+								moveTo = ViewCompat.getTranslationY(scrollView)
+										+ scrollView.getBottom() - item.getHeight();
 
-						ViewCompat.animate(item).y(moveTo).setDuration(0).start();
+							ViewCompat.animate(item).y(moveTo).setDuration(0).start();
 
-						int overItemIndex = itemPosRanges.get((int) (ViewCompat.getY(item)
-								+ item.getHeight()/2f));
+							int overItemIndex = itemPosRanges.get((int) (ViewCompat.getY(item)
+									+ item.getHeight() / 2f));
 
-						move(childIndex, overItemIndex);
+							move(childIndex, overItemIndex);
 
-						//reposition
-						for (int i = 0; i < linearLayout.getChildCount(); i++) {
-							if (childIndex == i) continue;
-							ViewCompat.animate(linearLayout.getChildAt(i)).z(2.5f)
-									.y(itemPos.get(i)).z(0).setDuration(0).start();
-						}
-						break;
-					case MotionEvent.ACTION_UP:
-						scrollView.setScrollingEnabled(true);
-						moveTo = itemPos.get(itemPosRanges.get((int) (ViewCompat.getY(item) + item.getHeight()/2f)));
-						ViewCompat.animate(item).y(moveTo).z(0).setDuration(0).start();
-						break;
-					default:
-						return false;
+							//reposition
+							for (int i = 0; i < linearLayout.getChildCount(); i++) {
+								if (childIndex == i) continue;
+								ViewCompat.animate(linearLayout.getChildAt(i)).z(2.5f)
+										.y(itemPos.get(i)).z(0).setDuration(0).start();
+							}
+							break;
+						case MotionEvent.ACTION_UP:
+							scrollView.setScrollingEnabled(true);
+							moveTo = itemPos.get(itemPosRanges.get((int) (ViewCompat.getY(item) + item.getHeight() / 2f)));
+							ViewCompat.animate(item).y(moveTo).z(0).setDuration(0).start();
+							break;
+						default:
+							return false;
+					}
+					return true;
 				}
-				return true;
-			}
 
-			private void move(int getToPos, int itemIndex) {
-				if (getToPos == itemIndex) return;
+				private void move(int getToPos, int itemIndex) {
+					if (getToPos == itemIndex) return;
 
-				boolean direction = getToPos > itemIndex;
-				int toBeMovedIndex = itemIndex + (direction? +1:-1);
-				if (toBeMovedIndex != getToPos)
-					move(getToPos, toBeMovedIndex);
+					boolean direction = getToPos > itemIndex;
+					int toBeMovedIndex = itemIndex + (direction ? +1 : -1);
+					if (toBeMovedIndex != getToPos)
+						move(getToPos, toBeMovedIndex);
 
-				swap(itemIndex, toBeMovedIndex);
-			}
-		});
+					swap(itemIndex, toBeMovedIndex);
+				}
+			});
+		}
 
 
 		EditText text = ((EditText) item.findViewById(R.id.text));
@@ -368,7 +378,10 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 		deleteConfirmation.setVisibility(VISIBLE);
 		deleteConfirmation.requestFocus();
 		deleteConfirmation.findViewById(R.id.deleteData).setOnClickListener(v->{
+			if(!isItemNew.get(childIndex))
+				deleteElements.add(currentValue.get(childIndex+1));
 			removeItem(item, childIndex);
+
 			invisibilizeDeleteConfirmation();
 		});
 		deleteConfirmation.findViewById(R.id.cancel).setOnClickListener(v->{

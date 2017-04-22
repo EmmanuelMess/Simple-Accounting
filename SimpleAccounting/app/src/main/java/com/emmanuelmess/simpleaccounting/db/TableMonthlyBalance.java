@@ -78,6 +78,11 @@ public class TableMonthlyBalance extends Database {
 		return data;
 	}
 
+	public void deleteAllForCurrency(String currency) {
+		String cond = format("%1$s=%2$s" , COLUMNS[2], "'" + currency + "'");
+		getWritableDatabase().delete(TABLE_NAME, cond, null);
+	}
+
 	private boolean isMonthInBD(int month, int year, String currency) {
 		boolean data;
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[] {COLUMNS[3]},
