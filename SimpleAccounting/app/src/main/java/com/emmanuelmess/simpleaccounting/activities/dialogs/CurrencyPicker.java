@@ -41,6 +41,7 @@ import static android.view.View.VISIBLE;
 
 public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View.OnClickListener {
 	public static final String KEY = "currency_picker";
+	public static final String DFLT = "DFLT";
 
 	private final ArrayList<String> DEFAULT_VALUE = new ArrayList<>();
 
@@ -101,7 +102,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 		textDefault = ((EditText) view.findViewById(R.id.textDefault));
 
 		if(currentValue.size() > 0)
-			textDefault.setText(Utils.equal(currentValue.get(0), getContext().getString(R.string.default_short))? "":currentValue.get(0));
+			textDefault.setText(Utils.equal(currentValue.get(0), DFLT)? "":currentValue.get(0));
 		else
 			currentValue.add("");
 
@@ -178,7 +179,6 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 	protected void onDialogClosed(boolean positiveResult) {
 		// When the user selects "OK", persist the new value
 		if (positiveResult) {
-			//TODO clean all deleted items from db
 			TableGeneral tableGeneral = new TableGeneral(getContext());//DO NOT change the order of table creation!
 			TableMonthlyBalance tableMonthlyBalance = new TableMonthlyBalance(getContext());
 			for(String s : deleteElements) {
@@ -194,7 +194,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 				if(currentValue.size() == 1)
 					currentValue.remove(0);
 				else
-					currentValue.set(0, getContext().getString(R.string.default_short));
+					currentValue.set(0, DFLT);
 			}
 
 			persistStringList(currentValue);
@@ -202,6 +202,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 			MainActivity.invalidateToolbar();
 		} else currentValue = getPersistedStringList(DEFAULT_VALUE);
 
+		deleteElements.clear();
 		itemPos.clear();
 		itemPosRanges.clear();
 		isItemNew.clear();

@@ -55,6 +55,7 @@ import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.emmanuelmess.simpleaccounting.activities.SettingsActivity.INVERT_CREDIT_DEBIT_SETTING;
+import static com.emmanuelmess.simpleaccounting.activities.dialogs.CurrencyPicker.DFLT;
 import static com.emmanuelmess.simpleaccounting.utils.Utils.equal;
 import static com.emmanuelmess.simpleaccounting.utils.Utils.parseString;
 import static com.emmanuelmess.simpleaccounting.utils.Utils.parseView;
@@ -270,7 +271,9 @@ public class MainActivity extends AppCompatActivity
 		getMenuInflater().inflate(R.menu.toolbar, menu);
 
 		TinyDB tinyDB = new TinyDB(this);
-		ArrayList<String> currencies = tinyDB.getListString(CurrencyPicker.KEY);
+		ArrayList<String> currencies = tinyDB.getListString(CurrencyPicker.KEY); //DO NOT save this List (first item changed)
+		if(Utils.equal(currencies.get(0), DFLT))
+			currencies.set(0, getString(R.string.default_short));
 
 		if (currencies.size() != 0 && !isSelectedMonthOlderThanUpdate()) {
 			MenuItem item = menu.findItem(R.id.action_currency);
