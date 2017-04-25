@@ -125,6 +125,19 @@ public class MainActivity extends AppCompatActivity
 	public static void setDate(int month, int year) {
 		editableMonth = month;
 		editableYear = year;
+		invalidateTable();
+	}
+
+	public static String getCurrency() {
+		return editableCurrency;
+	}
+
+	public static void setCurrency(String currency) {
+		editableCurrency = currency;
+		invalidateTable();
+	}
+
+	public static void invalidateTable() {
 		invalidateTable = true;
 	}
 
@@ -254,6 +267,7 @@ public class MainActivity extends AppCompatActivity
 		}
 		if (invalidateToolbar) {
 			invalidateOptionsMenu();
+
 			invalidateToolbar = false;
 		}
 	}
@@ -272,10 +286,11 @@ public class MainActivity extends AppCompatActivity
 
 		TinyDB tinyDB = new TinyDB(this);
 		ArrayList<String> currencies = tinyDB.getListString(CurrencyPicker.KEY); //DO NOT save this List (first item changed)
-		if(Utils.equal(currencies.get(0), DFLT))
-			currencies.set(0, getString(R.string.default_short));
 
 		if (currencies.size() != 0 && !isSelectedMonthOlderThanUpdate()) {
+			if(Utils.equal(currencies.get(0), DFLT))
+				currencies.set(0, getString(R.string.default_short));
+
 			MenuItem item = menu.findItem(R.id.action_currency);
 			SpinnerNoUnwantedOnClick spinner =
 					new SpinnerNoUnwantedOnClick(MenuItemCompat.getActionView(item));

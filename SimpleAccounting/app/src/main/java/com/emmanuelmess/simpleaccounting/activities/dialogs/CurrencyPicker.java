@@ -179,13 +179,6 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 	protected void onDialogClosed(boolean positiveResult) {
 		// When the user selects "OK", persist the new value
 		if (positiveResult) {
-			TableGeneral tableGeneral = new TableGeneral(getContext());//DO NOT change the order of table creation!
-			TableMonthlyBalance tableMonthlyBalance = new TableMonthlyBalance(getContext());
-			for(String s : deleteElements) {
-				tableGeneral.deleteAllForCurrency(s);
-				tableMonthlyBalance.deleteAllForCurrency(s);
-			}
-
 			for (int i = 1; i < currentValue.size(); i++) // STARTS on 1 to save default
 				if (Utils.equal(currentValue.get(i).replace(" ", ""), ""))
 					currentValue.remove(i);
@@ -195,6 +188,24 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 					currentValue.remove(0);
 				else
 					currentValue.set(0, DFLT);
+			}
+
+			if(deleteElements.size() > 0) {
+				TableGeneral tableGeneral = new TableGeneral(getContext());//DO NOT change the order of table creation!
+				TableMonthlyBalance tableMonthlyBalance = new TableMonthlyBalance(getContext());
+
+				boolean deletedCurrencyWasSelected = false;
+
+				for (String s : deleteElements) {
+					if(Utils.equal(MainActivity.getCurrency(), s))
+						deletedCurrencyWasSelected = true;
+
+					tableGeneral.deleteAllForCurrency(s);
+					tableMonthlyBalance.deleteAllForCurrency(s);
+				}
+
+				if(deletedCurrencyWasSelected)
+					MainActivity.setCurrency(currentValue.size() > 0? currentValue.get(0):"");
 			}
 
 			persistStringList(currentValue);
