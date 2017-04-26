@@ -205,7 +205,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 				}
 
 				if(deletedCurrencyWasSelected)
-					MainActivity.setCurrency(currentValue.size() > 0? currentValue.get(0):"");
+					MainActivity.setCurrency(""); //Default is "" (check MainActivity.editableCurrency)
 			}
 
 			persistStringList(currentValue);

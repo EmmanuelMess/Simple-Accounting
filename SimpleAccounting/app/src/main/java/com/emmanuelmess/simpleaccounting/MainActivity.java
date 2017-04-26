@@ -70,7 +70,6 @@ public class MainActivity extends AppCompatActivity
 	public static final String UPDATE_YEAR_SETTING = "update 1.2 year";
 	public static final String UPDATE_MONTH_SETTING = "update 1.2 month";
 
-	public static final String MONTH = "month", YEAR = "year";
 
 	public static int[] MONTH_STRINGS = new int[]{R.string.january, R.string.february, R.string.march, R.string.april, R.string.may,
 			R.string.june, R.string.july, R.string.august, R.string.september, R.string.october, R.string.november, R.string.december};
@@ -134,7 +133,7 @@ public class MainActivity extends AppCompatActivity
 
 	public static void setCurrency(String currency) {
 		editableCurrency = currency;
-		invalidateTable();
+		//invalidateTable(); TODO why is this unnecessary?
 	}
 
 	public static void invalidateTable() {
@@ -180,17 +179,8 @@ public class MainActivity extends AppCompatActivity
 		updateMonth = preferences.getInt(UPDATE_MONTH_SETTING, -1);
 		updateYear = preferences.getInt(UPDATE_YEAR_SETTING, -1);
 
-		int loadMonth, loadYear;
-		String loadCurrency = "";
-
-		if (getIntent().hasExtra(MONTH)) {
-			Bundle b = getIntent().getExtras();
-			loadMonth = b.getInt(MONTH);
-			loadYear = b.getInt(YEAR);
-		} else {
-			loadMonth = currentMonthYear[0];
-			loadYear = currentMonthYear[1];
-		}
+		editableMonth = currentMonthYear[0];
+		editableYear = currentMonthYear[1];
 
 		table.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
 			@Override
@@ -204,7 +194,7 @@ public class MainActivity extends AppCompatActivity
 				space.setMinimumHeight(findViewById(R.id.fab).getHeight()
 						- findViewById(R.id.fab).getPaddingTop());
 
-				loadMonth(loadMonth, loadYear, loadCurrency);
+				loadMonth(editableMonth, editableYear, editableCurrency);
 				//in case the activity gets destroyed
 				invalidateTable = false;
 				invalidateToolbar = false;
