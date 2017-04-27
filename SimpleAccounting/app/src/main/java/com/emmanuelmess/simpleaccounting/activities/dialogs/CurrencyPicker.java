@@ -3,6 +3,7 @@ package com.emmanuelmess.simpleaccounting.activities.dialogs;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.view.ViewCompat;
 import android.text.Editable;
@@ -15,10 +16,13 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.emmanuelmess.simpleaccounting.MainActivity;
 import com.emmanuelmess.simpleaccounting.R;
 import com.emmanuelmess.simpleaccounting.activities.views.LockableScrollView;
+import com.emmanuelmess.simpleaccounting.db.TableGeneral;
+import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
 import com.emmanuelmess.simpleaccounting.utils.RangedStructure;
 import com.emmanuelmess.simpleaccounting.utils.TinyDB;
 import com.emmanuelmess.simpleaccounting.utils.Utils;
@@ -28,6 +32,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 
 /**
  * @author Emmanuel
@@ -36,20 +41,26 @@ import static android.view.View.GONE;
 
 public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View.OnClickListener {
 	public static final String KEY = "currency_picker";
-	private static final ArrayList<String> DEFAULT_VALUE = new ArrayList<>();
+	public static final String DFLT = "DFLT";
 
-	private TinyDB tinyDB;
+	private final ArrayList<String> DEFAULT_VALUE = new ArrayList<>();
+
 	private ArrayList<String> currentValue = new ArrayList<>();
-	private boolean hasValueChanged = true;
+	private TinyDB tinyDB;
 	private LayoutInflater inflater;
 	private boolean firstTimeItemHeighted = true;
 	private SparseIntArray itemPos = new SparseIntArray(1);
 	private RangedStructure itemPosRanges = new RangedStructure();
 	private ArrayList<Boolean> isItemNew = new ArrayList<>();
+	private ArrayList<String> deleteElements = new ArrayList<>();
 	private LinearLayout linearLayout;
 	private View deleteConfirmation;
 	private View add;
+	private EditText textDefault;
+	private TextView textItemToDelete;
 	private LockableScrollView scrollView;
+
+	private int dialogBackground;
 
 	public CurrencyPicker(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -66,6 +77,20 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 	}
 
 	@Override
+	protected Object onGetDefaultValue(TypedArray a, int index) {
+		return a.getString(index);
+	}
+
+	@Override
+	public CharSequence getSummary() {
+		ArrayList<String> v = getPersistedStringList(DEFAULT_VALUE);
+		if(v.size() != 0) {
+			String[] myStringList = v.toArray(new String[v.size()]);
+			return TextUtils.join(", ", myStringList);
+		} else return getContext().getString(R.string.with_no_items_deactivated);
+	}
+
+	@Override
 	protected void onPrepareDialogBuilder(AlertDialog.Builder builder) {
 		builder.setTitle(R.string.costumize_currencies);
 		super.onPrepareDialogBuilder(builder);
@@ -73,11 +98,14 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 
 	@Override
 	public void onBindDialogView(View view) {
-		EditText textDefault = ((EditText) view.findViewById(R.id.textDefault));
+		currentValue = getPersistedStringList(DEFAULT_VALUE);
+		textDefault = ((EditText) view.findViewById(R.id.textDefault));
 
 		if(currentValue.size() > 0)
-			textDefault.setText(Utils.equal(currentValue.get(0), getContext().getString(R.string.default_short))? "":currentValue.get(0));
-		else currentValue.add("");
+			textDefault.setText(Utils.equal(currentValue.get(0), DFLT)? "":currentValue.get(0));
+		else
+			currentValue.add("");
+
 		textDefault.addTextChangedListener(new Utils.SimpleTextWatcher() {
 			@Override
 			public void afterTextChanged(Editable s) {
@@ -85,14 +113,15 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 			}
 		});
 
+		textItemToDelete = (TextView) view.findViewById(R.id.textItemToDelete);
 		linearLayout = ((LinearLayout) view.findViewById(R.id.scrollView));
 		scrollView = ((LockableScrollView) view.findViewById(R.id.scrollerView));
 		add = view.findViewById(R.id.add);
 		deleteConfirmation = view.findViewById(R.id.deleteConfirmation);
 		deleteConfirmation.findViewById(R.id.cancel).setOnClickListener(v->{
 			deleteConfirmation.setVisibility(GONE);
-			scrollView.setVisibility(View.VISIBLE);
-			add.setVisibility(View.VISIBLE);
+			scrollView.setVisibility(VISIBLE);
+			add.setVisibility(VISIBLE);
 		});
 		add.setOnClickListener(this);
 		super.onBindDialogView(view);
@@ -101,7 +130,10 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 	@Override
 	protected void showDialog(Bundle state) {
 		super.showDialog(state);
-		for(String s : currentValue)
+		dialogBackground =
+				Utils.getBackgroundColor(getDialog().getWindow().getDecorView().getBackground(), -1);
+
+		for(int i = 1; i < currentValue.size(); i++)
 			isItemNew.add(false);
 
 		scrollView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -139,7 +171,6 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 		} else {
 			// Set default state from the XML attribute
 			currentValue = new ArrayList<>(Arrays.asList(TextUtils.split((String) defaultValue, "‚‗‚")));
-			hasValueChanged = true;
 			persistStringList(currentValue);
 		}
 	}
@@ -156,27 +187,36 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 				if(currentValue.size() == 1)
 					currentValue.remove(0);
 				else
-					currentValue.set(0, getContext().getString(R.string.default_short));
+					currentValue.set(0, DFLT);
+			}
+
+			if(deleteElements.size() > 0) {
+				TableGeneral tableGeneral = new TableGeneral(getContext());//DO NOT change the order of table creation!
+				TableMonthlyBalance tableMonthlyBalance = new TableMonthlyBalance(getContext());
+
+				boolean deletedCurrencyWasSelected = false;
+
+				for (String s : deleteElements) {
+					if(Utils.equal(MainActivity.getCurrency(), s))
+						deletedCurrencyWasSelected = true;
+
+					tableGeneral.deleteAllForCurrency(s);
+					tableMonthlyBalance.deleteAllForCurrency(s);
+				}
+
+				if(deletedCurrencyWasSelected)
+					MainActivity.setCurrency(""); //Default is "" (check MainActivity.editableCurrency)
 			}
 
 			persistStringList(currentValue);
-			hasValueChanged = true;
+			notifyChanged();
 			MainActivity.invalidateToolbar();
 		} else currentValue = getPersistedStringList(DEFAULT_VALUE);
-	}
 
-	@Override
-	protected Object onGetDefaultValue(TypedArray a, int index) {
-		return a.getString(index);
-	}
-
-	@Override
-	public CharSequence getSummary() {
-		currentValue = getPersistedStringList(DEFAULT_VALUE);
-		if(currentValue.size() != 0) {
-			String[] myStringList = currentValue.toArray(new String[currentValue.size()]);
-			return TextUtils.join(", ", myStringList);
-		} else return getContext().getString(R.string.with_no_items_deactivated);
+		deleteElements.clear();
+		itemPos.clear();
+		itemPosRanges.clear();
+		isItemNew.clear();
 	}
 
 	/**
@@ -214,12 +254,8 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 	 * @see #persistInt(int)
 	 */
 	private ArrayList<String> getPersistedStringList(ArrayList<String> defaultValue) {
-		if (!shouldPersist()) {
-			return defaultValue;
-		} else if(hasValueChanged) {
-			hasValueChanged = false;
-			return tinyDB.getListString(KEY);
-		} else return currentValue;
+		if (!shouldPersist()) return defaultValue;
+		else return tinyDB.getListString(KEY);
 	}
 
 	@Override
@@ -239,6 +275,8 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 			@Override
 			public void onGlobalLayout() {
 				if (!alreadyLoaded) {
+					if(dialogBackground != -1)
+						item.setBackgroundColor(dialogBackground);
 					itemPos.append(childIndex, item.getTop());
 					itemPosRanges.add(item.getTop(), item.getBottom());
 					isItemNew.add(true);
@@ -256,70 +294,72 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 			scrollView.setMaxHeight(linearLayout.getChildAt(0).getHeight()*3);
 		}
 
-		item.findViewById(R.id.move).setOnTouchListener(new View.OnTouchListener() {
-			float dy;
+		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+			item.findViewById(R.id.move).setOnTouchListener(new View.OnTouchListener() {
+				float dy;
 
-			private void move(int getToPos, int itemIndex) {
-				if (getToPos == itemIndex) return;
+				@Override
+				public boolean onTouch(View v1, MotionEvent event) {
+					int childIndex = getChildIndex(item);
 
-				boolean direction = getToPos > itemIndex;
-				int toBeMovedIndex = itemIndex + (direction? +1:-1);
-				if (toBeMovedIndex != getToPos)
-					move(getToPos, toBeMovedIndex);
+					switch (event.getAction()) {
+						case MotionEvent.ACTION_DOWN:
+							ViewCompat.animate(item).z(5).setDuration(0).start();
+							dy = ViewCompat.getY(item) - event.getRawY();
+							scrollView.setScrollingEnabled(false);
+							break;
+						case MotionEvent.ACTION_MOVE:
+							float moveTo = event.getRawY() + dy;
 
-				swap(itemIndex, toBeMovedIndex);
-			}
+							if (moveTo < ViewCompat.getY(linearLayout))
+								moveTo = ViewCompat.getY(linearLayout);
+							else if (moveTo > ViewCompat.getTranslationY(scrollView)
+									+ scrollView.getBottom() - item.getHeight())
+								moveTo = ViewCompat.getTranslationY(scrollView)
+										+ scrollView.getBottom() - item.getHeight();
 
-			@Override
-			public boolean onTouch(View v1, MotionEvent event) {
-				int childIndex = getChildIndex(item);
+							ViewCompat.animate(item).y(moveTo).setDuration(0).start();
 
-				hasValueChanged = true;
+							int overItemIndex = itemPosRanges.get((int) (ViewCompat.getY(item)
+									+ item.getHeight() / 2f));
 
-				switch (event.getAction()) {
-					case MotionEvent.ACTION_DOWN:
-						ViewCompat.animate(item).z(5).setDuration(0).start();
-						dy = ViewCompat.getY(item) - event.getRawY();
-						scrollView.setScrollingEnabled(false);
-						break;
-					case MotionEvent.ACTION_MOVE:
-						float moveTo = event.getRawY() + dy;
+							move(childIndex, overItemIndex);
 
-						if (moveTo < ViewCompat.getY(linearLayout))
-							moveTo = ViewCompat.getY(linearLayout);
-						else if (moveTo > ViewCompat.getTranslationY(scrollView)
-								+ scrollView.getBottom() - item.getHeight())
-							moveTo = ViewCompat.getTranslationY(scrollView)
-									+ scrollView.getBottom() - item.getHeight();
-
-						ViewCompat.animate(item).y(moveTo).setDuration(0).start();
-
-						int overItemIndex = itemPosRanges.get((int) (ViewCompat.getY(item) + item.getHeight()/2f));
-
-						move(childIndex, overItemIndex);
-
-						//reposition
-						for (int i = 0; i < linearLayout.getChildCount(); i++) {
-							if (childIndex == i) continue;
-							ViewCompat.animate(linearLayout.getChildAt(i)).z(2.5f)
-									.y(itemPos.get(i)).z(0).setDuration(0).start();
-						}
-						break;
-					case MotionEvent.ACTION_UP:
-						scrollView.setScrollingEnabled(true);
-						moveTo = itemPos.get(itemPosRanges.get((int) (ViewCompat.getY(item) + item.getHeight()/2f)));
-						ViewCompat.animate(item).y(moveTo).z(0).setDuration(0).start();
-						break;
-					default:
-						return false;
+							//reposition
+							for (int i = 0; i < linearLayout.getChildCount(); i++) {
+								if (childIndex == i) continue;
+								ViewCompat.animate(linearLayout.getChildAt(i)).z(2.5f)
+										.y(itemPos.get(i)).z(0).setDuration(0).start();
+							}
+							break;
+						case MotionEvent.ACTION_UP:
+							scrollView.setScrollingEnabled(true);
+							moveTo = itemPos.get(itemPosRanges.get((int) (ViewCompat.getY(item) + item.getHeight() / 2f)));
+							ViewCompat.animate(item).y(moveTo).z(0).setDuration(0).start();
+							break;
+						default:
+							return false;
+					}
+					return true;
 				}
-				return true;
-			}
-		});
+
+				private void move(int getToPos, int itemIndex) {
+					if (getToPos == itemIndex) return;
+
+					boolean direction = getToPos > itemIndex;
+					int toBeMovedIndex = itemIndex + (direction ? +1 : -1);
+					if (toBeMovedIndex != getToPos)
+						move(getToPos, toBeMovedIndex);
+
+					swap(itemIndex, toBeMovedIndex);
+				}
+			});
+		}
+
 
 		EditText text = ((EditText) item.findViewById(R.id.text));
 		text.setOnFocusChangeListener((v1, hasFocus)->{
-			item.findViewById(R.id.delete).setVisibility(hasFocus? View.VISIBLE:View.INVISIBLE);
+			item.findViewById(R.id.delete).setVisibility(hasFocus? VISIBLE:View.INVISIBLE);
 		});
 		text.addTextChangedListener(new Utils.SimpleTextWatcher() {
 			@Override
@@ -340,16 +380,35 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 	}
 
 	private void animateDeleteConfirmation(View item, int childIndex) {
+		textDefault.setVisibility(GONE);
 		scrollView.setVisibility(GONE);
 		add.setVisibility(GONE);
-		deleteConfirmation.setVisibility(View.VISIBLE);
+
+		textItemToDelete.setText(currentValue.get(childIndex+1));
+		textItemToDelete.setVisibility(VISIBLE);
+
+		deleteConfirmation.setVisibility(VISIBLE);
 		deleteConfirmation.requestFocus();
 		deleteConfirmation.findViewById(R.id.deleteData).setOnClickListener(v->{
+			if(!isItemNew.get(childIndex))
+				deleteElements.add(currentValue.get(childIndex+1));
 			removeItem(item, childIndex);
-			deleteConfirmation.setVisibility(GONE);
-			scrollView.setVisibility(View.VISIBLE);
-			add.setVisibility(View.VISIBLE);
+
+			invisibilizeDeleteConfirmation();
 		});
+		deleteConfirmation.findViewById(R.id.cancel).setOnClickListener(v->{
+			invisibilizeDeleteConfirmation();
+		});
+	}
+
+	private void invisibilizeDeleteConfirmation() {
+		deleteConfirmation.setVisibility(GONE);
+		textItemToDelete.setVisibility(GONE);
+		textItemToDelete.setText("");
+
+		textDefault.setVisibility(VISIBLE);
+		scrollView.setVisibility(VISIBLE);
+		add.setVisibility(VISIBLE);
 	}
 
 	private void removeItem(View item, int childIndex) {
@@ -361,17 +420,15 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 
 		if (childIndex > 0 && linearLayout.getChildAt(childIndex - 1) != null)
 			linearLayout.getChildAt(childIndex - 1).findViewById(R.id.text).requestFocus();
-
-		hasValueChanged = true;
 	}
 
 	private interface OnFinishedLoadingListener {
-		public void onFinishedLoading();
+		void onFinishedLoading();
 	}
 
 	private void swap(int i1, int i2) {
-		Collections.swap(currentValue, i1, i2);
-		Collections.swap(isItemNew, i1, i2);
+		Collections.swap(currentValue, i1+1, i2+1);//+1 to account for the default elem
+		Collections.swap(isItemNew, i1+1, i2+1);//+1 to account for the default elem
 
 		Integer m = itemPos.get(i1);
 		itemPos.removeAt(i1);

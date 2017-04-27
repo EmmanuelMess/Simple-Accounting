@@ -62,6 +62,11 @@ public class RangedStructure {
 		return dataStart.size();
 	}
 
+	public void clear() {
+		dataStart.clear();
+		dataEnd.clear();
+	}
+
 	public String toString() {
 		String s = "{";
 		for(int i = 0; i < dataStart.size(); i++)

@@ -33,7 +33,7 @@
     <string name="currency">Unidad monetaria</string>
     <string name="settings">Ajustes</string>
     <string name="costumize_currencies">Personalizar unidades monetarias</string>
-    <string name="add_item">Añadir item...</string>
+    <string name="add_item">Añadir item</string>
     <string name="pref_title_currency">Monedas</string>
     <string name="with_no_items_deactivated">Sin items, el selector no se mostrará</string>
     <string name="delete_data">Eliminar balances en esta moneda?</string>
@@ -43,4 +43,5 @@
     <string name="version">Versión</string>
     <string name="pref_title_invertcreditdebit">Invertir debito y credito</string>
     <string name="pref_summary_invertcreditdebit">Credito y debito intercambian lugares en la tabla</string>
+    <string name="item_hint">Ingrese u. monet.</string>
 </resources>

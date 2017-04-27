@@ -12,20 +12,27 @@ import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
 public class LoadPrevBalanceAsyncTask extends AsyncTask<Void, Void, Double> {
 
 	private int month, year;
+	private String currency;
 	private TableMonthlyBalance tableMonthlyBalance;
 	private AsyncFinishedListener<Double> listener;
 
-	public LoadPrevBalanceAsyncTask(int m, int y, TableMonthlyBalance db,
+	public LoadPrevBalanceAsyncTask(int m, int y, String c, TableMonthlyBalance db,
 									AsyncFinishedListener<Double> l) {
 		month = m;
 		year = y;
+		currency = c;
 		tableMonthlyBalance = db;
 		listener = l;
 	}
 
 	@Override
+	protected void onPreExecute() {
+		tableMonthlyBalance.getReadableDatabase();//updates the database, calls onUpgrade()
+	}
+
+	@Override
 	protected Double doInBackground(Void... v) {
-		return tableMonthlyBalance.getBalanceLastMonthWithData(month, year);
+		return tableMonthlyBalance.getBalanceLastMonthWithData(month, year, currency);
 	}
 
 	@Override

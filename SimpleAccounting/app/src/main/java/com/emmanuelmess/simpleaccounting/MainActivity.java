@@ -55,6 +55,7 @@ import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.emmanuelmess.simpleaccounting.activities.SettingsActivity.INVERT_CREDIT_DEBIT_SETTING;
+import static com.emmanuelmess.simpleaccounting.activities.dialogs.CurrencyPicker.DFLT;
 import static com.emmanuelmess.simpleaccounting.utils.Utils.equal;
 import static com.emmanuelmess.simpleaccounting.utils.Utils.parseString;
 import static com.emmanuelmess.simpleaccounting.utils.Utils.parseView;
@@ -69,17 +70,17 @@ public class MainActivity extends AppCompatActivity
 	public static final String UPDATE_YEAR_SETTING = "update 1.2 year";
 	public static final String UPDATE_MONTH_SETTING = "update 1.2 month";
 
-	public static final String MONTH = "month", YEAR = "year";
 
 	public static int[] MONTH_STRINGS = new int[]{R.string.january, R.string.february, R.string.march, R.string.april, R.string.may,
-			R.string.june, R.string.july, R.string.august, R.string.september, R.string.october,
-			R.string.november, R.string.december};
+			R.string.june, R.string.july, R.string.august, R.string.september, R.string.october, R.string.november, R.string.december};
 
 	private final String PREFS_NAME = "shared prefs", PREFS_FIRST_RUN = "first_run";
 
 	//THESE COULD NOT BE IN ORDER (because of posible inversion between credit and debit)
 	public static final int[] EDIT_IDS = {R.id.editDate, R.id.editRef, R.id.editCredit, R.id.editDebit, R.id.textBalance};
 	public static final int[] TEXT_IDS = {R.id.textDate, R.id.textRef, R.id.textCredit, R.id.textDebit};
+
+	private static boolean invertCreditDebit = false;
 
 	private int FIRST_REAL_ROW = 1;//excluding header and previous balance. HAS 2 STATES: 1 & 2
 	private int DEFAULT_CURRENCY = 0;
@@ -95,7 +96,6 @@ public class MainActivity extends AppCompatActivity
 	private AsyncTask<Void, Void, Double> loadPrevBalance = null;
 
 	private int updateYear, updateMonth;
-	private static boolean invertCreditDebit = false;
 
 	//pointer to row being edited STARTS IN 1
 	private int editableRow = -1;
@@ -124,6 +124,19 @@ public class MainActivity extends AppCompatActivity
 	public static void setDate(int month, int year) {
 		editableMonth = month;
 		editableYear = year;
+		invalidateTable();
+	}
+
+	public static String getCurrency() {
+		return editableCurrency;
+	}
+
+	public static void setCurrency(String currency) {
+		editableCurrency = currency;
+		//invalidateTable(); TODO why is this unnecessary?
+	}
+
+	public static void invalidateTable() {
 		invalidateTable = true;
 	}
 
@@ -163,20 +176,11 @@ public class MainActivity extends AppCompatActivity
 			prefEditor.apply();
 		}
 
-		updateYear = preferences.getInt(UPDATE_YEAR_SETTING, -1);
 		updateMonth = preferences.getInt(UPDATE_MONTH_SETTING, -1);
+		updateYear = preferences.getInt(UPDATE_YEAR_SETTING, -1);
 
-		int loadMonth, loadYear;
-		String loadCurrency = "";
-
-		if (getIntent().hasExtra(MONTH)) {
-			Bundle b = getIntent().getExtras();
-			loadMonth = b.getInt(MONTH);
-			loadYear = b.getInt(YEAR);
-		} else {
-			loadMonth = currentMonthYear[0];
-			loadYear = currentMonthYear[1];
-		}
+		editableMonth = currentMonthYear[0];
+		editableYear = currentMonthYear[1];
 
 		table.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
 			@Override
@@ -190,7 +194,7 @@ public class MainActivity extends AppCompatActivity
 				space.setMinimumHeight(findViewById(R.id.fab).getHeight()
 						- findViewById(R.id.fab).getPaddingTop());
 
-				loadMonth(loadMonth, loadYear, loadCurrency);
+				loadMonth(editableMonth, editableYear, editableCurrency);
 				//in case the activity gets destroyed
 				invalidateTable = false;
 				invalidateToolbar = false;
@@ -198,7 +202,7 @@ public class MainActivity extends AppCompatActivity
 		});
 
 		fab = (FloatingActionButton) findViewById(R.id.fab);
-		if (editableMonth == TableGeneral.OLDER_THAN_UPDATE && editableYear == TableGeneral.OLDER_THAN_UPDATE) {
+		if (isSelectedMonthOlderThanUpdate()) {
 			fab.setVisibility(GONE);
 			space.setVisibility(GONE);
 		}
@@ -232,30 +236,28 @@ public class MainActivity extends AppCompatActivity
 		if (invertCreditDebit !=
 				getDefaultSharedPreferences(this).getBoolean(INVERT_CREDIT_DEBIT_SETTING, false)) {
 
+			int tempId = 0;
+
+			table.findViewById(R.id.credit).setId(tempId);
+			table.findViewById(R.id.debit).setId(R.id.credit);
+			table.findViewById(tempId).setId(R.id.debit);
+
+			((TextView) findViewById(R.id.credit)).setText(R.string.credit);
+			((TextView) findViewById(R.id.debit)).setText(R.string.debit);
+
 			invertCreditDebit =
 					getDefaultSharedPreferences(this).getBoolean(INVERT_CREDIT_DEBIT_SETTING, false);
-
-			if(invertCreditDebit) {
-				int tempId = 0;
-
-				table.findViewById(R.id.credit).setId(tempId);
-				table.findViewById(R.id.debit).setId(R.id.credit);
-				table.findViewById(tempId).setId(R.id.debit);
-
-				((TextView) findViewById(R.id.credit)).setText(R.string.credit);
-				((TextView) findViewById(R.id.debit)).setText(R.string.debit);
-			}
 		}
-		if (invalidateTable && (loadingMonthTask == null || loadingMonthTask.getStatus() == AsyncTask.Status.RUNNING)) {
+		if (invalidateTable && (loadingMonthTask == null || loadingMonthTask.getStatus() != AsyncTask.Status.RUNNING)) {
 			loadMonth(editableMonth, editableYear, editableCurrency);
 
-			fab.setVisibility(editableMonth == TableGeneral.OLDER_THAN_UPDATE
-					&& editableYear == TableGeneral.OLDER_THAN_UPDATE? GONE:VISIBLE);
+			fab.setVisibility(isSelectedMonthOlderThanUpdate()? GONE:VISIBLE);
 
 			invalidateTable = false;
 		}
 		if (invalidateToolbar) {
 			invalidateOptionsMenu();
+
 			invalidateToolbar = false;
 		}
 	}
@@ -273,9 +275,12 @@ public class MainActivity extends AppCompatActivity
 		getMenuInflater().inflate(R.menu.toolbar, menu);
 
 		TinyDB tinyDB = new TinyDB(this);
-		ArrayList<String> currencies = tinyDB.getListString(CurrencyPicker.KEY);
+		ArrayList<String> currencies = tinyDB.getListString(CurrencyPicker.KEY); //DO NOT save this List (first item changed)
 
-		if (currencies.size() != 0) {
+		if (currencies.size() != 0 && !isSelectedMonthOlderThanUpdate()) {
+			if(Utils.equal(currencies.get(0), DFLT))
+				currencies.set(0, getString(R.string.default_short));
+
 			MenuItem item = menu.findItem(R.id.action_currency);
 			SpinnerNoUnwantedOnClick spinner =
 					new SpinnerNoUnwantedOnClick(MenuItemCompat.getActionView(item));
@@ -304,7 +309,11 @@ public class MainActivity extends AppCompatActivity
 			});
 
 			currencyName = Utils.equal(editableCurrency, "")? currencies.get(0):editableCurrency;
-		} else menu.removeItem(R.id.action_currency);
+		} else {
+			menu.removeItem(R.id.action_currency);
+
+			if(isSelectedMonthOlderThanUpdate()) editableCurrency = "";//make sure
+		}
 
 		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.KITKAT)
 			menu.removeItem(R.id.action_print);
@@ -328,7 +337,8 @@ public class MainActivity extends AppCompatActivity
 						PrintManager printM = (PrintManager) getSystemService((Context.PRINT_SERVICE));
 
 						String job = getString(R.string.app_name) + ": " +
-								(editableMonth != TableGeneral.OLDER_THAN_UPDATE? getString(MONTH_STRINGS[editableMonth]):updateMonth);
+								(!isSelectedMonthOlderThanUpdate()?
+										getString(MONTH_STRINGS[editableMonth]):getString(MONTH_STRINGS[updateMonth]));
 						printM.print(job,
 								new PPrintDocumentAdapter(this, table, editableMonth, editableYear,
 										currencyName, new int[]{updateMonth, updateYear}),
@@ -554,10 +564,10 @@ public class MainActivity extends AppCompatActivity
 
 			TextView monthText = (TextView) findViewById(R.id.textMonth);
 
-			if (month != -1 && year != TableGeneral.OLDER_THAN_UPDATE) {
+			if (month != -1 && !isSelectedMonthOlderThanUpdate()) {
 				((TextView) findViewById(R.id.textMonth)).setText(MONTH_STRINGS[month]);
 
-				loadPrevBalance = new LoadPrevBalanceAsyncTask(month, year, tableMonthlyBalance,
+				loadPrevBalance = new LoadPrevBalanceAsyncTask(month, year, editableCurrency, tableMonthlyBalance,
 						(lastMonthData) -> {
 							if (lastMonthData != null) {
 								inflater.inflate(R.layout.newrow_main, table);
@@ -674,7 +684,8 @@ public class MainActivity extends AppCompatActivity
 			TextWatcher watcher = new Utils.SimpleTextWatcher() {
 				@Override
 				public void afterTextChanged(Editable editable) {
-					tableMonthlyBalance.updateMonth(editableMonth, editableYear, Double.parseDouble(editable.toString().substring(1)));
+					tableMonthlyBalance.updateMonth(editableMonth, editableYear, editableCurrency,
+							Double.parseDouble(editable.toString().substring(1)));
 				}
 			};
 			((TextView) row.findViewById(R.id.textBalance)).addTextChangedListener(watcher);
@@ -768,9 +779,14 @@ public class MainActivity extends AppCompatActivity
 		editableRow = value;
 	}
 
-	public void debugChangeDate(int month, int year) {
-		if (BuildConfig.DEBUG)
-			loadMonth(month, year, editableCurrency);
+	/**
+	 * The user should NEVER be allowed to edit in any way if this is true
+	 *
+	 * @return if the month selected is older than the update that added month selection
+	 */
+	private boolean isSelectedMonthOlderThanUpdate() {
+		return editableMonth == TableGeneral.OLDER_THAN_UPDATE
+				|| editableYear == TableGeneral.OLDER_THAN_UPDATE;
 	}
 
 }

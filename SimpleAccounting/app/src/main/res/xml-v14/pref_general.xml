@@ -3,7 +3,7 @@
     <com.emmanuelmess.simpleaccounting.activities.dialogs.CurrencyPicker
         android:key="pref_currencypicker"
         android:title="@string/pref_title_currency"/>
-    <CheckBoxPreference
+    <SwitchPreference
         android:key="pref_invertcreditdebit"
         android:title="@string/pref_title_invertcreditdebit"
         android:summary="@string/pref_summary_invertcreditdebit"

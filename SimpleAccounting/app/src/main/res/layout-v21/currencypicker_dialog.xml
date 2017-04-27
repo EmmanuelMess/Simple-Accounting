@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- As tested in API 10 the background in the Dialog Adapter is BLACK, so the text HAS to be WHITE -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:app="http://schemas.android.com/apk/res-auto"
               xmlns:tools="http://schemas.android.com/tools"
@@ -11,10 +10,13 @@
               android:paddingLeft="?dialogPreferredPadding"
               android:paddingRight="?dialogPreferredPadding"
               android:weightSum="1">
+
     <RelativeLayout android:layout_width="match_parent"
                     android:layout_height="36dp"
                     android:paddingTop="2dp"
-                    android:paddingBottom="2dp">
+                    android:paddingBottom="2dp"
+                    android:paddingStart="24dp"
+                    android:paddingLeft="24dp">
 
         <EditText
             android:layout_height="match_parent"
@@ -24,9 +26,7 @@
             android:textAlignment="gravity"
             android:gravity="center_vertical|start"
             android:background="@android:color/transparent"
-            android:hint="@string/default_ext"
-            android:textColor="@color/colorTextWhite"
-            android:textColorHint="@color/colorTextHintWhite"/>
+            android:hint="@string/default_ext"/>
 
         <TextView
             android:layout_height="match_parent"
@@ -35,15 +35,15 @@
             android:textAlignment="gravity"
             android:gravity="center_vertical|start"
             android:background="@android:color/transparent"
-            android:visibility="gone"
-            android:textColor="@color/colorTextWhite"/>
+            android:visibility="gone"/>
     </RelativeLayout>
 
     <com.emmanuelmess.simpleaccounting.activities.views.LockableScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/scrollerView"
-        android:fadeScrollbars="false">
+        android:fadeScrollbars="false"
+        >
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -57,18 +57,33 @@
         android:layout_width="match_parent"
         android:layout_height="36dp"
         android:id="@+id/add"
-        android:clickable="true">
+        android:clickable="true"
+        android:background="?android:attr/selectableItemBackground">
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_add_black_24dp"
+            android:background="@android:color/transparent"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:id="@+id/imageButton"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentTop="true"
+            android:scaleType="centerInside"/>
 
         <TextView
             android:text="@string/add_item"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/textView3"
+            android:layout_toEndOf="@+id/imageButton"
+            android:layout_alignBottom="@+id/imageButton"
             android:textAlignment="gravity"
+            android:layout_toRightOf="@+id/imageButton"
             android:layout_alignParentTop="true"
-            android:gravity="center"
-            android:textSize="14sp"
-            android:textColor="@color/colorTextWhite"/>
+            android:gravity="center_vertical|start"
+            android:textSize="14sp"/>
     </RelativeLayout>
 
 
@@ -78,7 +93,8 @@
         android:visibility="gone"
         android:id="@+id/deleteConfirmation"
         android:orientation="vertical"
-        android:gravity="center">
+        android:gravity="center"
+        >
 
         <LinearLayout
             android:orientation="horizontal"
@@ -113,7 +129,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/textView"
             android:padding="5dp"
-            android:textColor="@color/colorTextWhite"
+            android:textColor="?android:attr/textColorPrimary"
             android:textSize="@dimen/title"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"/>
