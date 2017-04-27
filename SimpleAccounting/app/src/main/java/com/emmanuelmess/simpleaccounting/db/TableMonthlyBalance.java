@@ -11,12 +11,13 @@ import static java.lang.String.format;
  *         on 14/11/2016, at 16:52.
  */
 public class TableMonthlyBalance extends Database {
-	private static final String[] COLUMNS = new String[] {"MONTH", "YEAR", "BALANCE"};
-	public static final String TABLE_NAME = "MONTHLY_BALANCE";
+	//Beware the columns in this array may not be in the real order
+	private static final String[] COLUMNS = new String[] {"MONTH", "YEAR", "CURRENCY", "BALANCE"};
+	private static final String TABLE_NAME = "MONTHLY_BALANCE";
 
-	private static final int DATABASE_VERSION = 2;
-	private static final String TABLE_CREATE = format("CREATE TABLE %1$s(%2$s INT, %3$s INT, %4$s INT, %5$s REAL);",
-			TABLE_NAME, NUMBER_COLUMN, COLUMNS[0], COLUMNS[1], COLUMNS[2]);
+	private static final int DATABASE_VERSION = 4;
+	private static final String TABLE_CREATE = format("CREATE TABLE %1$s(%2$s INT, %3$s INT, %4$s INT, %5$s TEXT, %6$s REAL);",
+			TABLE_NAME, NUMBER_COLUMN, COLUMNS[0], COLUMNS[1], COLUMNS[2], COLUMNS[3]);
 
 	public TableMonthlyBalance(Context context) {
 		super(context, TABLE_NAME, null, DATABASE_VERSION);
@@ -35,26 +36,30 @@ public class TableMonthlyBalance extends Database {
 				String sql = "DROP TABLE " + TableMonthlyBalance.TABLE_NAME;
 				db.execSQL(sql);
 				db.execSQL(TABLE_CREATE);
+			case 2:
+				sql = "ALTER TABLE " + TABLE_NAME + " ADD " + COLUMNS[2] + " TEXT default '';";
+				db.execSQL(sql);
 		}
 	}
 
-	public void updateMonth(int month, int year, double balance) {
-		if(!isMonthInBD(month, year))
-			createMonth(month, year);
+	public void updateMonth(int month, int year, String currency, double balance) {
+		if(!isMonthInBD(month, year, currency))
+			createMonth(month, year, currency);
 
-		CV.put(COLUMNS[2], balance);
+		CV.put(COLUMNS[3], balance);
 		getWritableDatabase().update(TABLE_NAME, CV, SQLShort(AND, format("%1$s=%2$s" , COLUMNS[0], month),
-				format("%1$s=%2$s" , COLUMNS[1], year)), null);
+				format("%1$s=%2$s" , COLUMNS[1], year), format("%1$s=%2$s" , COLUMNS[2], "'" + currency + "'")), null);
 		CV.clear();
 	}
 
-	public Double getBalanceLastMonthWithData(int month, int year) {
+	public Double getBalanceLastMonthWithData(int month, int year, String currency) {
 		double data = 0;
 
-		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[] {COLUMNS[2]},
-				SQLShort(OR, format("%1$s<%2$s" , COLUMNS[1], year),
-					"(" + SQLShort(AND, format("%1$s<%2$s" , COLUMNS[0], month),
-							format("%1$s=%2$s" , COLUMNS[1] , year)) + ")"),
+		String condMonth = SQLShort(AND, format("%1$s<%2$s" , COLUMNS[0], month), format("%1$s=%2$s" , COLUMNS[1] , year)),
+		condYear = SQLShort(OR, format("%1$s<%2$s" , COLUMNS[1], year), "(" + condMonth + ")"),
+		condCurrency = SQLShort(AND, "(" + condYear + ")", format("%1$s=%2$s" , COLUMNS[2], "'" + currency + "'"));
+
+		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[] {COLUMNS[3]}, condCurrency,
 				null, null, null, null);
 
 		c.moveToFirst();
@@ -73,11 +78,17 @@ public class TableMonthlyBalance extends Database {
 		return data;
 	}
 
-	private boolean isMonthInBD(int month, int year) {
+	public void deleteAllForCurrency(String currency) {
+		String cond = format("%1$s=%2$s" , COLUMNS[2], "'" + currency + "'");
+		getWritableDatabase().delete(TABLE_NAME, cond, null);
+	}
+
+	private boolean isMonthInBD(int month, int year, String currency) {
 		boolean data;
-		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[] {COLUMNS[2]},
+		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[] {COLUMNS[3]},
 				SQLShort(AND, format("%1$s=%2$s" , COLUMNS[0], month),
-						format("%1$s=%2$s" , COLUMNS[1], year)),
+						format("%1$s=%2$s" , COLUMNS[1], year),
+						format("%1$s=%2$s" , COLUMNS[2], "'" + currency + "'")),
 				null, null, null, null, "1");
 
 		data = c.getCount() != 0;
@@ -86,11 +97,12 @@ public class TableMonthlyBalance extends Database {
 		return data;
 	}
 
-	private void createMonth(int month, int year) {
-		if(!isMonthInBD(month, year)) {
+	private void createMonth(int month, int year, String currency) {
+		if(!isMonthInBD(month, year, currency)) {
 			CV.put(COLUMNS[0], month);
 			CV.put(COLUMNS[1], year);
-			CV.put(COLUMNS[2], 0);
+			CV.put(COLUMNS[2], currency);
+			CV.put(COLUMNS[3], 0);
 			getWritableDatabase().insert(TABLE_NAME, null, CV);
 			CV.clear();
 		}

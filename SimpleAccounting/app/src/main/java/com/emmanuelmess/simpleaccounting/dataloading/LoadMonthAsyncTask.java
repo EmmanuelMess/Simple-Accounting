@@ -1,18 +1,10 @@
 package com.emmanuelmess.simpleaccounting.dataloading;
 
 import android.os.AsyncTask;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.TableLayout;
-import android.widget.TextView;
+import android.util.Pair;
 
-import com.emmanuelmess.simpleaccounting.MainActivity;
-import com.emmanuelmess.simpleaccounting.R;
-import com.emmanuelmess.simpleaccounting.Utils;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
-import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 
 /**
@@ -20,89 +12,56 @@ import java.util.ArrayList;
  *         on 27/11/2016, at 15:03.
  */
 
-public class LoadMonthAsyncTask extends AsyncTask<Void, Void, String[][]> {
+public class LoadMonthAsyncTask extends AsyncTask<Void, Void, Pair<String[][], ArrayList<Integer>>> {
 
 	private int month, year;
+	private String currency;
 	private TableGeneral tableGeneral;
-	private TableMonthlyBalance tableMonthlyBalance;
-	private TableLayout table;
-	private LayoutInflater inflater;
-	private ArrayList<Integer> rowToDBRowConversion = new ArrayList<>();
-	private AsyncFinishedListener<ArrayList<Integer>> listener;
-	private MainActivity mainActivity;
+	private AsyncFinishedListener<Pair<String[][], ArrayList<Integer>>> listener;
+	private boolean invertCreditDebit = false;
 	private static boolean alreadyLoading = false;
 
-	public LoadMonthAsyncTask(int m, int y, TableGeneral dbG, TableMonthlyBalance db, TableLayout t,
-	                          LayoutInflater i, AsyncFinishedListener<ArrayList<Integer>> l,
-	                          MainActivity a) {
+	public LoadMonthAsyncTask(int m, int y, String c, TableGeneral dbG,
+							  AsyncFinishedListener<Pair<String[][], ArrayList<Integer>>> l,
+							  boolean invert) {
 		month = m;
 		year = y;
+		currency = c;
 		tableGeneral = dbG;
-		tableMonthlyBalance = db;
-		table = t;
-		inflater = i;
 		listener = l;
-		mainActivity = a;
+		invertCreditDebit = invert;
 	}
 
 	@Override
-	protected void onPreExecute() {
-		if(table.getChildCount() - mainActivity.getFirstRealRow() > 0)
-			throw new IllegalArgumentException("Table already contains "
-					+ (table.getChildCount() - mainActivity.getFirstRealRow()) + " elements: \n" +
-			table.toString());
-	}
-
-	@Override
-	protected String[][] doInBackground(Void... p) {
+	protected Pair<String[][], ArrayList<Integer>> doInBackground(Void... p) {
 		if(!alreadyLoading)
 			alreadyLoading = true;
 		else throw new IllegalStateException("Already loading month: " + year + "-" + (month+1));
 
-		int[] data = tableGeneral.getIndexesForMonth(month, year);
+		int[] data = tableGeneral.getIndexesForMonth(month, year, currency);
+		ArrayList<Integer> rowToDBRowConversion = new ArrayList<>();
+
+		if(isCancelled()) return null;
 
 		for(int m : data)
 			rowToDBRowConversion.add(m);
 
-		return tableGeneral.getAllForMonth(month, year);
+		if(isCancelled()) return null;
+
+		return new Pair<>(tableGeneral.getAllForMonth(month, year, currency),
+				rowToDBRowConversion);
 	}
 
 	@Override
-	protected void onPostExecute(String[][] dbRows) {
-		BigDecimal memBalance = BigDecimal.ZERO;
-
-		if(mainActivity.getFirstRealRow() == 2) {
-			memBalance = memBalance.add(Utils.parseString(
-					((TextView) table.getChildAt(1).findViewById(R.id.textBalance))
-							.getText().toString().substring(2)));
-		}
-
-		for (String[] dbRow : dbRows) {
-			inflater.inflate(R.layout.newrow_main, table);
-
-			View row = mainActivity.loadRow();
-
-			for (int j = 0; j < MainActivity.TEXT_IDS.length; j++) {
-				row.findViewById(MainActivity.EDIT_IDS[j]).setVisibility(View.GONE);
-
-				TextView t = (TextView) row.findViewById(MainActivity.TEXT_IDS[j]);
-				t.setVisibility(View.VISIBLE);
-				t.setText(dbRow[j]);
-			}
-
-			TextView t = (TextView) row.findViewById(R.id.textBalance);
-			if (dbRow[2] != null)
-				memBalance = memBalance.add(Utils.parseString(dbRow[2]));
-			if (dbRow[3] != null)
-				memBalance = memBalance.subtract(Utils.parseString(dbRow[3]));
-
-			String s = "$ " + String.valueOf(memBalance);
-			t.setText(s);
-		}
-
-		listener.OnAsyncFinished(rowToDBRowConversion);
+	protected void onPostExecute(Pair<String[][], ArrayList<Integer>> dbRowsPairedRowToDBConversion) {
+		if(!isCancelled())
+			listener.OnAsyncFinished(dbRowsPairedRowToDBConversion);
 
 		alreadyLoading = false;
+	}
+
+	public static boolean isAlreadyLoading() {
+		return alreadyLoading;
 	}
 
 }

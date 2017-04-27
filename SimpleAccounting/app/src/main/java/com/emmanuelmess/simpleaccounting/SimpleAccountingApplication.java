@@ -30,7 +30,7 @@ public class SimpleAccountingApplication extends Application {
 		super.attachBaseContext(base);
 
 		// The following line triggers the initialization of ACRA
-		ACRA.init(this);
+		if (!BuildConfig.DEBUG) ACRA.init(this);
 	}
 }
 

@@ -36,7 +36,7 @@ import java.util.Locale;
  */
 public class TempMonthActivity extends ListActivity {
 
-	private TableGeneral f;
+	private TableGeneral tableGeneral;
 	private MonthListAdapter monthListAdapter;
 	private ArrayList<Integer[]> dateIntValues = new ArrayList<>();
 	private int updateYear, updateMonth;
@@ -73,14 +73,14 @@ public class TempMonthActivity extends ListActivity {
 		ab.setDisplayHomeAsUpEnabled(true);
 
 
-		f = new TableGeneral(this);
+		tableGeneral = new TableGeneral(this);
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
 
 		(new AsyncTask<Void, Void, int[][]>() {
 			@Override
 			protected int[][] doInBackground(Void... p) {
-				return f.getMonthsWithData();
+				return tableGeneral.getMonthsWithData();
 			}
 
 			@Override

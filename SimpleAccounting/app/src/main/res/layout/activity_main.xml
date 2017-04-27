@@ -6,7 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="com.emmanuelmess.simpleaccounting.MainActivity">
+    tools:context="com.emmanuelmess.simpleaccounting.MainActivity"
+    android:id="@+id/baseLayout">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -19,9 +20,9 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
             android:elevation="4dp"
-            android:theme="@style/AppTheme.AppBarOverlay"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             app:popupTheme="@style/AppTheme.PopupOverlay"
-            app:menu="@menu/toolbar"/>
+            app:menu="@menu/toolbar"/> <!-- Check incompatibility app -> android -->
 
     </android.support.design.widget.AppBarLayout>
 
@@ -33,6 +34,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/ic_add_white_24dp"/>
+        app:srcCompat="@drawable/ic_add_white_24dp"/>
 
 </android.support.design.widget.CoordinatorLayout>
