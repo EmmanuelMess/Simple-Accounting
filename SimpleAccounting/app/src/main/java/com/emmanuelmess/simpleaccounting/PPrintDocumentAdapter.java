@@ -135,7 +135,8 @@ public class PPrintDocumentAdapter extends PrintDocumentAdapter {
 
 		int end = getEnd(pageRanges);
 
-		for (int i = getStart(pageRanges); i <= end; i++) {
+		//WARNING && i < writtenPages.length is a workaround because Android gives impossible PageRange (check 31 items in A2 page)
+		for (int i = getStart(pageRanges); i <= end && i < writtenPages.length; i++) {
 			if(isPageInRange(pageRanges, i) && !writtenPages [i]) {
 				PdfDocument.Page page = pdfDocument.startPage(i);
 				if (cancellationSignal.isCanceled()) {
