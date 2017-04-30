@@ -3,13 +3,10 @@ package com.emmanuelmess.simpleaccounting.activities.views;
 import android.content.Context;
 import android.support.annotation.IntRange;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
-import android.view.View;
 import android.widget.ScrollView;
 
 import org.acra.ACRA;
 
-import java.util.logging.LogManager;
 /**
  * @author JMPergar (https://gist.github.com/JMPergar)
  *
