@@ -291,6 +291,9 @@ public class MainActivity extends AppCompatActivity
 			spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 				@Override
 				public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+					if(editableRow != -1)
+						currentEditableToView();
+
 					if (pos == DEFAULT_CURRENCY)
 						editableCurrency = "";
 					else
@@ -304,7 +307,6 @@ public class MainActivity extends AppCompatActivity
 
 				@Override
 				public void onNothingSelected(AdapterView<?> parent) {
-					// Another interface callback
 				}
 			});
 
