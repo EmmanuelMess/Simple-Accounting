@@ -776,7 +776,7 @@ public class MainActivity extends AppCompatActivity
 		if (value == -1 || table == null)
 			ACRAHelper.reset();
 		else
-			ACRAHelper.writeData(table, editableMonth, editableYear);
+			ACRAHelper.writeData(table, editableYear, editableMonth);
 
 		editableRow = value;
 	}
