@@ -22,6 +22,11 @@
         android:title="@string/print"
         app:showAsAction="ifRoom"/>
 
+    <item
+        android:id="@+id/action_donate"
+        android:title="@string/donate"
+        app:showAsAction="never"/>
+
     <!-- Settings, should always be in the overflow-->
     <item android:id="@+id/action_settings"
           android:title="@string/settings"

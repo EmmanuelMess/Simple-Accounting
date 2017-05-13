@@ -29,6 +29,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.emmanuelmess.simpleaccounting.activities.DonateActivity;
 import com.emmanuelmess.simpleaccounting.activities.SettingsActivity;
 import com.emmanuelmess.simpleaccounting.activities.TempMonthActivity;
 import com.emmanuelmess.simpleaccounting.activities.dialogs.CurrencyPicker;
@@ -350,6 +351,9 @@ public class MainActivity extends AppCompatActivity
 					Toast.makeText(this, getString(R.string.nothing_to_print), Toast.LENGTH_SHORT).show();
 				}
 
+				return true;
+			case R.id.action_donate:
+				startActivity(new Intent(getApplicationContext(), DonateActivity.class));
 				return true;
 			case R.id.action_settings:
 				startActivity(new Intent(this, SettingsActivity.class));
