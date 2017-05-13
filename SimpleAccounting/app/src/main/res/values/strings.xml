@@ -53,6 +53,6 @@
     <string name="donate">Donate</string>
     <string name="bitcoin" translatable="false">Bitcoins</string>
     <string name="no_bitcoin_app">No bitcoin wallet app installed</string>
-    <string name="graph">Graph</string>
+    <string name="graph">Graphs</string>
 
 </resources>
