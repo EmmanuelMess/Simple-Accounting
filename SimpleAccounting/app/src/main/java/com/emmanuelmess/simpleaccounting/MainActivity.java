@@ -565,8 +565,7 @@ public class MainActivity extends AppCompatActivity
 
 			tableGeneral.getReadableDatabase();//triggers onUpdate()
 
-			loadingMonthTask = new LoadMonthAsyncTask(month, year, currency, tableGeneral, this,
-					invertCreditDebit);
+			loadingMonthTask = new LoadMonthAsyncTask(month, year, currency, tableGeneral, this);
 
 			editableMonth = month;
 			editableYear = year;

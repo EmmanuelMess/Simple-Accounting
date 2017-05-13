@@ -18,18 +18,15 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, Pair<String[][], A
 	private String currency;
 	private TableGeneral tableGeneral;
 	private AsyncFinishedListener<Pair<String[][], ArrayList<Integer>>> listener;
-	private boolean invertCreditDebit = false;
 	private static boolean alreadyLoading = false;
 
 	public LoadMonthAsyncTask(int m, int y, String c, TableGeneral dbG,
-							  AsyncFinishedListener<Pair<String[][], ArrayList<Integer>>> l,
-							  boolean invert) {
+	                          AsyncFinishedListener<Pair<String[][], ArrayList<Integer>>> l) {
 		month = m;
 		year = y;
 		currency = c;
 		tableGeneral = dbG;
 		listener = l;
-		invertCreditDebit = invert;
 	}
 
 	@Override
