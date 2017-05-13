@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="com.emmanuelmess.simpleaccounting"
-          xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.emmanuelmess.simpleaccounting"
           android:installLocation="auto">
 
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -39,9 +39,11 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
         </activity>
-        <activity android:name=".activities.DonateActivity"
-                  android:label="@string/donate"
-                  android:parentActivityName=".MainActivity">
+        <activity
+            android:name=".activities.DonateActivity"
+            android:label="@string/donate"
+            android:parentActivityName=".MainActivity">
+
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -51,6 +53,17 @@
             android:name=".activities.SettingsActivity"
             android:label="@string/settings"
             android:parentActivityName=".MainActivity">
+
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.emmanuelmess.simpleaccounting.MainActivity"/>
+        </activity>
+        <activity
+            android:name=".activities.GraphActivity"
+            android:label="@string/graph"
+            android:parentActivityName=".MainActivity">
+
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

@@ -11,6 +11,12 @@
         app:showAsAction="ifRoom"/>
 
     <item
+        android:id="@+id/action_graph"
+        android:icon="@drawable/ic_show_chart_white_24dp"
+        android:title="@string/graph"
+        app:showAsAction="ifRoom"/>
+
+    <item
         android:id="@+id/action_show_months"
         android:icon="@drawable/ic_web_asset_white_24dp"
         android:title="@string/show_months"

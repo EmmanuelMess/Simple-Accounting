@@ -30,6 +30,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.emmanuelmess.simpleaccounting.activities.DonateActivity;
+import com.emmanuelmess.simpleaccounting.activities.GraphActivity;
 import com.emmanuelmess.simpleaccounting.activities.SettingsActivity;
 import com.emmanuelmess.simpleaccounting.activities.TempMonthActivity;
 import com.emmanuelmess.simpleaccounting.activities.dialogs.CurrencyPicker;
@@ -331,6 +332,9 @@ public class MainActivity extends AppCompatActivity
 		int id = item.getItemId();
 
 		switch (id) {
+			case R.id.action_graph:
+				startActivity(new Intent(getApplicationContext(), GraphActivity.class));
+				return true;
 			case R.id.action_show_months:
 				startActivity(new Intent(this, TempMonthActivity.class));
 				return true;
