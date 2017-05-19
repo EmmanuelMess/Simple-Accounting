@@ -686,8 +686,12 @@ public class MainActivity extends AppCompatActivity
 			TextWatcher watcher = new Utils.SimpleTextWatcher() {
 				@Override
 				public void afterTextChanged(Editable editable) {
+					double balance =
+							editable.toString().length() > 1?
+									Double.parseDouble(editable.toString().substring(1)):0;
+
 					tableMonthlyBalance.updateMonth(editableMonth, editableYear, editableCurrency,
-							Double.parseDouble(editable.toString().substring(1)));
+							balance);
 				}
 			};
 			((TextView) row.findViewById(R.id.textBalance)).addTextChangedListener(watcher);
