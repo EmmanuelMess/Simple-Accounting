@@ -2,13 +2,13 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    buildToolsVersion "25.0.3"
 
     defaultConfig {
         applicationId "com.emmanuelmess.simpleaccounting"
         minSdkVersion 9
         targetSdkVersion 25
-        versionCode 14
+        versionCode 15
         versionName "@string/app_ver"
         jackOptions {
             enabled true
