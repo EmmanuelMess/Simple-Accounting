@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Point;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.print.PrintManager;
@@ -357,6 +358,17 @@ public class MainActivity extends AppCompatActivity
 				return true;
 			case R.id.action_settings:
 				startActivity(new Intent(this, SettingsActivity.class));
+				return true;
+			case R.id.action_feedback:
+				Intent emailIntent = new Intent(Intent.ACTION_SENDTO,
+						Uri.fromParts("mailto", getString(R.string.email), null));
+				emailIntent.putExtra(Intent.EXTRA_SUBJECT,
+						getString(R.string.feedback_about, getString(R.string.app_name)));
+				emailIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.mail_content));
+				emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{getString(R.string.email)});//makes it work in 4.3
+				Intent chooser = Intent.createChooser(emailIntent, getString(R.string.choose_email));
+				chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); startActivity(chooser);//prevents exception
+				startActivity(chooser);
 				return true;
 		}
 
