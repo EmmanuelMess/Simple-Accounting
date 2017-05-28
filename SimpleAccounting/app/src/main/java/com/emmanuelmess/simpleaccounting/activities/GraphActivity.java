@@ -66,14 +66,24 @@ public class GraphActivity extends AppCompatActivity {
 				List<Entry> entries = new ArrayList<>();
 
 				BigDecimal bigDecimal = BigDecimal.ZERO;
+				int lastDay = -1, elementsPerDay = 0;
 
 				for (String[] s : result.first) {
+					int day = parseInt(s[0]);
+
+					if(day == lastDay) {
+						elementsPerDay++;
+					} else {
+						elementsPerDay = 0;
+						lastDay = day;
+					}
+
 					float credit = s[2] != null? Float.parseFloat(s[2]):0,
 							debit = s[3] != null? Float.parseFloat(s[3]):0;
 
 					bigDecimal = bigDecimal.add(new BigDecimal(credit));
 					bigDecimal = bigDecimal.subtract(new BigDecimal(debit));
-					entries.add(new Entry(parseInt(s[0]), bigDecimal.floatValue()));
+					entries.add(new Entry(day + elementsPerDay*0.01f, bigDecimal.floatValue()));
 				}
 
 				LineDataSet dataSet = new LineDataSet(entries, null);
