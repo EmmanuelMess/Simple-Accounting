@@ -333,7 +333,13 @@ public class MainActivity extends AppCompatActivity
 
 		switch (id) {
 			case R.id.action_graph:
-				startActivity(new Intent(getApplicationContext(), GraphActivity.class));
+				Intent i = new Intent(getApplicationContext(), GraphActivity.class);
+				i.putExtra(GraphActivity.GRAPH_MONTH, editableMonth);
+				i.putExtra(GraphActivity.GRAPH_YEAR, editableYear);
+				i.putExtra(GraphActivity.GRAPH_CURRENCY, editableCurrency);
+				i.putExtra(GraphActivity.GRAPH_UPDATE_MONTH, updateMonth);
+				i.putExtra(GraphActivity.GRAPH_UPDATE_YEAR, updateYear);
+				startActivity(i);
 				return true;
 			case R.id.action_show_months:
 				startActivity(new Intent(this, TempMonthActivity.class));

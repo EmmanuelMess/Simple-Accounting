@@ -3,12 +3,13 @@ package com.emmanuelmess.simpleaccounting.activities;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.TextView;
 
 import com.emmanuelmess.simpleaccounting.R;
 import com.emmanuelmess.simpleaccounting.dataloading.LoadMonthAsyncTask;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
+import com.emmanuelmess.simpleaccounting.utils.Utils;
 import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
@@ -27,6 +28,12 @@ import static java.lang.Integer.parseInt;
 
 public class GraphActivity extends AppCompatActivity {
 
+	public static final String GRAPH_MONTH = "com.emmanuelmess.simpleaccounting.IntentGraphMonth",
+			GRAPH_YEAR = "com.emmanuelmess.simpleaccounting.IntentGraphYear",
+			GRAPH_CURRENCY = "com.emmanuelmess.simpleaccounting.IntentGraphCurrency",
+			GRAPH_UPDATE_MONTH = "com.emmanuelmess.simpleaccounting.IntentGraphUpdateMonth",
+			GRAPH_UPDATE_YEAR = "com.emmanuelmess.simpleaccounting.IntentGraphUpdateYear";
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -42,12 +49,19 @@ public class GraphActivity extends AppCompatActivity {
 		LineChart chart = (LineChart) findViewById(R.id.chart);
 
 		Date d = new Date();
-		int month = parseInt(new SimpleDateFormat("M", Locale.getDefault()).format(d)) - 1,
-				year = Integer.parseInt(new SimpleDateFormat("yyyy", Locale.getDefault()).format(d));
-		String currency = "";
-		TableGeneral tableGeneral = new TableGeneral(this);
+		int currentMonth = parseInt(new SimpleDateFormat("M", Locale.getDefault()).format(d)) - 1,
+				currentYear = parseInt(new SimpleDateFormat("yyyy", Locale.getDefault()).format(d));
 
-		new LoadMonthAsyncTask(month, year, currency, tableGeneral, (result) -> {
+		int month = getIntent().getIntExtra(GRAPH_MONTH, currentMonth),
+				year = getIntent().getIntExtra(GRAPH_YEAR, currentYear);
+		String currency = getIntent().getStringExtra(GRAPH_CURRENCY);
+		int[] updateDate = {getIntent().getIntExtra(GRAPH_UPDATE_MONTH, -1),
+				getIntent().getIntExtra(GRAPH_UPDATE_YEAR, -1)};
+
+		((TextView) findViewById(R.id.title))
+				.setText(Utils.getTitle(this, month, year, currency, updateDate));
+
+		new LoadMonthAsyncTask(month, year, currency, new TableGeneral(this), (result) -> {
 			if(result.first.length > 0) {
 				List<Entry> entries = new ArrayList<>();
 
@@ -59,7 +73,7 @@ public class GraphActivity extends AppCompatActivity {
 
 					bigDecimal = bigDecimal.add(new BigDecimal(credit));
 					bigDecimal = bigDecimal.subtract(new BigDecimal(debit));
-					entries.add(new Entry(Integer.parseInt(s[0]), bigDecimal.floatValue()));
+					entries.add(new Entry(parseInt(s[0]), bigDecimal.floatValue()));
 				}
 
 				LineDataSet dataSet = new LineDataSet(entries, null);
@@ -74,14 +88,11 @@ public class GraphActivity extends AppCompatActivity {
 			chart.invalidate();
 		}).execute();
 
-		Description description = new Description();
-		description.setText(month + "-" + year);
-
 		chart.getAxisRight().setEnabled(false);
 		chart.getXAxis().setDrawGridLines(false);
 		chart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
 		chart.getLegend().setEnabled(false);
-		chart.setDescription(description);
+		chart.setDescription(null);
 		chart.setNoDataText(getString(R.string.loading));
 	}
 
