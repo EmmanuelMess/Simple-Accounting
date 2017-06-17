@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Point;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.print.PrintManager;
@@ -29,6 +30,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.emmanuelmess.simpleaccounting.activities.DonateActivity;
 import com.emmanuelmess.simpleaccounting.activities.SettingsActivity;
 import com.emmanuelmess.simpleaccounting.activities.TempMonthActivity;
 import com.emmanuelmess.simpleaccounting.activities.dialogs.CurrencyPicker;
@@ -74,7 +76,7 @@ public class MainActivity extends AppCompatActivity
 	public static int[] MONTH_STRINGS = new int[]{R.string.january, R.string.february, R.string.march, R.string.april, R.string.may,
 			R.string.june, R.string.july, R.string.august, R.string.september, R.string.october, R.string.november, R.string.december};
 
-	private final String PREFS_NAME = "shared prefs", PREFS_FIRST_RUN = "first_run";
+	private static final String PREFS_NAME = "shared prefs", PREFS_FIRST_RUN = "first_run";
 
 	//THESE COULD NOT BE IN ORDER (because of posible inversion between credit and debit)
 	public static final int[] EDIT_IDS = {R.id.editDate, R.id.editRef, R.id.editCredit, R.id.editDebit, R.id.textBalance};
@@ -351,8 +353,22 @@ public class MainActivity extends AppCompatActivity
 				}
 
 				return true;
+			case R.id.action_donate:
+				startActivity(new Intent(getApplicationContext(), DonateActivity.class));
+				return true;
 			case R.id.action_settings:
 				startActivity(new Intent(this, SettingsActivity.class));
+				return true;
+			case R.id.action_feedback:
+				Intent emailIntent = new Intent(Intent.ACTION_SENDTO,
+						Uri.fromParts("mailto", getString(R.string.email), null));
+				emailIntent.putExtra(Intent.EXTRA_SUBJECT,
+						getString(R.string.feedback_about, getString(R.string.app_name)));
+				emailIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.mail_content));
+				emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{getString(R.string.email)});//makes it work in 4.3
+				Intent chooser = Intent.createChooser(emailIntent, getString(R.string.choose_email));
+				chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); startActivity(chooser);//prevents exception
+				startActivity(chooser);
 				return true;
 		}
 
@@ -557,8 +573,7 @@ public class MainActivity extends AppCompatActivity
 
 			tableGeneral.getReadableDatabase();//triggers onUpdate()
 
-			loadingMonthTask = new LoadMonthAsyncTask(month, year, currency, tableGeneral, this,
-					invertCreditDebit);
+			loadingMonthTask = new LoadMonthAsyncTask(month, year, currency, tableGeneral, this);
 
 			editableMonth = month;
 			editableYear = year;

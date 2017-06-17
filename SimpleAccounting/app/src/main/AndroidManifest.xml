@@ -42,6 +42,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
         </activity>
+        <activity android:name=".activities.DonateActivity"
+                  android:label="@string/donate"
+                  android:parentActivityName=".MainActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.emmanuelmess.simpleaccounting.MainActivity"/>
+        </activity>
         <activity
             android:name=".activities.SettingsActivity"
             android:label="@string/settings"

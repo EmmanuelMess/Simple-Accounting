@@ -31,10 +31,6 @@
     <string name="page">Page</string>
 
     <string name="currency">Currency</string>
-    <string-array name="spinner_list_item_array">
-        <item>ARG</item>
-        <item>U$D</item>
-    </string-array>
 
     <string name="settings">Settings</string>
     <string name="pref_title_currency">Currencies</string>
@@ -46,8 +42,17 @@
     <string name="default_ext">Default</string>
     <string name="default_short">DFLT</string>
     <string name="version">Version</string>
-    <string name="app_ver" translatable="false">1.4.3</string>
+    <string name="app_ver" translatable="false">1.4.4</string>
     <string name="pref_title_invertcreditdebit">Invert credit and debit</string>
     <string name="pref_summary_invertcreditdebit">Credit and debit interchange places in table</string>
     <string name="item_hint">Set currency</string>
+    <string name="donate">Donate</string>
+    <string name="bitcoin" translatable="false">Bitcoins</string>
+    <string name="no_bitcoin_app">No bitcoin wallet app installed</string>
+    <string name="feedback">Feedback</string>
+    <string name="feedback_about">Feedback about %s</string>
+    <string name="email" translatable="false">emmanuelbendavid@gmail.com</string>
+    <string name="choose_email">Select email sender</string>
+    <string name="mail_content">\n\n\nAndroid version: \nPhone model: </string>
+
 </resources>
