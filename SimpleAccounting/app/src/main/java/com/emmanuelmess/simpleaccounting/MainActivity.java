@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity
 	public static int[] MONTH_STRINGS = new int[]{R.string.january, R.string.february, R.string.march, R.string.april, R.string.may,
 			R.string.june, R.string.july, R.string.august, R.string.september, R.string.october, R.string.november, R.string.december};
 
-	private final String PREFS_NAME = "shared prefs", PREFS_FIRST_RUN = "first_run";
+	private static final String PREFS_NAME = "shared prefs", PREFS_FIRST_RUN = "first_run";
 
 	//THESE COULD NOT BE IN ORDER (because of posible inversion between credit and debit)
 	public static final int[] EDIT_IDS = {R.id.editDate, R.id.editRef, R.id.editCredit, R.id.editDebit, R.id.textBalance};
@@ -573,8 +573,7 @@ public class MainActivity extends AppCompatActivity
 
 			tableGeneral.getReadableDatabase();//triggers onUpdate()
 
-			loadingMonthTask = new LoadMonthAsyncTask(month, year, currency, tableGeneral, this,
-					invertCreditDebit);
+			loadingMonthTask = new LoadMonthAsyncTask(month, year, currency, tableGeneral, this);
 
 			editableMonth = month;
 			editableYear = year;
