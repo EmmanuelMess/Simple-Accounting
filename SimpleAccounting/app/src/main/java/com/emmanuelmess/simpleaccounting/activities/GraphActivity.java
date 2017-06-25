@@ -10,10 +10,12 @@ import com.emmanuelmess.simpleaccounting.dataloading.LoadMonthAsyncTask;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 import com.emmanuelmess.simpleaccounting.utils.Utils;
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.formatter.IValueFormatter;
 import com.github.mikephil.charting.utils.ViewPortHandler;
 
@@ -58,8 +60,7 @@ public class GraphActivity extends AppCompatActivity {
 		int[] updateDate = {getIntent().getIntExtra(GRAPH_UPDATE_MONTH, -1),
 				getIntent().getIntExtra(GRAPH_UPDATE_YEAR, -1)};
 
-		((TextView) findViewById(R.id.title))
-				.setText(Utils.getTitle(this, month, year, currency, updateDate));
+		((TextView) findViewById(R.id.title)).setText(Utils.getTitle(this, month, year, currency, updateDate));
 
 		new LoadMonthAsyncTask(month, year, currency, new TableGeneral(this), (result) -> {
 			if(result.first.length > 0) {
@@ -99,6 +100,9 @@ public class GraphActivity extends AppCompatActivity {
 		}).execute();
 
 		chart.getAxisRight().setEnabled(false);
+		chart.getXAxis().setValueFormatter(new DeleteNonWholeFormatter());
+		chart.getXAxis().setAxisMinimum(0);
+		chart.getXAxis().setAxisMaximum(32);
 		chart.getXAxis().setDrawGridLines(false);
 		chart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
 		chart.getLegend().setEnabled(false);
@@ -111,6 +115,20 @@ public class GraphActivity extends AppCompatActivity {
 		public String getFormattedValue(float value, Entry entry, int dataSetIndex,
 		                                ViewPortHandler viewPortHandler) {
 			return "$ " + value;
+		}
+	}
+
+	/**
+	 * This formatter deletes non whole values from axis {1, 1.5, 1.75, 2, 3.2}->{1, 2}
+	 */
+	private class DeleteNonWholeFormatter implements IAxisValueFormatter {
+		@Override
+		public String getFormattedValue(float value, AxisBase axis) {
+			if(value % 1 == 0) {//check if has decimal part
+				return String.valueOf((int) value);
+			} else {
+				return "";
+			}
 		}
 	}
 
