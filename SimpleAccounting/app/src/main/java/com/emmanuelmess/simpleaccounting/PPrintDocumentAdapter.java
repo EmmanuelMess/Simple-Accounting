@@ -19,13 +19,10 @@ import android.view.View;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
-import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 import com.emmanuelmess.simpleaccounting.utils.Utils;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-
-import static com.emmanuelmess.simpleaccounting.MainActivity.MONTH_STRINGS;
 
 /**
  * @author Emmanuel
@@ -43,7 +40,7 @@ public class PPrintDocumentAdapter extends PrintDocumentAdapter {
 	private TableLayout table;
 	private int month, year;
 	private String currency;
-	private int updateMonth, updateYear;
+	private int[] updateDate;
 	private String[][] rawToPrint;
 	private PrintedPdfDocument pdfDocument;
 	private String title;
@@ -59,10 +56,7 @@ public class PPrintDocumentAdapter extends PrintDocumentAdapter {
 		month = m;
 		year = y;
 		this.currency = currency;
-		if(updateDate != null) {
-			updateMonth = updateDate[0];
-			updateYear = updateDate[1];
-		}
+		this.updateDate = updateDate;
 	}
 
 	@Override
@@ -102,14 +96,7 @@ public class PPrintDocumentAdapter extends PrintDocumentAdapter {
 
 			writtenPages = new boolean[amountOfPages];
 
-			if(year != TableGeneral.OLDER_THAN_UPDATE)
-				title = context.getString(MONTH_STRINGS[month]) + "-" + year;
-			else title = context.getString(R.string.before_update_1_2)
-						+ " " + context.getString(MainActivity.MONTH_STRINGS[updateMonth]).toLowerCase()
-						+ "-" + String.valueOf(updateYear);
-
-			if(!Utils.equal(currency, ""))
-				title += " [" + currency + "]";
+			title = Utils.getTitle(context, month, year, currency, updateDate);
 
 			PrintDocumentInfo info = new PrintDocumentInfo.Builder(title + ".pdf")
 					.setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)

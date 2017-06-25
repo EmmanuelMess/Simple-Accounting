@@ -46,6 +46,8 @@
     <string name="item_hint">Ingrese u. monet.</string>
     <string name="no_bitcoin_app">No hay applicación de billetera bitcoin</string>
     <string name="donate">Donar</string>
+    <string name="graph">Graficar</string>
+    <string name="nothing_to_graph">No hay nada que graficar</string>
     <string name="feedback">Enviar comentarios</string>
     <string name="feedback_about">Comentarios sobre %s</string>
     <string name="choose_email">Seleccionar emisario</string>

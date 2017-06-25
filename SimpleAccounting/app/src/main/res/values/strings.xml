@@ -49,10 +49,11 @@
     <string name="donate">Donate</string>
     <string name="bitcoin" translatable="false">Bitcoins</string>
     <string name="no_bitcoin_app">No bitcoin wallet app installed</string>
+    <string name="graph">Graph</string>
+    <string name="nothing_to_graph">Nothing graphable!</string>
     <string name="feedback">Feedback</string>
     <string name="feedback_about">Feedback about %s</string>
     <string name="email" translatable="false">emmanuelbendavid@gmail.com</string>
     <string name="choose_email">Select email sender</string>
     <string name="mail_content">\n\n\nAndroid version: \nPhone model: </string>
-
 </resources>
