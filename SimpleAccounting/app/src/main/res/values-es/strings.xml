@@ -48,4 +48,8 @@
     <string name="donate">Donar</string>
     <string name="graph">Graficar</string>
     <string name="nothing_to_graph">No hay nada que graficar</string>
+    <string name="feedback">Enviar comentarios</string>
+    <string name="feedback_about">Comentarios sobre %s</string>
+    <string name="choose_email">Seleccionar emisario</string>
+    <string name="mail_content">\n\n\nVersión de Android: \nModelo de teléfono: </string>
 </resources>

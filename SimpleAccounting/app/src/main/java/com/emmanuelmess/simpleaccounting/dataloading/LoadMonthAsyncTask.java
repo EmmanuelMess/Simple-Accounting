@@ -21,7 +21,7 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, Pair<String[][], A
 	private static boolean alreadyLoading = false;
 
 	public LoadMonthAsyncTask(int m, int y, String c, TableGeneral dbG,
-	                          AsyncFinishedListener<Pair<String[][], ArrayList<Integer>>> l) {
+							  AsyncFinishedListener<Pair<String[][], ArrayList<Integer>>> l) {
 		month = m;
 		year = y;
 		currency = c;

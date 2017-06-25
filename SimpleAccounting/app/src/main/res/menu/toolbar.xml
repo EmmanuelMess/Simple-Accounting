@@ -38,4 +38,8 @@
           android:title="@string/settings"
           app:showAsAction="never"/>
 
+    <item
+        android:id="@+id/action_feedback"
+        android:title="@string/feedback"
+        app:showAsAction="never"/>
 </menu>
