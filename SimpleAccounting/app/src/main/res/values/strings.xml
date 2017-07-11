@@ -56,5 +56,5 @@
     <string name="email" translatable="false">emmanuelbendavid@gmail.com</string>
     <string name="choose_email">Select email sender</string>
     <string name="mail_content">\n\n\nAndroid version: \nPhone model: </string>
-    <string name="without_day_data_is_not_charted">Entires without defined day aren\'t graphed</string>
+    <string name="without_day_data_is_not_charted">Entires without day aren\'t graphed</string>
 </resources>
