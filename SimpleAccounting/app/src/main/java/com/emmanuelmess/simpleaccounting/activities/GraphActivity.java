@@ -1,6 +1,7 @@
 package com.emmanuelmess.simpleaccounting.activities;
 
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
@@ -70,27 +71,34 @@ public class GraphActivity extends AppCompatActivity {
 				int lastDay = -1, elementsPerDay = 0;
 
 				for (String[] s : result.first) {
-					int day = parseInt(s[0]);
+					if(s[0] != null) {
+						int day = parseInt(s[0]);
 
-					if(day == lastDay) {
-						elementsPerDay++;
-					} else {
-						elementsPerDay = 0;
-						lastDay = day;
+						if (day == lastDay) {
+							elementsPerDay++;
+						} else {
+							elementsPerDay = 0;
+							lastDay = day;
+						}
+
+						float credit = s[2] != null ? Float.parseFloat(s[2]) : 0,
+								debit = s[3] != null ? Float.parseFloat(s[3]) : 0;
+
+						bigDecimal = bigDecimal.add(new BigDecimal(credit));
+						bigDecimal = bigDecimal.subtract(new BigDecimal(debit));
+						entries.add(new Entry(day + elementsPerDay * 0.01f, bigDecimal.floatValue()));
 					}
-
-					float credit = s[2] != null? Float.parseFloat(s[2]):0,
-							debit = s[3] != null? Float.parseFloat(s[3]):0;
-
-					bigDecimal = bigDecimal.add(new BigDecimal(credit));
-					bigDecimal = bigDecimal.subtract(new BigDecimal(debit));
-					entries.add(new Entry(day + elementsPerDay*0.01f, bigDecimal.floatValue()));
 				}
 
-				LineDataSet dataSet = new LineDataSet(entries, null);
-				dataSet.setValueFormatter(new MoneyFormatter());
+				if(entries.size() > 0) {
+					LineDataSet dataSet = new LineDataSet(entries, null);
+					dataSet.setValueFormatter(new MoneyFormatter());
 
-				chart.setData(new LineData(dataSet));
+					chart.setData(new LineData(dataSet));
+				} else {
+					chart.setNoDataText(getString(R.string.nothing_to_graph));
+					Snackbar.make(chart, R.string.without_day_data_is_not_charted, Snackbar.LENGTH_LONG).show();
+				}
 			} else {
 				chart.setNoDataText(getString(R.string.nothing_to_graph));
 			}

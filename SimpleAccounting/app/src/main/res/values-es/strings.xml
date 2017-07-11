@@ -52,4 +52,5 @@
     <string name="feedback_about">Comentarios sobre %s</string>
     <string name="choose_email">Seleccionar emisario</string>
     <string name="mail_content">\n\n\nVersión de Android: \nModelo de teléfono: </string>
+    <string name="without_day_data_is_not_charted">Las entradas sin dia no están graficadas</string>
 </resources>
