@@ -66,31 +66,36 @@ public class GraphActivity extends AppCompatActivity {
 		new LoadMonthAsyncTask(month, year, currency, new TableGeneral(this), (result) -> {
 			if(result.first.length > 0) {
 				List<Entry> entries = new ArrayList<>();
-
 				BigDecimal bigDecimal = BigDecimal.ZERO;
-				int lastDay = -1, elementsPerDay = 0;
 
 				for (String[] s : result.first) {
 					if(s[0] != null) {
 						int day = parseInt(s[0]);
-
-						if (day == lastDay) {
-							elementsPerDay++;
-						} else {
-							elementsPerDay = 0;
-							lastDay = day;
-						}
 
 						float credit = s[2] != null ? Float.parseFloat(s[2]) : 0,
 								debit = s[3] != null ? Float.parseFloat(s[3]) : 0;
 
 						bigDecimal = bigDecimal.add(new BigDecimal(credit));
 						bigDecimal = bigDecimal.subtract(new BigDecimal(debit));
-						entries.add(new Entry(day + elementsPerDay * 0.01f, bigDecimal.floatValue()));
+						entries.add(new Entry(day, bigDecimal.floatValue()));
 					}
 				}
 
 				if(entries.size() > 0) {
+					for(int i = 0; i < entries.size(); i++) {
+						int entriesInDay = 0, day = (int) entries.get(i).getX();
+						for(int j = i; j < entries.size() && day == entries.get(j).getX(); j++) {
+							entriesInDay++;
+						}
+
+						for(int j = i, k = 0; j < entries.size() && day == entries.get(j).getX(); j++, k++) {
+							float separationWidth =  1 / (entriesInDay + 1f);//the amount of space between points in the same day (X axis)
+							entries.get(j).setX(day + (k+1) * separationWidth);
+						}
+
+						while(day == entries.get(i).getX()) i++;
+					}
+
 					LineDataSet dataSet = new LineDataSet(entries, null);
 					dataSet.setValueFormatter(new MoneyFormatter());
 
