@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.print.PrintManager;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -28,7 +29,6 @@ import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.emmanuelmess.simpleaccounting.activities.DonateActivity;
 import com.emmanuelmess.simpleaccounting.activities.SettingsActivity;
@@ -349,7 +349,7 @@ public class MainActivity extends AppCompatActivity
 								null);
 					}
 				} else {
-					Toast.makeText(this, getString(R.string.nothing_to_print), Toast.LENGTH_SHORT).show();
+					Snackbar.make(table, getString(R.string.nothing_to_print), Snackbar.LENGTH_SHORT).show();
 				}
 
 				return true;
