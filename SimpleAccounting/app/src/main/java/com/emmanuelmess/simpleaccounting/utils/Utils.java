@@ -1,5 +1,6 @@
 package com.emmanuelmess.simpleaccounting.utils;
 
+import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -8,9 +9,15 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.TextView;
 
+import com.emmanuelmess.simpleaccounting.MainActivity;
+import com.emmanuelmess.simpleaccounting.R;
+import com.emmanuelmess.simpleaccounting.db.TableGeneral;
+
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.Objects;
+
+import static com.emmanuelmess.simpleaccounting.MainActivity.MONTH_STRINGS;
 
 /**
  * @author Emmanuel
@@ -18,6 +25,24 @@ import java.util.Objects;
  */
 
 public class Utils {
+
+	public static String getTitle(Context c, int month, int year, String currency, int[] updateDate) {
+		String title;
+
+		if(year != TableGeneral.OLDER_THAN_UPDATE) {
+			title = c.getString(MONTH_STRINGS[month]) + "-" + year;
+		} else {
+			title = c.getString(R.string.before_update_1_2)
+					+ " " + c.getString(MainActivity.MONTH_STRINGS[updateDate[0]]).toLowerCase()
+					+ "-" + String.valueOf(updateDate[1]);
+		}
+
+		if(!Utils.equal(currency, "")) {
+			title += " [" + currency + "]";
+		}
+
+		return title;
+	}
 
 	public static BigDecimal parseView(TextView v) {
 		return parseString(parseViewToString(v));
