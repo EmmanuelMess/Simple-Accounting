@@ -529,7 +529,7 @@ public class MainActivity extends AppCompatActivity
 
 	private void currentEditableToView() {
 		View row = table.getChildAt(editableRow);
-		if (row != null && editableRow >= 0) {//TODO change to editableRow != -1 if this is problematic
+		if (row != null && editableRow >= 0) {
 			for (int i = 0; i < EDIT_IDS.length - 1; i++) {
 				if (editedColumn[i]) {
 					String t = ((EditText) row.findViewById(EDIT_IDS[i])).getText().toString();
