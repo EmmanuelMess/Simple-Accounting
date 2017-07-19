@@ -2,6 +2,8 @@
 <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
           android:layout_width="match_parent"
           android:layout_height="match_parent"
+          android:layout_marginStart="@dimen/mainactivity_margin"
+          android:layout_marginEnd="@dimen/mainactivity_margin"
           android:baselineAligned="false"
           android:weightSum="10"
           android:background="?android:attr/selectableItemBackground">
