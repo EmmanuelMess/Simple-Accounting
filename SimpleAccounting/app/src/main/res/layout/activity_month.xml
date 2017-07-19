@@ -25,5 +25,5 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_temp_month"/>
+    <include layout="@layout/content_month"/>
 </android.support.design.widget.CoordinatorLayout>

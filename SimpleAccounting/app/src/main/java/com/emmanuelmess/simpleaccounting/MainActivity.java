@@ -287,9 +287,9 @@ public class MainActivity extends AppCompatActivity
 			MenuItem item = menu.findItem(R.id.action_currency);
 			SpinnerNoUnwantedOnClick spinner =
 					new SpinnerNoUnwantedOnClick(MenuItemCompat.getActionView(item));
-			ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.simple_spinner_item,
+			ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_toolbar,
 					currencies.toArray(new String[currencies.size()]));
-			adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+			adapter.setDropDownViewResource(R.layout.item_spinner);
 			spinner.setAdapter(adapter);
 			spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 				@Override
@@ -597,7 +597,7 @@ public class MainActivity extends AppCompatActivity
 				loadPrevBalance = new LoadPrevBalanceAsyncTask(month, year, editableCurrency, tableMonthlyBalance,
 						(lastMonthData) -> {
 							if (lastMonthData != null) {
-								inflater.inflate(R.layout.newrow_main, table);
+								inflater.inflate(R.layout.row_main, table);
 
 								int rowViewIndex = table.getChildCount() - 1;
 								TableRow row = (TableRow) table.getChildAt(rowViewIndex);
@@ -783,7 +783,7 @@ public class MainActivity extends AppCompatActivity
 	}
 
 	private void inflateNewRow() {
-		inflater.inflate(R.layout.newrow_main, table);
+		inflater.inflate(R.layout.row_main, table);
 
 		if (invertCreditDebit) {
 			View r = table.getChildAt(table.getChildCount() - 1);

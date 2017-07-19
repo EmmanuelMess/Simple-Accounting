@@ -43,7 +43,7 @@ public class DonateActivity extends AppCompatActivity {
 		h.put("title", getString(R.string.bitcoin));
 		h.put("summary", BITCOIN_DIRECTION);
 		m.add(h);
-		ListAdapter adapter = new SimpleAdapter(this, m, R.layout.donate_item,
+		ListAdapter adapter = new SimpleAdapter(this, m, R.layout.item_donate,
 				new String[]{"title", "summary"}, new int[]{R.id.title, R.id.summary});
 
 		// create a new ListView, set the adapter and item click listener

@@ -69,7 +69,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 
-		setDialogLayoutResource(R.layout.currencypicker_dialog);
+		setDialogLayoutResource(R.layout.dialog_currencypicker);
 		setPositiveButtonText(android.R.string.ok);
 		setNegativeButtonText(android.R.string.cancel);
 
@@ -265,7 +265,7 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 	}
 
 	private View createItem(OnFinishedLoadingListener loadingListener) {
-		inflater.inflate(R.layout.currencypicker_dialog_item, linearLayout);
+		inflater.inflate(R.layout.item_currencypicker, linearLayout);
 		View item = linearLayout.getChildAt(linearLayout.getChildCount() - 1);
 
 		item.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
