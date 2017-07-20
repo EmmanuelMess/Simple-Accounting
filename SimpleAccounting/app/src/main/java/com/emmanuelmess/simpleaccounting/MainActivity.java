@@ -772,13 +772,12 @@ public class MainActivity extends AppCompatActivity
 								table.removeView(table.getChildAt(rowToEdit));
 								editableRow = -1;
 							}
-						}
-					})
-					.build();
 
-			SharedPreferences.Editor pref_editor = myPrefs.edit();
-			pref_editor.putBoolean(PREFS_FIRST_RUN, false);
-			pref_editor.apply();
+							SharedPreferences.Editor pref_editor = myPrefs.edit();
+							pref_editor.putBoolean(PREFS_FIRST_RUN, false);
+							pref_editor.apply();
+						}
+					}).build();
 		}
 	}
 
