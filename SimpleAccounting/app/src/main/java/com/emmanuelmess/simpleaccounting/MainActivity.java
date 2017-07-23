@@ -566,8 +566,7 @@ public class MainActivity extends AppCompatActivity {
 	 * Set as editable a row
 	 * @param rowIndex row number, starts at 1
 	 */
-	private void
-	setEditableRow(int rowIndex) {
+	private void setEditableRow(int rowIndex) {
 		if(rowIndex < 1) throw new IllegalArgumentException("Row index < 1");
 
 		View row = table.getChildAt(rowIndex);
@@ -839,8 +838,10 @@ public class MainActivity extends AppCompatActivity {
 
 	@Override
 	public void onSaveInstanceState(Bundle savedInstanceState) {
-		if(editableRow != -1)
+		if(editableRow != -1) {
 			savedInstanceState.putInt(EDITINGROW_STATE, editableRow);
+			currentEditableToView();
+		}
 
 		// Always call the superclass so it can save the view hierarchy state
 		super.onSaveInstanceState(savedInstanceState);

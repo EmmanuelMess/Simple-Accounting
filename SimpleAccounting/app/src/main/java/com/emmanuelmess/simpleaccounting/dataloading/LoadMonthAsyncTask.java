@@ -45,8 +45,7 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, Pair<String[][], A
 
 		if(isCancelled()) return null;
 
-		return new Pair<>(tableGeneral.getAllForMonth(month, year, currency),
-				rowToDBRowConversion);
+		return new Pair<>(tableGeneral.getAllForMonth(month, year, currency), rowToDBRowConversion);
 	}
 
 	@Override
