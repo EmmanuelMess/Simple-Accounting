@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -11,7 +12,6 @@ import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-import android.widget.Toast;
 
 import com.emmanuelmess.simpleaccounting.R;
 
@@ -43,7 +43,7 @@ public class DonateActivity extends AppCompatActivity {
 		h.put("title", getString(R.string.bitcoin));
 		h.put("summary", BITCOIN_DIRECTION);
 		m.add(h);
-		ListAdapter adapter = new SimpleAdapter(this, m, R.layout.donate_item,
+		ListAdapter adapter = new SimpleAdapter(this, m, R.layout.item_donate,
 				new String[]{"title", "summary"}, new int[]{R.id.title, R.id.summary});
 
 		// create a new ListView, set the adapter and item click listener
@@ -60,8 +60,8 @@ public class DonateActivity extends AppCompatActivity {
 							i.setData(Uri.parse(url));
 							startActivity(i);
 						} catch (ActivityNotFoundException e) {
-							Toast.makeText(getApplicationContext(), R.string.no_bitcoin_app,
-									Toast.LENGTH_LONG).show();
+							Snackbar.make(listViewItems, R.string.no_bitcoin_app,
+									Snackbar.LENGTH_LONG).show();
 						}
 						break;
 				}

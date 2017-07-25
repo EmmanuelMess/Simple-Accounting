@@ -45,8 +45,7 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, Pair<String[][], A
 
 		if(isCancelled()) return null;
 
-		return new Pair<>(tableGeneral.getAllForMonth(month, year, currency),
-				rowToDBRowConversion);
+		return new Pair<>(tableGeneral.getAllForMonth(month, year, currency), rowToDBRowConversion);
 	}
 
 	@Override
@@ -54,6 +53,11 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, Pair<String[][], A
 		if(!isCancelled())
 			listener.OnAsyncFinished(dbRowsPairedRowToDBConversion);
 
+		alreadyLoading = false;
+	}
+
+	@Override
+	protected void onCancelled(Pair<String[][], ArrayList<Integer>> result) {
 		alreadyLoading = false;
 	}
 

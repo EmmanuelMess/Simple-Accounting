@@ -9,8 +9,8 @@ android {
         applicationId "com.emmanuelmess.simpleaccounting"
         minSdkVersion 9
         targetSdkVersion 25
-        versionCode 16
-        versionName "1.4.4"
+        versionCode 17
+        versionName "1.5"
         vectorDrawables.useSupportLibrary = true
     }
 
@@ -31,14 +31,18 @@ android {
     }
 }
 
-dependencies {
-    compile 'ch.acra:acra:4.9.2'
-    compile 'com.github.amlcurran.showcaseview:library:5.4.3'
 
+dependencies {    
     compile 'com.android.support:design:25.3.1'
     compile 'com.android.support:support-vector-drawable:25.3.1'
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:support-v4:25.3.1'
-    testCompile 'junit:junit:4.12'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
+
+    compile 'com.faendir:acra:4.10.0'
+
+    compile 'com.github.amlcurran.showcaseview:library:5.4.3'
+    compile 'com.github.PhilJay:MPAndroidChart:v3.0.2'
+
+    testCompile 'junit:junit:4.12'
 }

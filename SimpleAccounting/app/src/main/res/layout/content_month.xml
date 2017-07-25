@@ -12,7 +12,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.emmanuelmess.simpleaccounting.activities.TempMonthActivity"
-    tools:showIn="@layout/activity_temp_month">
+    tools:showIn="@layout/activity_month">
 
     <ListView
         android:layout_width="match_parent"

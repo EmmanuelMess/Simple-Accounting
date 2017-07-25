@@ -17,6 +17,12 @@
         app:showAsAction="ifRoom"/>
 
     <item
+        android:id="@+id/action_graph"
+        android:icon="@drawable/ic_show_chart_white_24dp"
+        android:title="@string/graph"
+        app:showAsAction="ifRoom"/>
+
+    <item
         android:id="@+id/action_print"
         android:icon="@drawable/ic_print_white_24dp"
         android:title="@string/print"

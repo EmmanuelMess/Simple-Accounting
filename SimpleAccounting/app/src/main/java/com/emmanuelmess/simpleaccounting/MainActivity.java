@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.print.PrintManager;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -28,9 +29,9 @@ import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.emmanuelmess.simpleaccounting.activities.DonateActivity;
+import com.emmanuelmess.simpleaccounting.activities.GraphActivity;
 import com.emmanuelmess.simpleaccounting.activities.SettingsActivity;
 import com.emmanuelmess.simpleaccounting.activities.TempMonthActivity;
 import com.emmanuelmess.simpleaccounting.activities.dialogs.CurrencyPicker;
@@ -94,8 +95,8 @@ public class MainActivity extends AppCompatActivity
 	private TableMonthlyBalance tableMonthlyBalance;
 	private LayoutInflater inflater;
 	private ScrollView scrollView;
-	private AsyncTask<Void, Void, Pair<String[][], ArrayList<Integer>>> loadingMonthTask = null;
-	private AsyncTask<Void, Void, Double> loadPrevBalance = null;
+	private LoadMonthAsyncTask loadingMonthTask = null;
+	private LoadPrevBalanceAsyncTask loadPrevBalance = null;
 
 	private int updateYear, updateMonth;
 
@@ -286,9 +287,9 @@ public class MainActivity extends AppCompatActivity
 			MenuItem item = menu.findItem(R.id.action_currency);
 			SpinnerNoUnwantedOnClick spinner =
 					new SpinnerNoUnwantedOnClick(MenuItemCompat.getActionView(item));
-			ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.simple_spinner_item,
+			ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_toolbar,
 					currencies.toArray(new String[currencies.size()]));
-			adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+			adapter.setDropDownViewResource(R.layout.item_spinner);
 			spinner.setAdapter(adapter);
 			spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 				@Override
@@ -332,6 +333,15 @@ public class MainActivity extends AppCompatActivity
 		int id = item.getItemId();
 
 		switch (id) {
+			case R.id.action_graph:
+				Intent i = new Intent(getApplicationContext(), GraphActivity.class);
+				i.putExtra(GraphActivity.GRAPH_MONTH, editableMonth);
+				i.putExtra(GraphActivity.GRAPH_YEAR, editableYear);
+				i.putExtra(GraphActivity.GRAPH_CURRENCY, editableCurrency);
+				i.putExtra(GraphActivity.GRAPH_UPDATE_MONTH, updateMonth);
+				i.putExtra(GraphActivity.GRAPH_UPDATE_YEAR, updateYear);
+				startActivity(i);
+				return true;
 			case R.id.action_show_months:
 				startActivity(new Intent(this, TempMonthActivity.class));
 				return true;
@@ -349,7 +359,7 @@ public class MainActivity extends AppCompatActivity
 								null);
 					}
 				} else {
-					Toast.makeText(this, getString(R.string.nothing_to_print), Toast.LENGTH_SHORT).show();
+					Snackbar.make(table, getString(R.string.nothing_to_print), Snackbar.LENGTH_SHORT).show();
 				}
 
 				return true;
@@ -519,7 +529,7 @@ public class MainActivity extends AppCompatActivity
 
 	private void currentEditableToView() {
 		View row = table.getChildAt(editableRow);
-		if (row != null && editableRow >= 0) {//TODO change to editableRow != -1 if this is problematic
+		if (row != null && editableRow >= 0) {
 			for (int i = 0; i < EDIT_IDS.length - 1; i++) {
 				if (editedColumn[i]) {
 					String t = ((EditText) row.findViewById(EDIT_IDS[i])).getText().toString();
@@ -587,7 +597,7 @@ public class MainActivity extends AppCompatActivity
 				loadPrevBalance = new LoadPrevBalanceAsyncTask(month, year, editableCurrency, tableMonthlyBalance,
 						(lastMonthData) -> {
 							if (lastMonthData != null) {
-								inflater.inflate(R.layout.newrow_main, table);
+								inflater.inflate(R.layout.row_main, table);
 
 								int rowViewIndex = table.getChildCount() - 1;
 								TableRow row = (TableRow) table.getChildAt(rowViewIndex);
@@ -773,7 +783,7 @@ public class MainActivity extends AppCompatActivity
 	}
 
 	private void inflateNewRow() {
-		inflater.inflate(R.layout.newrow_main, table);
+		inflater.inflate(R.layout.row_main, table);
 
 		if (invertCreditDebit) {
 			View r = table.getChildAt(table.getChildCount() - 1);

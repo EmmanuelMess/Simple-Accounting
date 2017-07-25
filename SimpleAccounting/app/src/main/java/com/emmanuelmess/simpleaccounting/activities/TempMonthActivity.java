@@ -44,7 +44,7 @@ public class TempMonthActivity extends ListActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_temp_month);
+		setContentView(R.layout.activity_month);
 
 		AppCompatCallback callback = new AppCompatCallback() {
 			@Override
@@ -65,7 +65,7 @@ public class TempMonthActivity extends ListActivity {
 		AppCompatDelegate delegate = AppCompatDelegate.create(this, callback);
 
 		delegate.onCreate(savedInstanceState);
-		delegate.setContentView(R.layout.activity_temp_month);
+		delegate.setContentView(R.layout.activity_month);
 
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		delegate.setSupportActionBar(toolbar);
@@ -154,7 +154,7 @@ public class TempMonthActivity extends ListActivity {
 		String[][] values;
 
 		MonthListAdapter(Context context, String[][] values) {
-			super(context, R.layout.list_item, values);
+			super(context, R.layout.item_month, values);
 			this.values = values;
 		}
 
@@ -165,7 +165,7 @@ public class TempMonthActivity extends ListActivity {
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 			if(convertView == null)
-				convertView = inflater.inflate(R.layout.list_item, parent, false);
+				convertView = inflater.inflate(R.layout.item_month, parent, false);
 
 			TextView monthView = (TextView) convertView.findViewById(R.id.textMonth);
 			TextView yearView = (TextView) convertView.findViewById(R.id.textYear);
