@@ -95,8 +95,8 @@ public class MainActivity extends AppCompatActivity
 	private TableMonthlyBalance tableMonthlyBalance;
 	private LayoutInflater inflater;
 	private ScrollView scrollView;
-	private AsyncTask<Void, Void, Pair<String[][], ArrayList<Integer>>> loadingMonthTask = null;
-	private AsyncTask<Void, Void, Double> loadPrevBalance = null;
+	private LoadMonthAsyncTask loadingMonthTask = null;
+	private LoadPrevBalanceAsyncTask loadPrevBalance = null;
 
 	private int updateYear, updateMonth;
 
