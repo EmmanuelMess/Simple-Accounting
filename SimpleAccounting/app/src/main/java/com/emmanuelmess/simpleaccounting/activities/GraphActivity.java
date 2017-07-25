@@ -55,8 +55,8 @@ public class GraphActivity extends AppCompatActivity {
 		int currentMonth = parseInt(new SimpleDateFormat("M", Locale.getDefault()).format(d)) - 1,
 				currentYear = parseInt(new SimpleDateFormat("yyyy", Locale.getDefault()).format(d));
 
-		int month = getIntent().getIntExtra(GRAPH_MONTH, currentMonth),
-				year = getIntent().getIntExtra(GRAPH_YEAR, currentYear);
+		int month = getIntent().getIntExtra(GRAPH_MONTH, currentMonth);
+		int year = getIntent().getIntExtra(GRAPH_YEAR, currentYear);
 		String currency = getIntent().getStringExtra(GRAPH_CURRENCY);
 		int[] updateDate = {getIntent().getIntExtra(GRAPH_UPDATE_MONTH, -1),
 				getIntent().getIntExtra(GRAPH_UPDATE_YEAR, -1)};
@@ -121,6 +121,18 @@ public class GraphActivity extends AppCompatActivity {
 		chart.getLegend().setEnabled(false);
 		chart.setDescription(null);
 		chart.setNoDataText(getString(R.string.loading));
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case android.R.id.home:
+				//NavUtils.navigateUpFromSameTask(this);
+				onBackPressed();//To make the MainActivity not destroy itself
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
 	}
 
 	private class MoneyFormatter implements IValueFormatter {
