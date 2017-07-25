@@ -1,9 +1,11 @@
 package com.emmanuelmess.simpleaccounting.activities;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.emmanuelmess.simpleaccounting.R;
@@ -37,6 +39,8 @@ public class GraphActivity extends AppCompatActivity {
 			GRAPH_UPDATE_MONTH = "com.emmanuelmess.simpleaccounting.IntentGraphUpdateMonth",
 			GRAPH_UPDATE_YEAR = "com.emmanuelmess.simpleaccounting.IntentGraphUpdateYear";
 
+	private LoadMonthAsyncTask loadMonthAsyncTask;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -63,7 +67,7 @@ public class GraphActivity extends AppCompatActivity {
 
 		((TextView) findViewById(R.id.title)).setText(Utils.getTitle(this, month, year, currency, updateDate));
 
-		new LoadMonthAsyncTask(month, year, currency, new TableGeneral(this), (result) -> {
+		loadMonthAsyncTask = new LoadMonthAsyncTask(month, year, currency, new TableGeneral(this), (result) -> {
 			if(result.first.length > 0) {
 				List<Entry> entries = new ArrayList<>();
 				BigDecimal bigDecimal = BigDecimal.ZERO;
@@ -110,7 +114,9 @@ public class GraphActivity extends AppCompatActivity {
 
 			chart.notifyDataSetChanged();
 			chart.invalidate();
-		}).execute();
+		});
+
+		loadMonthAsyncTask.execute();
 
 		chart.getAxisRight().setEnabled(false);
 		chart.getXAxis().setValueFormatter(new DeleteNonWholeFormatter());
@@ -121,6 +127,15 @@ public class GraphActivity extends AppCompatActivity {
 		chart.getLegend().setEnabled(false);
 		chart.setDescription(null);
 		chart.setNoDataText(getString(R.string.loading));
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+
+		if(loadMonthAsyncTask.getStatus() == AsyncTask.Status.RUNNING) {
+			loadMonthAsyncTask.cancel(true);
+		}
 	}
 
 	@Override
