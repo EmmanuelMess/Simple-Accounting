@@ -48,7 +48,7 @@ public class TableMonthlyBalance extends Database {
 
 		CV.put(COLUMNS[3], balance);
 		getWritableDatabase().update(TABLE_NAME, CV, SQLShort(AND, format("%1$s=%2$s" , COLUMNS[0], month),
-				format("%1$s=%2$s" , COLUMNS[1], year), format("%1$s=%2$s" , COLUMNS[2], "'" + currency + "'")), null);
+				format("%1$s=%2$s" , COLUMNS[1], year), format("%1$s=%2$s" , COLUMNS[2], "?")), new String[] {currency});
 		CV.clear();
 	}
 
@@ -57,10 +57,10 @@ public class TableMonthlyBalance extends Database {
 
 		String condMonth = SQLShort(AND, format("%1$s<%2$s" , COLUMNS[0], month), format("%1$s=%2$s" , COLUMNS[1] , year)),
 		condYear = SQLShort(OR, format("%1$s<%2$s" , COLUMNS[1], year), "(" + condMonth + ")"),
-		condCurrency = SQLShort(AND, "(" + condYear + ")", format("%1$s=%2$s" , COLUMNS[2], "'" + currency + "'"));
+		condCurrency = SQLShort(AND, "(" + condYear + ")", format("%1$s=%2$s" , COLUMNS[2], "?"));
 
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[] {COLUMNS[3]}, condCurrency,
-				null, null, null, null);
+				new String[] {currency}, null, null, null);
 
 		c.moveToFirst();
 
@@ -79,8 +79,8 @@ public class TableMonthlyBalance extends Database {
 	}
 
 	public void deleteAllForCurrency(String currency) {
-		String cond = format("%1$s=%2$s" , COLUMNS[2], "'" + currency + "'");
-		getWritableDatabase().delete(TABLE_NAME, cond, null);
+		String condition = format("%1$s=%2$s" , COLUMNS[2], "?");
+		getWritableDatabase().delete(TABLE_NAME, condition, new String[] {currency});
 	}
 
 	private boolean isMonthInBD(int month, int year, String currency) {
@@ -88,8 +88,8 @@ public class TableMonthlyBalance extends Database {
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[] {COLUMNS[3]},
 				SQLShort(AND, format("%1$s=%2$s" , COLUMNS[0], month),
 						format("%1$s=%2$s" , COLUMNS[1], year),
-						format("%1$s=%2$s" , COLUMNS[2], "'" + currency + "'")),
-				null, null, null, null, "1");
+						format("%1$s=%2$s" , COLUMNS[2], "?")),
+				new String[] {currency}, null, null, null, "1");
 
 		data = c.getCount() != 0;
 		c.close();

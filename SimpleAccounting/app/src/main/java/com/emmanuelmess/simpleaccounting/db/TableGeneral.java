@@ -182,8 +182,8 @@ public class TableGeneral extends Database {
 		String [][] data;
 
 		Cursor c = db.query(TABLE_NAME, COLUMNS,
-				SQLShort(AND, COLUMNS[4] + "=" + month, COLUMNS[5] + "=" + year, COLUMNS[6] + "='" + currency + "'"),
-				null, null, null, COLUMNS[0]);
+				SQLShort(AND, COLUMNS[4] + "=" + month, COLUMNS[5] + "=" + year, COLUMNS[6] + "=?"),
+				new String[] {currency}, null, null, COLUMNS[0]);
 
 		if (c != null) {
 			c.moveToFirst();
@@ -205,9 +205,8 @@ public class TableGeneral extends Database {
 		int[] data;
 
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[]{NUMBER_COLUMN},
-				format("%1$s = %2$s AND %3$s = %4$s AND %5$s = '%6$s'", COLUMNS[4], month, COLUMNS[5],
-						year, COLUMNS[6], currency),
-				null, null, null, COLUMNS[0]);
+				format("%1$s = %2$s AND %3$s = %4$s AND %5$s = ?", COLUMNS[4], month, COLUMNS[5], year, COLUMNS[6]),
+				new String[] {currency}, null, null, COLUMNS[0]);
 
 		if (c != null) {
 			c.moveToFirst();
@@ -234,8 +233,8 @@ public class TableGeneral extends Database {
 	}
 
 	public void deleteAllForCurrency(String currency) {
-		String cond = format("%1$s=%2$s" , COLUMNS[6], "'" + currency + "'");
-		getWritableDatabase().delete(TABLE_NAME, cond, null);
+		String cond = format("%1$s=%2$s" , COLUMNS[6], "?");
+		getWritableDatabase().delete(TABLE_NAME, cond, new String[] {currency});
 	}
 
 }
