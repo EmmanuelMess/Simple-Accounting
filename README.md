@@ -1,6 +1,8 @@
 # Simple-Accounting
 Android app that helps you balance: https://play.google.com/store/apps/details?id=com.emmanuelmess.simpleaccounting
-
+### Donating: 
+Bitcoin: 1HFhPxH9bqMKvs44nHqXjEEPC2m7z1V8tW
+## Screenshots
 ### Main
 <img src="Screenshot_1491862500.png" data-canonical-src="Screenshot_1491862500.png" height="350" /> <img src="Screenshot_1491862506.png" data-canonical-src="Screenshot_1491862506.png" height="350" /> <img src="Screenshot_1491945273.png" data-canonical-src="Screenshot_1491945273.png" height="350" /> <img src="Screenshot_1491945294.png" data-canonical-src="Screenshot_1491945294.png" height="350" />
 
