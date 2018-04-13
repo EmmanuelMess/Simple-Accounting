@@ -32,7 +32,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.TempMonthActivity"
+            android:name=".activities.MonthActivity"
             android:label="@string/title_activity_temp_month"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">

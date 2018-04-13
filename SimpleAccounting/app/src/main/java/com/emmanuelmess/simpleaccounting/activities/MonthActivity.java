@@ -34,7 +34,7 @@ import java.util.Locale;
 /**
  * @author Emmanuel
  */
-public class TempMonthActivity extends ListActivity {
+public class MonthActivity extends ListActivity {
 
 	private TableGeneral tableGeneral;
 	private MonthListAdapter monthListAdapter;
