@@ -33,7 +33,7 @@ import android.widget.TextView;
 import com.emmanuelmess.simpleaccounting.activities.DonateActivity;
 import com.emmanuelmess.simpleaccounting.activities.GraphActivity;
 import com.emmanuelmess.simpleaccounting.activities.SettingsActivity;
-import com.emmanuelmess.simpleaccounting.activities.TempMonthActivity;
+import com.emmanuelmess.simpleaccounting.activities.MonthActivity;
 import com.emmanuelmess.simpleaccounting.activities.dialogs.CurrencyPicker;
 import com.emmanuelmess.simpleaccounting.activities.views.SpinnerNoUnwantedOnClick;
 import com.emmanuelmess.simpleaccounting.dataloading.AsyncFinishedListener;
@@ -343,7 +343,7 @@ public class MainActivity extends AppCompatActivity
 				startActivity(i);
 				return true;
 			case R.id.action_show_months:
-				startActivity(new Intent(this, TempMonthActivity.class));
+				startActivity(new Intent(this, MonthActivity.class));
 				return true;
 			case R.id.action_print:
 				if (table.getChildCount() > 1) {
