@@ -45,7 +45,7 @@ dependencies {
     implementation 'com.faendir:acra:4.10.0'
 
     implementation 'com.github.amlcurran.showcaseview:library:5.4.3'
-    implementation 'com.github.PhilJay:MPAndroidChart:v3.0.2'
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
 
     implementation 'com.mikepenz:aboutlibraries:6.0.8'
 
