@@ -67,7 +67,7 @@ public class MonthActivity extends ListActivity {
 		delegate.onCreate(savedInstanceState);
 		delegate.setContentView(R.layout.activity_month);
 
-		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		Toolbar toolbar = findViewById(R.id.toolbar);
 		delegate.setSupportActionBar(toolbar);
 		ActionBar ab = delegate.getSupportActionBar();
 		ab.setDisplayHomeAsUpEnabled(true);
