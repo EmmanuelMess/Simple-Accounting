@@ -156,12 +156,12 @@ public class MainActivity extends AppCompatActivity
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 
 		inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		scrollView = (ScrollView) findViewById(R.id.scrollView);
-		table = (TableLayout) findViewById(R.id.table);
+		scrollView = findViewById(R.id.scrollView);
+		table = findViewById(R.id.table);
 		tableGeneral = new TableGeneral(this);//DO NOT change the order of table creation!
 		tableMonthlyBalance = new TableMonthlyBalance(this);
 
@@ -589,7 +589,7 @@ public class MainActivity extends AppCompatActivity
 			editableYear = year;
 			editableCurrency = currency;
 
-			TextView monthText = (TextView) findViewById(R.id.textMonth);
+			TextView monthText = findViewById(R.id.textMonth);
 
 			if (month != -1 && !isSelectedMonthOlderThanUpdate()) {
 				((TextView) findViewById(R.id.textMonth)).setText(MONTH_STRINGS[month]);

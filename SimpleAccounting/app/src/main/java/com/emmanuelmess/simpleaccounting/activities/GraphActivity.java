@@ -53,7 +53,7 @@ public class GraphActivity extends AppCompatActivity {
 		}
 
 		// programmatically create a LineChart
-		LineChart chart = (LineChart) findViewById(R.id.chart);
+		LineChart chart = findViewById(R.id.chart);
 
 		Date d = new Date();
 		int currentMonth = parseInt(new SimpleDateFormat("M", Locale.getDefault()).format(d)) - 1,
