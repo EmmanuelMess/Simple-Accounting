@@ -167,8 +167,8 @@ public class MonthActivity extends ListActivity {
 			if(convertView == null)
 				convertView = inflater.inflate(R.layout.item_month, parent, false);
 
-			TextView monthView = (TextView) convertView.findViewById(R.id.textMonth);
-			TextView yearView = (TextView) convertView.findViewById(R.id.textYear);
+			TextView monthView = convertView.findViewById(R.id.textMonth);
+			TextView yearView = convertView.findViewById(R.id.textYear);
 
 			monthView.setText(values[position][0]);
 			yearView.setText(values[position][1]);
