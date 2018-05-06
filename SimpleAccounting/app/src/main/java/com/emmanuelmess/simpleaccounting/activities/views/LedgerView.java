@@ -11,6 +11,8 @@ import android.widget.TextView;
 
 import com.emmanuelmess.simpleaccounting.R;
 
+import java.math.BigDecimal;
+
 import static com.emmanuelmess.simpleaccounting.MainActivity.EDIT_IDS;
 import static com.emmanuelmess.simpleaccounting.MainActivity.TEXT_IDS;
 
@@ -30,20 +32,17 @@ public class LedgerView extends TableLayout {
 	 */
 	private int editableRow = -1;
 
-	public LedgerView(Context context) {
-		super(context);
-		createInstance(context);
-	}
+	private BalanceFormatter formatter;
 
 	public LedgerView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		createInstance(context);
-	}
-
-	private void createInstance(Context c) {
 		addView(inflate(getContext(), R.layout.view_ledger, null));
 
-		inflater = (LayoutInflater) c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	}
+
+	public void setFormatter(BalanceFormatter f) {
+		formatter = f;
 	}
 
 	public void setListener(LedgeCallbacks l) {
@@ -104,24 +103,13 @@ public class LedgerView extends TableLayout {
 	 * Converts editable row into not editable.
 	 */
 	public void editableRowToView() {
-		View row = getChildAt(editableRow);
+		LedgerRow row = (LedgerRow) getChildAt(editableRow);
 		if (row != null && editableRow >= 0) {
 			listener.onBeforeMakeRowNotEditable(row);
 
 			updateEditableRow(-1);
 
-			for (int i = 0; i < TEXT_IDS.length; i++) {
-				EditText t = row.findViewById(EDIT_IDS[i]);
-				TextView t1 = row.findViewById(TEXT_IDS[i]);
-
-				t.setOnTouchListener(null);
-
-				t1.setText(t.getText());
-				t.setText("");
-
-				t.setVisibility(GONE);
-				t1.setVisibility(VISIBLE);
-			}
+			row.makeRowNotEditable();
 
 			listener.onAfterMakeRowNotEditable(row);
 		}
@@ -132,26 +120,21 @@ public class LedgerView extends TableLayout {
 	}
 
 	public void clear() {
-		removeAllViews();
+		for(int i = getChildCount()-1; i > 0; i--) {//DO NOT remove first line, the column titles
+			removeViewAt(i);
+		}
+
 		updateEditableRow(-1);
 	}
 
-	private View inflateRow() {
+	private LedgerRow inflateRow() {
 		inflater.inflate(R.layout.row_main, this);
-
-		View row = getChildAt(getChildCount() - 1);
+		editableRow = getChildCount() -1;
+		LedgerRow row = (LedgerRow) getChildAt(editableRow);
+		row.formatter = formatter;
 
 		if (invertCreditAndDebit) {
-			row.findViewById(R.id.textCredit).setId(0);
-			row.findViewById(R.id.textDebit).setId(R.id.textCredit);
-			row.findViewById(0).setId(R.id.textDebit);
-
-			row.findViewById(R.id.editCredit).setId(0);
-			row.findViewById(R.id.editDebit).setId(R.id.editCredit);
-			row.findViewById(0).setId(R.id.editDebit);
-
-			((EditText) row.findViewById(R.id.editCredit)).setHint(R.string.credit);
-			((EditText) row.findViewById(R.id.editDebit)).setHint(R.string.debit);
+			row.invertDebitCredit();
 		}
 
 		return row;
@@ -166,6 +149,10 @@ public class LedgerView extends TableLayout {
 		void onUpdateEditableRow(int index);
 		void onBeforeMakeRowNotEditable(View row);
 		void onAfterMakeRowNotEditable(View row);
+	}
+
+	public interface BalanceFormatter {
+		String format(BigDecimal balance);
 	}
 
 }
