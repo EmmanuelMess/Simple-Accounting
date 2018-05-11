@@ -123,7 +123,6 @@ public class MainActivity extends AppCompatActivity
 	private ArrayList<Integer> rowToDBRowConversion = new ArrayList<>();
 
 	private boolean destroyFirst = false;
-	private boolean reloadMonthOnChangeToView = false;
 	private boolean createNewRowWhenMonthLoaded = false;
 
 	public static void setDate(int month, int year) {
@@ -395,7 +394,6 @@ public class MainActivity extends AppCompatActivity
 
 		setListener(rowViewIndex);
 		checkEditInBalance(rowViewIndex, row);
-		checkDateChanged(rowViewIndex, row);
 		return row;
 	}
 
@@ -464,28 +462,6 @@ public class MainActivity extends AppCompatActivity
 			lastBalance.addTextChangedListener(watcher);
 	}
 
-	void checkDateChanged(final int index, TableRow row) {
-		final EditText DATE = row.findViewById(R.id.editDate);
-
-		TextWatcher watcher = new Utils.SimpleTextWatcher() {
-			String mem = "";
-
-			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-				if (equal(mem, ""))
-					mem = s.toString();
-			}
-
-			@Override
-			public void afterTextChanged(Editable editable) {
-				if (editableRow == index && !equal(mem, ""))
-					reloadMonthOnChangeToView = !equal(mem, editable.toString());
-			}
-		};
-
-		DATE.addTextChangedListener(watcher);
-	}
-
 	private void setListener(final int rowIndex) {
 		final View row = table.getChildAt(rowIndex);
 
@@ -512,6 +488,10 @@ public class MainActivity extends AppCompatActivity
 	private void currentEditableToView() {
 		View row = table.getChildAt(editableRow);
 		if (row != null && editableRow >= 0) {
+			String editDateText = ((EditText) row.findViewById(R.id.editDate)).getText().toString();
+			boolean reloadMonthOnChangeToView = !editDateText.isEmpty()
+					&& editableRowColumnsHash[0] != editDateText.hashCode();
+
 			for (int i = 0; i < EDIT_IDS.length - 1; i++) {
 				String t = ((EditText) row.findViewById(EDIT_IDS[i])).getText().toString();
 
@@ -548,7 +528,6 @@ public class MainActivity extends AppCompatActivity
 			}
 
 			if (reloadMonthOnChangeToView) {
-				reloadMonthOnChangeToView = false;
 				loadMonth(editableMonth, editableYear, editableCurrency);
 			}
 		}
