@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity
 	//pointer to row being edited STARTS IN 1
 	private int editableRow = -1;
 
-	private boolean editedColumn[] = new boolean[4];
+	private int[] editableRowColumnsHash = new int[4];
 
 	/**
 	 * Pointer to month being viewed
@@ -123,7 +123,6 @@ public class MainActivity extends AppCompatActivity
 	private ArrayList<Integer> rowToDBRowConversion = new ArrayList<>();
 
 	private boolean destroyFirst = false;
-	private boolean reloadMonthOnChangeToView = false;
 	private boolean createNewRowWhenMonthLoaded = false;
 
 	public static void setDate(int month, int year) {
@@ -395,8 +394,6 @@ public class MainActivity extends AppCompatActivity
 
 		setListener(rowViewIndex);
 		checkEditInBalance(rowViewIndex, row);
-		checkDateChanged(rowViewIndex, row);
-		addToDB(row);
 		return row;
 	}
 
@@ -465,42 +462,6 @@ public class MainActivity extends AppCompatActivity
 			lastBalance.addTextChangedListener(watcher);
 	}
 
-	void checkDateChanged(final int index, TableRow row) {
-		final EditText DATE = row.findViewById(R.id.editDate);
-
-		TextWatcher watcher = new Utils.SimpleTextWatcher() {
-			String mem = "";
-
-			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-				if (equal(mem, ""))
-					mem = s.toString();
-			}
-
-			@Override
-			public void afterTextChanged(Editable editable) {
-				if (editableRow == index && !equal(mem, ""))
-					reloadMonthOnChangeToView = !equal(mem, editable.toString());
-			}
-		};
-
-		DATE.addTextChangedListener(watcher);
-	}
-
-	private void addToDB(View row) {
-		for (int i = 0; i < EDIT_IDS.length - 1; i++) {
-			final int colIndex = i;
-			TextWatcher watcher = new Utils.SimpleTextWatcher() {
-				@Override
-				public void afterTextChanged(Editable editable) {
-					editedColumn[colIndex] = true;
-				}
-			};
-
-			((TextView) row.findViewById(EDIT_IDS[i])).addTextChangedListener(watcher);
-		}
-	}
-
 	private void setListener(final int rowIndex) {
 		final View row = table.getChildAt(rowIndex);
 
@@ -510,6 +471,8 @@ public class MainActivity extends AppCompatActivity
 			for (int i = 0; i < TEXT_IDS.length; i++) {
 				TextView t1 = row.findViewById(TEXT_IDS[i]);
 				EditText t = row.findViewById(EDIT_IDS[i]);
+
+				editableRowColumnsHash[i] = t1.getText().toString().hashCode();
 
 				t.setText(t1.getText());
 				t1.setText("");
@@ -525,11 +488,17 @@ public class MainActivity extends AppCompatActivity
 	private void currentEditableToView() {
 		View row = table.getChildAt(editableRow);
 		if (row != null && editableRow >= 0) {
+			String editDateText = ((EditText) row.findViewById(R.id.editDate)).getText().toString();
+			boolean reloadMonthOnChangeToView = !editDateText.isEmpty()
+					&& editableRowColumnsHash[0] != editDateText.hashCode();
+
 			for (int i = 0; i < EDIT_IDS.length - 1; i++) {
-				if (editedColumn[i]) {
-					String t = ((EditText) row.findViewById(EDIT_IDS[i])).getText().toString();
+				String t = ((EditText) row.findViewById(EDIT_IDS[i])).getText().toString();
+
+				if (editableRowColumnsHash[i] != t.hashCode()) {
 					tableGeneral.update(rowToDBRowConversion.get(editableRow - FIRST_REAL_ROW),
-							TableGeneral.COLUMNS[i], (!equal(t, "")? t:null));
+							TableGeneral.COLUMNS[i], (!t.isEmpty()? t:null));
+					editableRowColumnsHash[i] = -1;
 				}
 			}
 
@@ -559,7 +528,6 @@ public class MainActivity extends AppCompatActivity
 			}
 
 			if (reloadMonthOnChangeToView) {
-				reloadMonthOnChangeToView = false;
 				loadMonth(editableMonth, editableYear, editableCurrency);
 			}
 		}
