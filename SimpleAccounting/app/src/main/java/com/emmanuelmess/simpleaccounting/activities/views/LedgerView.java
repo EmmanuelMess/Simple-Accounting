@@ -83,7 +83,9 @@ public class LedgerView extends TableLayout {
 	public void rowViewToEditable(int index) {
 		if(index <= 0) throw new IllegalArgumentException("Can't edit table header!");
 
-		final View row = getChildAt(index);
+		final LedgerRow row = (LedgerRow) getChildAt(index);
+
+		row.makeRowEditable();
 
 		for (int i = 0; i < TEXT_IDS.length; i++) {
 			TextView t1 = (TextView) row.findViewById(TEXT_IDS[i]);
