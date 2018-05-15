@@ -23,8 +23,9 @@ public class LedgerRow extends TableRow {
 
 	protected LedgerView.BalanceFormatter formatter;
 
-	private TextView dateText, referenceText, creditText, debitText, balanceText;
-	private EditText dateEditText, referenceEditText, creditEditText, debitEditText;
+	private EditableViewPair<TextView, TextView, EditText> datePair, referencePair, creditPair, debitPair;
+
+	private TextView balanceText;
 
 	public LedgerRow(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -33,59 +34,57 @@ public class LedgerRow extends TableRow {
 	@Override
 	protected void onFinishInflate() {
 		super.onFinishInflate();
-		dateText = findViewById(R.id.textDate);
-		referenceText = findViewById(R.id.textRef);
-		creditText = findViewById(R.id.textCredit);
-		debitText = findViewById(R.id.textDebit);
-		balanceText = findViewById(R.id.textBalance);
 
-		dateEditText = findViewById(R.id.editDate);
-		referenceEditText = findViewById(R.id.editRef);
-		creditEditText = findViewById(R.id.editCredit);
-		debitEditText = findViewById(R.id.editDebit);
+		datePair = new EditableViewPair<>(findViewById(R.id.textDate), findViewById(R.id.editDate));
+		referencePair = new EditableViewPair<>(findViewById(R.id.textRef), findViewById(R.id.editRef));
+		creditPair = new EditableViewPair<>(findViewById(R.id.textCredit), findViewById(R.id.editCredit));
+		debitPair = new EditableViewPair<>(findViewById(R.id.textDebit), findViewById(R.id.editDebit));
+
+		balanceText = findViewById(R.id.textBalance);
 	}
 
 	public void setDate(String date) {
-		setText(dateText, dateEditText, date);
+		datePair.get().setText(date);
 	}
 
 	public void setReference(@StringRes int ref) {
-		setText(referenceText, referenceEditText, ref);
+	    referencePair.get().setText(ref);
 	}
 
 	public void setReference(String ref) {
-		setText(referenceText, referenceEditText, ref);
+		referencePair.get().setText(ref);
 	}
 
 	public void setCredit(String credit) {
-		setText(creditText, creditEditText, credit);
+		creditPair.get().setText(credit);
 	}
 
 	public CharSequence getCreditText() {
-		return creditText.getText();
+	    return creditPair.get().getText();
 	}
 
 	public void setDebit(String debit) {
-		setText(debitText, debitEditText, debit);
+		debitPair.get().setText(debit);
 	}
 
 	public CharSequence getDebitText() {
-		return debitText.getText();
+		return debitPair.get().getText();
 	}
 
 	public void setCredit(BigDecimal credit) {
-		if(creditText.getVisibility() != VISIBLE) {
+		if(creditPair.isBeingEdited()) {
 			throw new IllegalStateException("setCredit(BigDecimal) CANNOT be used while the row is editable!");
 		}
-		creditText.setText(credit.toPlainString());
+
+		creditPair.get().setText(credit.toPlainString());
 	}
 
 	public void setDebit(BigDecimal debit) {
-		if(creditText.getVisibility() != VISIBLE) {
+		if(debitPair.isBeingEdited()) {
 			throw new IllegalStateException("setDebit(BigDecimal) CANNOT be used while the row is editable!");
 		}
 
-		debitText.setText(debit.toPlainString());
+		debitPair.get().setText(debit.toPlainString());
 	}
 
 	public void setBalance(BigDecimal balance) {
@@ -108,13 +107,23 @@ public class LedgerRow extends TableRow {
 		((EditText) findViewById(R.id.editCredit)).setHint(R.string.credit);
 		((EditText) findViewById(R.id.editDebit)).setHint(R.string.debit);
 
-		creditText = findViewById(R.id.textCredit);
-		debitText = findViewById(R.id.textDebit);
-		creditEditText = findViewById(R.id.editCredit);
-		debitEditText = findViewById(R.id.editDebit);
+		creditPair = new EditableViewPair<>(findViewById(R.id.textCredit), findViewById(R.id.editCredit));
+		debitPair = new EditableViewPair<>(findViewById(R.id.textDebit), findViewById(R.id.editDebit));
+	}
+
+	public void makeRowEditable() {
+		datePair.setBeingEdited(true);
+		referencePair.setBeingEdited(true);
+		creditPair.setBeingEdited(true);
+		debitPair.setBeingEdited(true);
 	}
 
 	public void makeRowNotEditable() {
+		datePair.setBeingEdited(false);
+		referencePair.setBeingEdited(false);
+		creditPair.setBeingEdited(false);
+		debitPair.setBeingEdited(false);
+
 		for (int i = 0; i < TEXT_IDS.length; i++) {
 			EditText t = findViewById(EDIT_IDS[i]);
 			TextView t1 = findViewById(TEXT_IDS[i]);
@@ -126,22 +135,6 @@ public class LedgerRow extends TableRow {
 
 			t.setVisibility(GONE);
 			t1.setVisibility(VISIBLE);
-		}
-	}
-
-	private void setText(TextView a, TextView b, CharSequence s) {
-		if(a.getVisibility() != VISIBLE) {
-			b.setText(s);
-		} else {
-			a.setText(s);
-		}
-	}
-
-	private void setText(TextView a, TextView b, @StringRes int s) {
-		if(a.getVisibility() != VISIBLE) {
-			b.setText(s);
-		} else {
-			a.setText(s);
 		}
 	}
 
