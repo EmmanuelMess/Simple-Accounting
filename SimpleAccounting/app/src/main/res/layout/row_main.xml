@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
-          android:layout_width="match_parent"
-          android:layout_height="match_parent"
-          android:layout_marginStart="@dimen/mainactivity_margin"
-          android:layout_marginEnd="@dimen/mainactivity_margin"
-          android:baselineAligned="false"
-          android:weightSum="10">
+<com.emmanuelmess.simpleaccounting.activities.views.LedgerRow
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginStart="@dimen/mainactivity_margin"
+    android:layout_marginEnd="@dimen/mainactivity_margin"
+    android:baselineAligned="false"
+    android:weightSum="10">
 
     <EditText
         android:layout_width="0dp"
@@ -127,4 +128,4 @@
         android:gravity="center_vertical|end"
         android:ems="3"
         android:textSize="@dimen/normal"/>
-</TableRow>
+</com.emmanuelmess.simpleaccounting.activities.views.LedgerRow>
