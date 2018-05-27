@@ -29,6 +29,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
 }
 
 
@@ -52,5 +58,8 @@ dependencies {
 
     implementation 'com.mikepenz:aboutlibraries:6.0.8'
 
+    // --From here for testing--
     androidTestImplementation 'junit:junit:4.12'
+
+    testImplementation "org.robolectric:robolectric:3.8"
 }
