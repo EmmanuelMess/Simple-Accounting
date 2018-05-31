@@ -370,6 +370,8 @@ public class MainActivity extends AppCompatActivity
 		LedgerRow row = (LedgerRow) table.getLastRow();
 		tableDataManager.addRow();
 
+		row.setBalance(tableDataManager.getTotal(getCorrectedIndexForDataManager(rowViewIndex)));
+
 		setListener(rowViewIndex);
 		checkEditInBalance(rowViewIndex, row);
 		return row;
