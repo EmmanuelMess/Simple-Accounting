@@ -9,6 +9,7 @@
         android:summary="@string/pref_summary_invertcreditdebit"
         android:defaultValue="false" />
     <Preference
-        android:title="Version"
-        android:summary="@string/app_ver"/>
+        android:key="pref_libs"
+        android:title="@string/libraries"
+        android:summary="@string/easier"/>
 </PreferenceScreen>

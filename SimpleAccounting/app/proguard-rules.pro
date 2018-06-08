@@ -15,3 +15,7 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+#From here for AboutLibraries
+-keepclasseswithmembers class **.R$* {
+    public static final int define_*;
+}
