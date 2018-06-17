@@ -53,4 +53,8 @@
     <string name="choose_email">Seleccionar emisario</string>
     <string name="mail_content">\n\n\nVersión de Android: \nModelo de teléfono: </string>
     <string name="without_day_data_is_not_charted">Las entradas sin dia no están graficadas</string>
+    <string name="libraries">Bibliotecas de codigo abierto</string>
+    <string name="easier">Estas personas facilitaron mi trabajo</string>
+    <string name="simpleaccounting_description">La app que te facilita guardar tu balance!</string>
+    <string name="license">Licencias</string>
 </resources>
