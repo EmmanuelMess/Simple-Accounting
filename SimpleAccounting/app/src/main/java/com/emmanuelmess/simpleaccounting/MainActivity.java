@@ -222,6 +222,8 @@ public class MainActivity extends AppCompatActivity
 				row.setDate(new SimpleDateFormat("dd", Locale.getDefault()).format(new Date()));
 				row.requestFocus();
 
+				editableRowColumnsHash[0] = row.getDate().toString().hashCode();
+
 				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 				imm.showSoftInput(row.findViewById(R.id.editDate), InputMethodManager.SHOW_IMPLICIT);
 			} else createNewRowWhenMonthLoaded = true;
@@ -439,8 +441,6 @@ public class MainActivity extends AppCompatActivity
 	private void setListener(final int rowIndex) {
 		resetEditableHash(rowIndex);
 		table.getChildAt(rowIndex).setOnLongClickListener(v->{
-			resetEditableHash(rowIndex);
-
 			table.editableRowToView();
 			table.rowViewToEditable(rowIndex);
 			return true;
@@ -529,7 +529,12 @@ public class MainActivity extends AppCompatActivity
 			int[] textIds = MainActivity.TEXT_IDS;
 
 			for (int j = 0; j < textIds.length; j++) {
-				((TextView) row.findViewById(textIds[j])).setText(dbRow[j]);
+				if(dbRow[j] == null) continue;
+
+				TextView v = row.findViewById(textIds[j]);
+
+				v.setText(dbRow[j]);
+				editableRowColumnsHash[j] = dbRow[j].hashCode();
 			}
 
 			if (dbRow[2] != null)
@@ -549,7 +554,7 @@ public class MainActivity extends AppCompatActivity
 
 		loadShowcaseView(inflater, scrollView);
 
-		if (createNewRowWhenMonthLoaded && table != null) {
+		if (createNewRowWhenMonthLoaded && table != null) {// TODO: 24/06/18 duplicated code
 			table.inflateEmptyRow();
 
 			scrollView.fullScroll(View.FOCUS_DOWN);
@@ -562,8 +567,10 @@ public class MainActivity extends AppCompatActivity
 			addToMonthsDB();
 
 			row.setDate(new SimpleDateFormat("dd", Locale.getDefault()).format(new Date()));
-
 			row.requestFocus();
+
+			editableRowColumnsHash[0] = row.getDate().toString().hashCode();
+
 			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 			imm.showSoftInput(row.findViewById(R.id.editDate), InputMethodManager.SHOW_IMPLICIT);
 			createNewRowWhenMonthLoaded = false;
@@ -674,6 +681,8 @@ public class MainActivity extends AppCompatActivity
 				}
 			}
 		}
+
+		resetEditableHash(table.getEditableRow());
 
 		TextView balanceText = row.findViewById(R.id.textBalance);
 
