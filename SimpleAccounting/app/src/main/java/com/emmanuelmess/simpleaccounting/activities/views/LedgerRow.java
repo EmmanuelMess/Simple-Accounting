@@ -47,6 +47,10 @@ public class LedgerRow extends TableRow {
 		datePair.get().setText(date);
 	}
 
+	public CharSequence getDate() {
+		return datePair.get().getText();
+	}
+
 	public void setReference(@StringRes int ref) {
 	    referencePair.get().setText(ref);
 	}

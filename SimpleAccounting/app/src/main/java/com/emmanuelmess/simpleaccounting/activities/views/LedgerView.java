@@ -74,9 +74,11 @@ public class LedgerView extends TableLayout {
 	}
 
 	/**
-	 * Creates and inflates a new row
+	 * Creates and inflates a new row.
+     * Restores editable row to view.
 	 */
 	public View inflateEmptyRow() {
+		editableRowToView();
 		return inflateRow();
 	}
 
