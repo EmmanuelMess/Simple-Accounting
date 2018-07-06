@@ -47,11 +47,26 @@ public class MainActivityTest {
 
     @Before
     public void setUp() {
+        startSetUp();
+        /*
+         * All SharedPreferences editing calls must be done before this point.
+         * @see #endSetUp()
+         */
+        endSetUp();
+    }
+
+    protected void startSetUp() {
         context = RuntimeEnvironment.application.getApplicationContext();
         sharedPreferences = context.getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE);
 
-        setShowTutorial(false);//DO NOT MOVE THIS LINE AFTER ACTIVITY CREATION
+        setShowTutorial(false);
+    }
 
+    /**
+     * This is a hack, used to circumvent a call to park() that never ends.
+     * In this method go all calls for creating and after creating an Activity.
+     */
+    protected void endSetUp() {
         activity =  Robolectric.buildActivity(MainActivity.class)
                 .create().start().resume().visible().get();
         table = activity.findViewById(R.id.table);
