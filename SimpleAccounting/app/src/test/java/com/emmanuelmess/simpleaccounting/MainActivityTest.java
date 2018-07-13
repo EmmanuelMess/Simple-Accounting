@@ -86,17 +86,9 @@ public class MainActivityTest {
 
     @Test
     public void testEditRow() {
-        fab.callOnClick();
-
-        TableRow row = (TableRow) table.getChildAt(table.getEditableRow());
-        EditText creditEditable = row.findViewById(R.id.editCredit);
-        EditText debitEditable = row.findViewById(R.id.editDebit);
         String c = "300", d = "500";
 
-        creditEditable.setText(c);
-        debitEditable.setText(d);
-
-        table.editableRowToView();
+        TableRow row = createNewRow(c, d);
 
         TextView creditText = row.findViewById(R.id.textCredit);
         TextView debitText = row.findViewById(R.id.textDebit);
@@ -107,8 +99,8 @@ public class MainActivityTest {
         table.rowViewToEditable(table.getChildCount()-1);
 
         row = (TableRow) table.getChildAt(table.getEditableRow());
-        creditEditable = row.findViewById(R.id.editCredit);
-        debitEditable = row.findViewById(R.id.editDebit);
+        EditText creditEditable = row.findViewById(R.id.editCredit);
+        EditText debitEditable = row.findViewById(R.id.editDebit);
 
         assertEquals(c, creditEditable.getText().toString());
         assertEquals(d, debitEditable.getText().toString());
@@ -152,6 +144,21 @@ public class MainActivityTest {
             result = newResult;
             fab.callOnClick();
         }
+    }
+
+    protected TableRow createNewRow(String credit, String debit) {
+        fab.callOnClick();
+
+        TableRow row = (TableRow) table.getChildAt(table.getEditableRow());
+        EditText creditEditable = row.findViewById(R.id.editCredit);
+        EditText debitEditable = row.findViewById(R.id.editDebit);
+
+        creditEditable.setText(credit);
+        debitEditable.setText(debit);
+
+        table.editableRowToView();
+
+        return row;
     }
 
     private void setShowTutorial(boolean show) {
