@@ -16,7 +16,7 @@ public class TableMonthlyBalance extends Database {
 	private static final String TABLE_NAME = "MONTHLY_BALANCE";
 
 	private static final int DATABASE_VERSION = 4;
-	private static final String TABLE_CREATE = format("CREATE TABLE %1$s(%2$s INT, %3$s INT, %4$s INT, %5$s TEXT, %6$s REAL);",
+	public static final String TABLE_CREATE = format("CREATE TABLE %1$s(%2$s INT, %3$s INT, %4$s INT, %5$s TEXT, %6$s REAL);",
 			TABLE_NAME, NUMBER_COLUMN, COLUMNS[0], COLUMNS[1], COLUMNS[2], COLUMNS[3]);
 
 	public TableMonthlyBalance(Context context) {

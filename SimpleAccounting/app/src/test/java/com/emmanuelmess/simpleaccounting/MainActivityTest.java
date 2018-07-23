@@ -23,6 +23,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 import org.robolectric.fakes.RoboMenuItem;
 
@@ -41,6 +42,7 @@ public class MainActivityTest {
 
     protected Context context;
     protected SharedPreferences sharedPreferences;
+    protected ActivityController<MainActivity> activityController;
     protected MainActivity activity;
     protected LedgerView table;
     protected FloatingActionButton fab;
@@ -67,8 +69,9 @@ public class MainActivityTest {
      * In this method go all calls for creating and after creating an Activity.
      */
     protected void endSetUp() {
-        activity =  Robolectric.buildActivity(MainActivity.class)
-                .create().start().resume().visible().get();
+        activityController = Robolectric.buildActivity(MainActivity.class)
+                .create().start().resume().visible();
+        activity =  activityController.get();
         table = activity.findViewById(R.id.table);
         fab = activity.findViewById(R.id.fab);
     }
