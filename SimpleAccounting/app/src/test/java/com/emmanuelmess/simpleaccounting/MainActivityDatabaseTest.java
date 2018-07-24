@@ -43,6 +43,28 @@ public class MainActivityDatabaseTest extends MainActivityTest {
     }
 
     @Test
+    public void testNewRow() {
+        String c = "200", d = "100";
+
+        BigDecimal credit = new BigDecimal(c);
+        BigDecimal debit = new BigDecimal(d);
+        String total = new SimpleBalanceFormatter().format(credit.subtract(debit).setScale(1));
+
+        Date date = new Date();
+        int month = Integer.parseInt(new SimpleDateFormat("M", Locale.getDefault()).format(date)) - 1;
+        int year = Integer.parseInt(new SimpleDateFormat("yyyy", Locale.getDefault()).format(date));
+
+        fakePastRow(month, year, "", 2, "test", credit, debit);
+
+        super.endSetUp();
+
+        LedgerRow balance = (LedgerRow) table.getChildAt(1);
+
+        assertEquals(1, activity.getFirstRealRow());
+        assertEquals(total, balance.getBalanceText());
+    }
+
+    @Test
     public void testLastBalance() {
         String c = "200", d = "100";
 
