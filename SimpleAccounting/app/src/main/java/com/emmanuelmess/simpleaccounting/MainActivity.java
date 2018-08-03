@@ -214,12 +214,16 @@ public class MainActivity extends AppCompatActivity
 			scrollView.fullScroll(View.FOCUS_DOWN);
 
 			if (table.getChildCount() > FIRST_REAL_ROW) {
-				tableGeneral.newRowInMonth(editableMonth, editableYear, editableCurrency);
+				String day = new SimpleDateFormat("dd", Locale.getDefault()).format(new Date());
+
+				int index = tableGeneral.newRowInMonth(editableMonth, editableYear, editableCurrency);
+				tableGeneral.update(index, TableGeneral.COLUMNS[0], day);
+
 				rowToDBRowConversion.add(tableGeneral.getLastIndex());
 				LedgerRow row = loadRow();
 				addToMonthsDB();
 
-				row.setDate(new SimpleDateFormat("dd", Locale.getDefault()).format(new Date()));
+				row.setDate(day);
 				row.requestFocus();
 
 				editableRowColumnsHash[0] = row.getDate().toString().hashCode();
