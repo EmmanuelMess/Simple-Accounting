@@ -221,12 +221,11 @@ public class MainActivity extends AppCompatActivity
 
 				rowToDBRowConversion.add(tableGeneral.getLastIndex());
 				LedgerRow row = loadRow();
-				addToMonthsDB();
 
 				row.setDate(day);
 				row.requestFocus();
 
-				editableRowColumnsHash[0] = row.getDate().toString().hashCode();
+				//editableRowColumnsHash[0] = row.getDate().toString().hashCode();
 
 				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 				imm.showSoftInput(row.findViewById(R.id.editDate), InputMethodManager.SHOW_IMPLICIT);
@@ -238,6 +237,7 @@ public class MainActivity extends AppCompatActivity
 	protected void onResume() {
 		super.onResume();
 		table.setInvertCreditAndDebit(getDefaultSharedPreferences(this).getBoolean(INVERT_CREDIT_DEBIT_SETTING, false));
+        tableMonthlyBalance.getAll();
 		if (invalidateTable && (loadingMonthTask == null || loadingMonthTask.getStatus() != AsyncTask.Status.RUNNING)) {
 			loadMonth(editableMonth, editableYear, editableCurrency);
 
@@ -550,8 +550,6 @@ public class MainActivity extends AppCompatActivity
 		dataManagerIndex++;
 		}
 
-		addToMonthsDB();
-
 		scrollView.fullScroll(View.FOCUS_DOWN);
 
 		findViewById(R.id.progressBar).setVisibility(GONE);
@@ -568,7 +566,6 @@ public class MainActivity extends AppCompatActivity
 			tableGeneral.newRowInMonth(editableMonth, editableYear, editableCurrency);
 			this.rowToDBRowConversion.add(tableGeneral.getLastIndex());
 			LedgerRow row = loadRow();
-			addToMonthsDB();
 
 			row.setDate(new SimpleDateFormat("dd", Locale.getDefault()).format(new Date()));
 			row.requestFocus();
@@ -578,21 +575,6 @@ public class MainActivity extends AppCompatActivity
 			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 			imm.showSoftInput(row.findViewById(R.id.editDate), InputMethodManager.SHOW_IMPLICIT);
 			createNewRowWhenMonthLoaded = false;
-		}
-	}
-
-	private void addToMonthsDB() {
-		if (table.getChildCount() - 1 >= FIRST_REAL_ROW) {
-			int tableIndex = table.getChildCount() - 1;
-
-			TextWatcher watcher = new Utils.SimpleTextWatcher() {
-				@Override
-				public void afterTextChanged(Editable editable) {
-					tableMonthlyBalance.updateMonth(editableMonth, editableYear, editableCurrency,
-							tableDataManager.getTotal(getCorrectedIndexForDataManager(tableIndex)).doubleValue());
-				}
-			};
-			((TextView) table.getChildAt(tableIndex).findViewById(R.id.textBalance)).addTextChangedListener(watcher);
 		}
 	}
 
@@ -673,6 +655,14 @@ public class MainActivity extends AppCompatActivity
 		String editDateText = ((EditText) row.findViewById(R.id.editDate)).getText().toString();
 		reloadMonthOnChangeToView = !editDateText.isEmpty()
 				&& editableRowColumnsHash[0] != editDateText.hashCode();
+
+		String editCreditText = ((EditText) row.findViewById(R.id.editCredit)).getText().toString();
+		String editDebitText = ((EditText) row.findViewById(R.id.editDebit)).getText().toString();
+		if(editableRowColumnsHash[2] != editCreditText.hashCode()
+				|| editableRowColumnsHash[3] != editDebitText.hashCode()) {
+			tableMonthlyBalance.updateMonth(editableMonth, editableYear, editableCurrency,
+					tableDataManager.getTotal(getCorrectedIndexForDataManager(table.getEditableRow())).doubleValue());
+		}
 
 		if(table.getEditableRow() >= FIRST_REAL_ROW) {//Last month total row is editable for some time
 			for (int i = 0; i < EDIT_IDS.length - 1; i++) {
