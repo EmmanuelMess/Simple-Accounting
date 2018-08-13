@@ -23,6 +23,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 import org.robolectric.fakes.RoboMenuItem;
 
@@ -41,6 +42,7 @@ public class MainActivityTest {
 
     protected Context context;
     protected SharedPreferences sharedPreferences;
+    protected ActivityController<MainActivity> activityController;
     protected MainActivity activity;
     protected LedgerView table;
     protected FloatingActionButton fab;
@@ -67,8 +69,9 @@ public class MainActivityTest {
      * In this method go all calls for creating and after creating an Activity.
      */
     protected void endSetUp() {
-        activity =  Robolectric.buildActivity(MainActivity.class)
-                .create().start().resume().visible().get();
+        activityController = Robolectric.buildActivity(MainActivity.class)
+                .create().start().resume().visible();
+        activity =  activityController.get();
         table = activity.findViewById(R.id.table);
         fab = activity.findViewById(R.id.fab);
     }
@@ -86,17 +89,9 @@ public class MainActivityTest {
 
     @Test
     public void testEditRow() {
-        fab.callOnClick();
-
-        TableRow row = (TableRow) table.getChildAt(table.getEditableRow());
-        EditText creditEditable = row.findViewById(R.id.editCredit);
-        EditText debitEditable = row.findViewById(R.id.editDebit);
         String c = "300", d = "500";
 
-        creditEditable.setText(c);
-        debitEditable.setText(d);
-
-        table.editableRowToView();
+        TableRow row = createNewRow(c, d);
 
         TextView creditText = row.findViewById(R.id.textCredit);
         TextView debitText = row.findViewById(R.id.textDebit);
@@ -107,8 +102,8 @@ public class MainActivityTest {
         table.rowViewToEditable(table.getChildCount()-1);
 
         row = (TableRow) table.getChildAt(table.getEditableRow());
-        creditEditable = row.findViewById(R.id.editCredit);
-        debitEditable = row.findViewById(R.id.editDebit);
+        EditText creditEditable = row.findViewById(R.id.editCredit);
+        EditText debitEditable = row.findViewById(R.id.editDebit);
 
         assertEquals(c, creditEditable.getText().toString());
         assertEquals(d, debitEditable.getText().toString());
@@ -152,6 +147,21 @@ public class MainActivityTest {
             result = newResult;
             fab.callOnClick();
         }
+    }
+
+    protected TableRow createNewRow(String credit, String debit) {
+        fab.callOnClick();
+
+        TableRow row = (TableRow) table.getChildAt(table.getEditableRow());
+        EditText creditEditable = row.findViewById(R.id.editCredit);
+        EditText debitEditable = row.findViewById(R.id.editDebit);
+
+        creditEditable.setText(credit);
+        debitEditable.setText(debit);
+
+        table.editableRowToView();
+
+        return row;
     }
 
     private void setShowTutorial(boolean show) {
