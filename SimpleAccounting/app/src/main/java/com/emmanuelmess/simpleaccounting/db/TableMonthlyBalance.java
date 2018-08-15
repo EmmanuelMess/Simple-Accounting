@@ -115,32 +115,4 @@ public class TableMonthlyBalance extends Database {
 		}
 	}
 
-	public class Data {
-		public int id, month, year;
-		public String currency;
-		public double total;
-	}
-
-	public List<Data> getAll() {
-		Cursor c = getReadableDatabase().rawQuery("SELECT * FROM " + TABLE_NAME, null);
-
-		List<Data> values = new ArrayList<>();
-
-		if(c.getCount() == 0)
-			values =  null;
-		else {
-			while (c.moveToNext()) {
-				Data d = new Data();
-				d.id = c.getInt(0);
-				d.month = c.getInt(1);
-				d.year = c.getInt(2);
-				d.currency = c.getString(3);
-				d.total = c.getDouble(4);
-				values.add(d);
-			}
-		}
-
-		return values;
-	}
-
 }
