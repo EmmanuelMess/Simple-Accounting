@@ -237,7 +237,7 @@ public class MainActivity extends AppCompatActivity
 	protected void onResume() {
 		super.onResume();
 		table.setInvertCreditAndDebit(getDefaultSharedPreferences(this).getBoolean(INVERT_CREDIT_DEBIT_SETTING, false));
-        tableMonthlyBalance.getAll();
+
 		if (invalidateTable && (loadingMonthTask == null || loadingMonthTask.getStatus() != AsyncTask.Status.RUNNING)) {
 			loadMonth(editableMonth, editableYear, editableCurrency);
 
@@ -577,7 +577,7 @@ public class MainActivity extends AppCompatActivity
 			createNewRowWhenMonthLoaded = false;
 		}
 	}
-
+	
 	private void loadShowcaseView(LayoutInflater inflater, ScrollView scrollView) {
 		SharedPreferences myPrefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 		boolean isFirstRun = myPrefs.getBoolean(PREFS_FIRST_RUN, true);
@@ -588,6 +588,10 @@ public class MainActivity extends AppCompatActivity
 			if (table.getChildAt(rowToEdit) == null) {
 				table.inflateEmptyRow();
 				scrollView.fullScroll(View.FOCUS_DOWN);
+
+				tableDataManager.addRow();
+				tableDataManager.updateCredit(1, BigDecimal.ZERO);
+				tableDataManager.updateDebit(1, new BigDecimal(100));
 
 				table.editableRowToView();
 				LedgerRow row = (LedgerRow) table.getChildAt(rowToEdit);
@@ -652,19 +656,19 @@ public class MainActivity extends AppCompatActivity
 
 	@Override
 	public void onBeforeMakeRowNotEditable(View row){
-		String editDateText = ((EditText) row.findViewById(R.id.editDate)).getText().toString();
-		reloadMonthOnChangeToView = !editDateText.isEmpty()
-				&& editableRowColumnsHash[0] != editDateText.hashCode();
-
-		String editCreditText = ((EditText) row.findViewById(R.id.editCredit)).getText().toString();
-		String editDebitText = ((EditText) row.findViewById(R.id.editDebit)).getText().toString();
-		if(editableRowColumnsHash[2] != editCreditText.hashCode()
-				|| editableRowColumnsHash[3] != editDebitText.hashCode()) {
-			tableMonthlyBalance.updateMonth(editableMonth, editableYear, editableCurrency,
-					tableDataManager.getTotal(getCorrectedIndexForDataManager(table.getEditableRow())).doubleValue());
-		}
-
 		if(table.getEditableRow() >= FIRST_REAL_ROW) {//Last month total row is editable for some time
+			String editDateText = ((EditText) row.findViewById(R.id.editDate)).getText().toString();
+			reloadMonthOnChangeToView = !editDateText.isEmpty()
+					&& editableRowColumnsHash[0] != editDateText.hashCode();
+
+			String editCreditText = ((EditText) row.findViewById(R.id.editCredit)).getText().toString();
+			String editDebitText = ((EditText) row.findViewById(R.id.editDebit)).getText().toString();
+			if(editableRowColumnsHash[2] != editCreditText.hashCode()
+					|| editableRowColumnsHash[3] != editDebitText.hashCode()) {
+				tableMonthlyBalance.updateMonth(editableMonth, editableYear, editableCurrency,
+						tableDataManager.getTotal(getCorrectedIndexForDataManager(table.getEditableRow())).doubleValue());
+			}
+
 			for (int i = 0; i < EDIT_IDS.length - 1; i++) {
 				String t = ((EditText) row.findViewById(EDIT_IDS[i])).getText().toString();
 
