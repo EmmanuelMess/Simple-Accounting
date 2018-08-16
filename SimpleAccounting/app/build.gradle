@@ -53,6 +53,8 @@ dependencies {
     implementation "ch.acra:acra-http:$acraVersion"
     implementation "ch.acra:acra-toast:$acraVersion"
 
+    implementation "com.github.emmanuelmess:SQLiteQueryBuilder:0.5.0"
+
     implementation 'com.github.amlcurran.showcaseview:library:5.4.3'
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
 

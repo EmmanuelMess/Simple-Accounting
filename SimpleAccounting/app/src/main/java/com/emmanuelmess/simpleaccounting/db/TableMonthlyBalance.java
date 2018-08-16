@@ -5,10 +5,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
+import static android.database.Cursor.FIELD_TYPE_NULL;
+import static com.alexfu.sqlitequerybuilder.api.SQLiteClauseBuilder.clause;
+import static com.alexfu.sqlitequerybuilder.api.SQLiteExpressionBuilder.caseExp;
+import static com.alexfu.sqlitequerybuilder.api.SQLiteQueryBuilder.select;
 import static java.lang.String.format;
 
 /**
@@ -58,27 +59,28 @@ public class TableMonthlyBalance extends Database {
 	}
 
 	public Double getBalanceLastMonthWithData(int month, int year, String currency) {
-		double data = 0;
+		String querySum =
+				select(COLUMNS[3])
+				.from(TABLE_NAME)
+				.where(clause(clause(COLUMNS[0] + "<" + month).and(COLUMNS[1] + "=" + year))
+						.or(COLUMNS[1] + "<" + year)
+						.and(COLUMNS[2] + "=?"))
+				.orderBy(COLUMNS[1] + " DESC, " + COLUMNS[0]).desc().limit(1)
+				.build();
 
-		String condMonth = SQLShort(AND, format("%1$s<%2$s" , COLUMNS[0], month), format("%1$s=%2$s" , COLUMNS[1] , year)),
-		condYear = SQLShort(OR, format("%1$s<%2$s" , COLUMNS[1], year), "(" + condMonth + ")"),
-		condCurrency = SQLShort(AND, "(" + condYear + ")", format("%1$s=%2$s" , COLUMNS[2], "?"));
-
-		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[] {COLUMNS[3]}, condCurrency,
-				new String[] {currency}, null, null, null);
-
+		Cursor c = getReadableDatabase().rawQuery(querySum, new String[] {currency});
 		c.moveToFirst();
 
-		if(c.getCount() == 0)
-			return null;
-		else {
-			for(int i = 0; i < c.getCount(); i++) {
-				data += c.getDouble(0);
-				c.moveToNext();
+		Double data;
+		try {
+			if(c.getCount() == 0) {
+				return null;
 			}
-		}
 
-		c.close();
+			data = c.getType(0) != FIELD_TYPE_NULL? c.getDouble(0):null;
+		} finally {
+			c.close();
+		}
 
 		return data;
 	}
@@ -111,34 +113,6 @@ public class TableMonthlyBalance extends Database {
 			getWritableDatabase().insert(TABLE_NAME, null, CV);
 			CV.clear();
 		}
-	}
-
-	public class Data {
-		public int id, month, year;
-		public String currency;
-		public double total;
-	}
-
-	public List<Data> getAll() {
-		Cursor c = getReadableDatabase().rawQuery("SELECT * FROM " + TABLE_NAME, null);
-
-		List<Data> values = new ArrayList<>();
-
-		if(c.getCount() == 0)
-			values =  null;
-		else {
-			while (c.moveToNext()) {
-				Data d = new Data();
-				d.id = c.getInt(0);
-				d.month = c.getInt(1);
-				d.year = c.getInt(2);
-				d.currency = c.getString(3);
-				d.total = c.getDouble(4);
-				values.add(d);
-			}
-		}
-
-		return values;
 	}
 
 }
