@@ -34,7 +34,7 @@ import java.util.Locale;
 /**
  * @author Emmanuel
  */
-public class TempMonthActivity extends ListActivity {
+public class MonthActivity extends ListActivity {
 
 	private TableGeneral tableGeneral;
 	private MonthListAdapter monthListAdapter;
@@ -67,7 +67,7 @@ public class TempMonthActivity extends ListActivity {
 		delegate.onCreate(savedInstanceState);
 		delegate.setContentView(R.layout.activity_month);
 
-		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		Toolbar toolbar = findViewById(R.id.toolbar);
 		delegate.setSupportActionBar(toolbar);
 		ActionBar ab = delegate.getSupportActionBar();
 		ab.setDisplayHomeAsUpEnabled(true);
@@ -167,8 +167,8 @@ public class TempMonthActivity extends ListActivity {
 			if(convertView == null)
 				convertView = inflater.inflate(R.layout.item_month, parent, false);
 
-			TextView monthView = (TextView) convertView.findViewById(R.id.textMonth);
-			TextView yearView = (TextView) convertView.findViewById(R.id.textYear);
+			TextView monthView = convertView.findViewById(R.id.textMonth);
+			TextView yearView = convertView.findViewById(R.id.textYear);
 
 			monthView.setText(values[position][0]);
 			yearView.setText(values[position][1]);

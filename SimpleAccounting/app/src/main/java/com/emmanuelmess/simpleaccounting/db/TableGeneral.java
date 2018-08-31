@@ -127,7 +127,7 @@ public class TableGeneral extends Database {
 		CV.clear();
 	}
 
-	public void newRowInMonth(int month, int year, String currency) {
+	public int newRowInMonth(int month, int year, String currency) {
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[]{NUMBER_COLUMN},
 				null, null, null, null, null);
 		int i;
@@ -146,6 +146,8 @@ public class TableGeneral extends Database {
 		CV.put(COLUMNS[6], currency);
 		getWritableDatabase().insert(TABLE_NAME, null, CV);
 		CV.clear();
+
+		return i;
 	}
 
 	public int[][] getMonthsWithData() {

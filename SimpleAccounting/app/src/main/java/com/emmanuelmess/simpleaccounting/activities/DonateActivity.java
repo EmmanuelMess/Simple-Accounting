@@ -47,7 +47,7 @@ public class DonateActivity extends AppCompatActivity {
 				new String[]{"title", "summary"}, new int[]{R.id.title, R.id.summary});
 
 		// create a new ListView, set the adapter and item click listener
-		ListView listViewItems = (ListView) findViewById(R.id.listView);
+		ListView listViewItems = findViewById(R.id.listView);
 		listViewItems.setAdapter(adapter);
 		listViewItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
