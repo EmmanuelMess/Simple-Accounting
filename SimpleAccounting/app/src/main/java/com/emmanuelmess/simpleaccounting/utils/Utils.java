@@ -78,7 +78,7 @@ public class Utils {
 		if(Build.VERSION.SDK_INT >= 21)
 			return defaultColor;//Other method will fail
 
-		if (Build.VERSION.SDK_INT >= 11 && drawable instanceof ColorDrawable)
+		if (drawable instanceof ColorDrawable)
 			return ((ColorDrawable) drawable).getColor();
 
 		try {

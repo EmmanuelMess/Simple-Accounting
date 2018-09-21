@@ -1,20 +1,17 @@
 package com.emmanuelmess.simpleaccounting;
 
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Spinner;
 
-import com.emmanuelmess.simpleaccounting.activities.dialogs.CurrencyPicker;
+import com.emmanuelmess.simpleaccounting.activities.preferences.CurrencyPicker;
 import com.emmanuelmess.simpleaccounting.utils.TinyDB;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 
 import static junit.framework.Assert.assertEquals;
 import static org.robolectric.Shadows.shadowOf;
