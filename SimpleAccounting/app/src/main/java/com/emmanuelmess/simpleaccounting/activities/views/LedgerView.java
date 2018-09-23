@@ -135,7 +135,7 @@ public class LedgerView extends TableLayout {
 		inflater.inflate(R.layout.row_main, this);
 		editableRow = getChildCount() -1;
 		LedgerRow row = (LedgerRow) getChildAt(editableRow);
-		row.formatter = formatter;
+		row.setFormatter(formatter);
 
 		if (invertCreditAndDebit) {
 			row.invertDebitCredit();
