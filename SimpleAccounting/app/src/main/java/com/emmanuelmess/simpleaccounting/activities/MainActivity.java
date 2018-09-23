@@ -648,9 +648,9 @@ public class MainActivity extends AppCompatActivity
 	@Override
 	public void onUpdateEditableRow(int index) {
 		if (index == -1 || table == null)
-			ACRAHelper.reset();
+			ACRAHelper.INSTANCE.reset();
 		else
-			ACRAHelper.writeData(table, editableYear, editableMonth);
+			ACRAHelper.INSTANCE.writeData(table, editableYear, editableMonth);
 	}
 
 	@Override
