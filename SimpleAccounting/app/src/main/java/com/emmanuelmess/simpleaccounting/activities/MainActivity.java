@@ -1,4 +1,4 @@
-package com.emmanuelmess.simpleaccounting;
+package com.emmanuelmess.simpleaccounting.activities;
 
 import android.content.Context;
 import android.content.Intent;
@@ -28,10 +28,8 @@ import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.emmanuelmess.simpleaccounting.activities.DonateActivity;
-import com.emmanuelmess.simpleaccounting.activities.GraphActivity;
-import com.emmanuelmess.simpleaccounting.activities.SettingsActivity;
-import com.emmanuelmess.simpleaccounting.activities.MonthActivity;
+import com.emmanuelmess.simpleaccounting.PPrintDocumentAdapter;
+import com.emmanuelmess.simpleaccounting.R;
 import com.emmanuelmess.simpleaccounting.activities.preferences.CurrencyPicker;
 import com.emmanuelmess.simpleaccounting.activities.views.LedgerRow;
 import com.emmanuelmess.simpleaccounting.activities.views.LedgerView;

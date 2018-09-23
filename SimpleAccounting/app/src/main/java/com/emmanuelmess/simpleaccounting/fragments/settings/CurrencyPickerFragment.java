@@ -17,7 +17,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.emmanuelmess.simpleaccounting.MainActivity;
+import com.emmanuelmess.simpleaccounting.activities.MainActivity;
 import com.emmanuelmess.simpleaccounting.R;
 import com.emmanuelmess.simpleaccounting.activities.preferences.CurrencyPicker;
 import com.emmanuelmess.simpleaccounting.activities.views.LockableScrollView;

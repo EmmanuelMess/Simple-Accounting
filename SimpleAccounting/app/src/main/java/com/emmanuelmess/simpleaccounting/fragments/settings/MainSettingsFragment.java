@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 
-import com.emmanuelmess.simpleaccounting.MainActivity;
+import com.emmanuelmess.simpleaccounting.activities.MainActivity;
 import com.emmanuelmess.simpleaccounting.R;
 import com.emmanuelmess.simpleaccounting.activities.preferences.CurrencyPicker;
 import com.mikepenz.aboutlibraries.Libs;
