@@ -22,7 +22,7 @@ public class MainActivityTestWithCurrency extends MainActivityTest {
     public void startSetUp() {
         super.startSetUp();
         TinyDB tinyDB = new TinyDB(context);
-        tinyDB.putListString(CurrencyPicker.KEY, new ArrayList<>(Arrays.asList("ARG", "U$D", "--", "fdfasd")));
+        tinyDB.putListString(CurrencyPicker.Companion.getKEY(), new ArrayList<>(Arrays.asList("ARG", "U$D", "--", "fdfasd")));
     }
 
     @Test
