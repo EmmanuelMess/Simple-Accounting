@@ -38,6 +38,6 @@ public class LoadPrevBalanceAsyncTask extends AsyncTask<Void, Void, Double> {
 	@Override
 	protected void onPostExecute(Double lastMonthData) {
 		if(!isCancelled())
-			listener.OnAsyncFinished(lastMonthData);
+			listener.onAsyncFinished(lastMonthData);
 	}
 }

@@ -51,7 +51,7 @@ public class LoadMonthAsyncTask extends AsyncTask<Void, Void, Pair<String[][], A
 	@Override
 	protected void onPostExecute(Pair<String[][], ArrayList<Integer>> dbRowsPairedRowToDBConversion) {
 		if(!isCancelled())
-			listener.OnAsyncFinished(dbRowsPairedRowToDBConversion);
+			listener.onAsyncFinished(dbRowsPairedRowToDBConversion);
 
 		alreadyLoading = false;
 	}

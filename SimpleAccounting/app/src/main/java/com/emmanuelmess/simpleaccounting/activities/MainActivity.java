@@ -512,7 +512,7 @@ public class MainActivity extends AppCompatActivity
 	}
 
 	@Override
-	public void OnAsyncFinished(Pair<String[][], ArrayList<Integer>> dbRowsPairedRowToDBConversion) {
+	public void onAsyncFinished(Pair<String[][], ArrayList<Integer>> dbRowsPairedRowToDBConversion) {
 		if(table.getChildCount() - getFirstRealRow() > 0)
 			throw new IllegalArgumentException("Table already contains "
 					+ (table.getChildCount() - getFirstRealRow()) + " elements; " +
