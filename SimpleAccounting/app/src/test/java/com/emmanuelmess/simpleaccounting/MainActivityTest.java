@@ -2,20 +2,13 @@ package com.emmanuelmess.simpleaccounting;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
-import android.text.TextUtils;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import com.emmanuelmess.simpleaccounting.activities.dialogs.CurrencyPicker;
 import com.emmanuelmess.simpleaccounting.activities.views.LedgerView;
 import com.emmanuelmess.simpleaccounting.utils.SimpleBalanceFormatter;
-import com.emmanuelmess.simpleaccounting.utils.TinyDB;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -25,13 +18,8 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
-import org.robolectric.fakes.RoboMenuItem;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
 import static org.robolectric.Shadows.shadowOf;

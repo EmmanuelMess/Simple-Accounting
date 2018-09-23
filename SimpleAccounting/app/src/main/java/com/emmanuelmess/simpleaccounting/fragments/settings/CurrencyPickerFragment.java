@@ -1,14 +1,13 @@
-package com.emmanuelmess.simpleaccounting.activities.dialogs;
+package com.emmanuelmess.simpleaccounting.fragments.settings;
 
-import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.view.ViewCompat;
+import android.support.v7.preference.PreferenceDialogFragmentCompat;
 import android.text.Editable;
-import android.text.TextUtils;
-import android.util.AttributeSet;
 import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -20,33 +19,35 @@ import android.widget.TextView;
 
 import com.emmanuelmess.simpleaccounting.MainActivity;
 import com.emmanuelmess.simpleaccounting.R;
+import com.emmanuelmess.simpleaccounting.activities.preferences.CurrencyPicker;
 import com.emmanuelmess.simpleaccounting.activities.views.LockableScrollView;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
 import com.emmanuelmess.simpleaccounting.utils.RangedStructure;
-import com.emmanuelmess.simpleaccounting.utils.TinyDB;
 import com.emmanuelmess.simpleaccounting.utils.Utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
-/**
- * @author Emmanuel
- *         on 24/1/2017, at 22:55.
- */
+public class CurrencyPickerFragment extends PreferenceDialogFragmentCompat implements View.OnClickListener {
 
-public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View.OnClickListener {
-	public static final String KEY = "currency_picker";
+	public static final String CURRENT_VALUE_KEY = "currency_picker";
 	public static final String DFLT = "DFLT";
+
+	public static CurrencyPickerFragment newInstance(String key) {
+		CurrencyPickerFragment fragment = new CurrencyPickerFragment();
+		Bundle b = new Bundle(1);
+		b.putString("key", key);
+		fragment.setArguments(b);
+		return fragment;
+	}
 
 	private final ArrayList<String> DEFAULT_VALUE = new ArrayList<>();
 
 	private ArrayList<String> currentValue = new ArrayList<>();
-	private TinyDB tinyDB;
 	private LayoutInflater inflater;
 	private boolean firstTimeItemHeighted = true;
 	private SparseIntArray itemPos = new SparseIntArray(1);
@@ -62,44 +63,33 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 
 	private int dialogBackground;
 
-	public CurrencyPicker(Context context, AttributeSet attrs) {
-		super(context, attrs);
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
-		tinyDB = new TinyDB(context);
-		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		inflater = (LayoutInflater) requireContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
+		CurrencyPicker currencyPicker = (CurrencyPicker) getPreference();
 
-		setDialogLayoutResource(R.layout.dialog_currencypicker);
-		setPositiveButtonText(android.R.string.ok);
-		setNegativeButtonText(android.R.string.cancel);
-
-		setDialogIcon(null);
+		if(savedInstanceState == null) {
+			currentValue = currencyPicker.getPersistedStringList(DEFAULT_VALUE);
+		} else {
+			currentValue = savedInstanceState.getStringArrayList(CURRENT_VALUE_KEY);
+		}
 	}
 
 	@Override
-	protected Object onGetDefaultValue(TypedArray a, int index) {
-		return a.getString(index);
+	public void onSaveInstanceState(@NonNull Bundle outState) {
+		super.onSaveInstanceState(outState);
+
+		outState.putStringArrayList(CURRENT_VALUE_KEY, currentValue);
 	}
 
 	@Override
-	public CharSequence getSummary() {
-		ArrayList<String> v = getPersistedStringList(DEFAULT_VALUE);
-		if(v.size() != 0) {
-			String[] myStringList = v.toArray(new String[v.size()]);
-			return TextUtils.join(", ", myStringList);
-		} else return getContext().getString(R.string.with_no_items_deactivated);
-	}
+	protected View onCreateDialogView(Context context) {
+		View view = super.onCreateDialogView(context);
 
-	@Override
-	protected void onPrepareDialogBuilder(AlertDialog.Builder builder) {
-		builder.setTitle(R.string.costumize_currencies);
-		super.onPrepareDialogBuilder(builder);
-	}
-
-	@Override
-	public void onBindDialogView(View view) {
-		currentValue = getPersistedStringList(DEFAULT_VALUE);
-		textDefault = ((EditText) view.findViewById(R.id.textDefault));
+		textDefault = view.findViewById(R.id.textDefault);
 
 		if(currentValue.size() > 0)
 			textDefault.setText(Utils.equal(currentValue.get(0), DFLT)? "":currentValue.get(0));
@@ -113,9 +103,9 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 			}
 		});
 
-		textItemToDelete = (TextView) view.findViewById(R.id.textItemToDelete);
-		linearLayout = ((LinearLayout) view.findViewById(R.id.scrollView));
-		scrollView = ((LockableScrollView) view.findViewById(R.id.scrollerView));
+		textItemToDelete = view.findViewById(R.id.textItemToDelete);
+		linearLayout = view.findViewById(R.id.scrollView);
+		scrollView = view.findViewById(R.id.scrollerView);
 		add = view.findViewById(R.id.add);
 		deleteConfirmation = view.findViewById(R.id.deleteConfirmation);
 		deleteConfirmation.findViewById(R.id.cancel).setOnClickListener(v->{
@@ -124,14 +114,17 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 			add.setVisibility(VISIBLE);
 		});
 		add.setOnClickListener(this);
-		super.onBindDialogView(view);
+
+		return view;
 	}
 
+	@NonNull
 	@Override
-	protected void showDialog(Bundle state) {
-		super.showDialog(state);
+	public Dialog onCreateDialog(Bundle savedInstanceState) {
+		Dialog dialog = super.onCreateDialog(savedInstanceState);
+
 		dialogBackground =
-				Utils.getBackgroundColor(getDialog().getWindow().getDecorView().getBackground(), -1);
+				Utils.getBackgroundColor(dialog.getWindow().getDecorView().getBackground(), -1);
 
 		for(int i = 1; i < currentValue.size(); i++)
 			isItemNew.add(false);
@@ -149,6 +142,8 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 				}
 			}
 		});
+
+		return dialog;
 	}
 
 	private void load(int i) {
@@ -156,106 +151,6 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 			if(i+1 < currentValue.size())
 				load(i+1);
 		}).findViewById(R.id.text)).setText(currentValue.get(i));
-	}
-
-	@Override
-	public boolean needInputMethod() {
-		return true;
-	}
-
-	@Override
-	protected void onSetInitialValue(boolean restorePersistedValue, Object defaultValue) {
-		if (restorePersistedValue) {
-			// Restore existing state
-			currentValue = getPersistedStringList(DEFAULT_VALUE);
-		} else {
-			// Set default state from the XML attribute
-			currentValue = new ArrayList<>(Arrays.asList(TextUtils.split((String) defaultValue, "‚‗‚")));
-			persistStringList(currentValue);
-		}
-	}
-
-	@Override
-	protected void onDialogClosed(boolean positiveResult) {
-		// When the user selects "OK", persist the new value
-		if (positiveResult) {
-			for (int i = 1; i < currentValue.size(); i++) // STARTS on 1 to save default
-				if (Utils.equal(currentValue.get(i).replace(" ", ""), ""))
-					currentValue.remove(i);
-
-			if(Utils.equal(currentValue.get(0).replace(" ", ""), "")) {
-				if(currentValue.size() == 1)
-					currentValue.remove(0);
-				else
-					currentValue.set(0, DFLT);
-			}
-
-			if(deleteElements.size() > 0) {
-				TableGeneral tableGeneral = new TableGeneral(getContext());//DO NOT change the order of table creation!
-				TableMonthlyBalance tableMonthlyBalance = new TableMonthlyBalance(getContext());
-
-				boolean deletedCurrencyWasSelected = false;
-
-				for (String s : deleteElements) {
-					if(Utils.equal(MainActivity.getCurrency(), s))
-						deletedCurrencyWasSelected = true;
-
-					tableGeneral.deleteAllForCurrency(s);
-					tableMonthlyBalance.deleteAllForCurrency(s);
-				}
-
-				if(deletedCurrencyWasSelected)
-					MainActivity.setCurrency(""); //Default is "" (check MainActivity.editableCurrency)
-			}
-
-			persistStringList(currentValue);
-			notifyChanged();
-			MainActivity.invalidateToolbar();
-		} else currentValue = getPersistedStringList(DEFAULT_VALUE);
-
-		deleteElements.clear();
-		itemPos.clear();
-		itemPosRanges.clear();
-		isItemNew.clear();
-	}
-
-	/**
-	 * Attempts to persist an ArrayList&lt;String&gt; to the {@link android.content.SharedPreferences}.
-	 *
-	 * @param value The value to persist.
-	 * @return True if the Preference is persistent. (This is not whether the
-	 * value was persisted, since we may not necessarily commit if there
-	 * will be a batch commit later.)
-	 * @see #persistString(String)
-	 * @see #getPersistedInt(int)
-	 */
-	private boolean persistStringList(ArrayList<String> value) {
-		if (shouldPersist()) {
-			if (value == getPersistedStringList(value)) {
-				// It's already there, so the same as persisting
-				return true;
-			}
-
-			tinyDB.putListString(KEY, value);
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Attempts to get a persisted ArrayList&lt;String&gt; from the {@link android.content.SharedPreferences}.
-	 *
-	 * @param defaultValue The default value to return if either this
-	 *                     Preference is not persistent or this Preference is not in the
-	 *                     SharedPreferences.
-	 * @return The value from the SharedPreferences or the default return
-	 * value.
-	 * @see #getPersistedString(String)
-	 * @see #persistInt(int)
-	 */
-	private ArrayList<String> getPersistedStringList(ArrayList<String> defaultValue) {
-		if (!shouldPersist()) return defaultValue;
-		else return tinyDB.getListString(KEY);
 	}
 
 	@Override
@@ -441,6 +336,57 @@ public class CurrencyPicker extends DialogPreferenceWithKeyboard implements View
 
 	private int getChildIndex(View v) {
 		return linearLayout.indexOfChild(v);
+	}
+
+	protected boolean needInputMethod() {
+		return true;
+	}
+
+	@Override
+	public void onDialogClosed(boolean positiveResult) {
+		CurrencyPicker currencyPicker = (CurrencyPicker) getPreference();
+
+		// When the user selects "OK", persist the new value
+		if (positiveResult) {
+			for (int i = 1; i < currentValue.size(); i++) // STARTS on 1 to save default
+				if (Utils.equal(currentValue.get(i).replace(" ", ""), ""))
+					currentValue.remove(i);
+
+			if(Utils.equal(currentValue.get(0).replace(" ", ""), "")) {
+				if(currentValue.size() == 1)
+					currentValue.remove(0);
+				else
+					currentValue.set(0, DFLT);
+			}
+
+			if(deleteElements.size() > 0) {
+				TableGeneral tableGeneral = new TableGeneral(getContext());//DO NOT change the order of table creation!
+				TableMonthlyBalance tableMonthlyBalance = new TableMonthlyBalance(getContext());
+
+				boolean deletedCurrencyWasSelected = false;
+
+				for (String s : deleteElements) {
+					if(Utils.equal(MainActivity.getCurrency(), s))
+						deletedCurrencyWasSelected = true;
+
+					tableGeneral.deleteAllForCurrency(s);
+					tableMonthlyBalance.deleteAllForCurrency(s);
+				}
+
+				if(deletedCurrencyWasSelected)
+					MainActivity.setCurrency(""); //Default is "" (check MainActivity.editableCurrency)
+			}
+
+			if(currencyPicker.callChangeListener(currentValue)) {
+				currencyPicker.setCurrencyList(currentValue);
+			}
+			MainActivity.invalidateToolbar();
+		} else currentValue = currencyPicker.getPersistedStringList(DEFAULT_VALUE);
+
+		deleteElements.clear();
+		itemPos.clear();
+		itemPosRanges.clear();
+		isItemNew.clear();
 	}
 
 }
