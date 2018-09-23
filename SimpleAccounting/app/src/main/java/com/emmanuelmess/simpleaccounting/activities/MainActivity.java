@@ -38,6 +38,7 @@ import com.emmanuelmess.simpleaccounting.dataloading.async.AsyncFinishedListener
 import com.emmanuelmess.simpleaccounting.dataloading.TableDataManager;
 import com.emmanuelmess.simpleaccounting.dataloading.async.LoadMonthAsyncTask;
 import com.emmanuelmess.simpleaccounting.dataloading.async.LoadPrevBalanceAsyncTask;
+import com.emmanuelmess.simpleaccounting.dataloading.data.MonthData;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
 import com.emmanuelmess.simpleaccounting.utils.ACRAHelper;
@@ -66,7 +67,7 @@ import static com.emmanuelmess.simpleaccounting.utils.Utils.parseString;
  * @author Emmanuel
  */
 public class MainActivity extends AppCompatActivity
-		implements AsyncFinishedListener<Pair<String[][], ArrayList<Integer>>>, LedgerView.LedgeCallbacks{
+		implements AsyncFinishedListener<MonthData>, LedgerView.LedgeCallbacks{
 
 	public static final String UPDATE_YEAR_SETTING = "update 1.2 year";
 	public static final String UPDATE_MONTH_SETTING = "update 1.2 month";
@@ -457,7 +458,7 @@ public class MainActivity extends AppCompatActivity
 	}
 
 	private void loadMonth(int month, int year, String currency) {
-		if(!LoadMonthAsyncTask.isAlreadyLoading()) {
+		if(!LoadMonthAsyncTask.Companion.isAlreadyLoading()) {
 			findViewById(R.id.progressBar).setVisibility(VISIBLE);
 
 			FIRST_REAL_ROW = 1;
@@ -512,7 +513,7 @@ public class MainActivity extends AppCompatActivity
 	}
 
 	@Override
-	public void onAsyncFinished(Pair<String[][], ArrayList<Integer>> dbRowsPairedRowToDBConversion) {
+	public void onAsyncFinished(MonthData dbData) {
 		if(table.getChildCount() - getFirstRealRow() > 0)
 			throw new IllegalArgumentException("Table already contains "
 					+ (table.getChildCount() - getFirstRealRow()) + " elements; " +
@@ -520,9 +521,9 @@ public class MainActivity extends AppCompatActivity
 
 		int dataManagerIndex = 1;
 
-		this.rowToDBRowConversion = dbRowsPairedRowToDBConversion.second;
+		this.rowToDBRowConversion = dbData.getRowToDBConversion();
 
-		for (String[] dbRow : dbRowsPairedRowToDBConversion.first) {
+		for (String[] dbRow : dbData.getDbRows()) {
 			table.inflateEmptyRow();
 
 			LedgerRow row = loadRow();

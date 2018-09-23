@@ -68,11 +68,11 @@ public class GraphActivity extends AppCompatActivity {
 		((TextView) findViewById(R.id.title)).setText(Utils.getTitle(this, month, year, currency, updateDate));
 
 		loadMonthAsyncTask = new LoadMonthAsyncTask(month, year, currency, new TableGeneral(this), (result) -> {
-			if(result.first.length > 0) {
+			if(result.getDbRows().length > 0) {
 				List<Entry> entries = new ArrayList<>();
 				BigDecimal bigDecimal = BigDecimal.ZERO;
 
-				for (String[] s : result.first) {
+				for (String[] s : result.getDbRows()) {
 					if(s[0] != null) {
 						int day = parseInt(s[0]);
 
