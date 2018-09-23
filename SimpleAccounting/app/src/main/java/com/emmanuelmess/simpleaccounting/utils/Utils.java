@@ -9,7 +9,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.TextView;
 
-import com.emmanuelmess.simpleaccounting.MainActivity;
+import com.emmanuelmess.simpleaccounting.activities.MainActivity;
 import com.emmanuelmess.simpleaccounting.R;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 
@@ -17,7 +17,7 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-import static com.emmanuelmess.simpleaccounting.MainActivity.MONTH_STRINGS;
+import static com.emmanuelmess.simpleaccounting.activities.MainActivity.MONTH_STRINGS;
 
 /**
  * @author Emmanuel

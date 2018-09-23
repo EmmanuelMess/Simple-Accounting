@@ -11,8 +11,8 @@ import com.emmanuelmess.simpleaccounting.R;
 
 import java.math.BigDecimal;
 
-import static com.emmanuelmess.simpleaccounting.MainActivity.EDIT_IDS;
-import static com.emmanuelmess.simpleaccounting.MainActivity.TEXT_IDS;
+import static com.emmanuelmess.simpleaccounting.activities.MainActivity.EDIT_IDS;
+import static com.emmanuelmess.simpleaccounting.activities.MainActivity.TEXT_IDS;
 
 /**
  * @author Emmanuel

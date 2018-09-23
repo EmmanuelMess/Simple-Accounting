@@ -7,6 +7,7 @@ import android.widget.EditText;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.emmanuelmess.simpleaccounting.activities.MainActivity;
 import com.emmanuelmess.simpleaccounting.activities.views.LedgerView;
 import com.emmanuelmess.simpleaccounting.utils.SimpleBalanceFormatter;
 

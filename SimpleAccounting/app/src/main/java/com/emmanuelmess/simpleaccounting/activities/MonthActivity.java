@@ -21,7 +21,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.emmanuelmess.simpleaccounting.MainActivity;
 import com.emmanuelmess.simpleaccounting.R;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 

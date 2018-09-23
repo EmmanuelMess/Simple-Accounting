@@ -19,6 +19,7 @@ import android.view.View;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
+import com.emmanuelmess.simpleaccounting.activities.MainActivity;
 import com.emmanuelmess.simpleaccounting.utils.Utils;
 
 import java.io.FileOutputStream;
