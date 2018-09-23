@@ -9,7 +9,7 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.emmanuelmess.simpleaccounting.R;
-import com.emmanuelmess.simpleaccounting.dataloading.LoadMonthAsyncTask;
+import com.emmanuelmess.simpleaccounting.dataloading.async.LoadMonthAsyncTask;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 import com.emmanuelmess.simpleaccounting.utils.Utils;
 import com.github.mikephil.charting.charts.LineChart;

@@ -1,4 +1,4 @@
-package com.emmanuelmess.simpleaccounting.dataloading;
+package com.emmanuelmess.simpleaccounting.dataloading.async;
 
 import android.os.AsyncTask;
 
