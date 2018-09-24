@@ -21,6 +21,7 @@ import android.widget.TextView
 
 import com.emmanuelmess.simpleaccounting.activities.MainActivity
 import com.emmanuelmess.simpleaccounting.utils.Utils
+import com.emmanuelmess.simpleaccounting.utils.get
 
 import java.io.FileOutputStream
 import java.io.IOException
@@ -54,7 +55,7 @@ class PPrintDocumentAdapter(private val context: Context, private val table: Tab
         val raw = mutableListOf<List<String>>()
 
         for (i in 0 until (table.childCount - 1)) {
-            val row = table.getChildAt(i + 1)//+1 to account for the header
+            val row = table.get<View>(i + 1)!!//+1 to account for the header
             val list = mutableListOf<String>()
 
             for (j in 0..3) {

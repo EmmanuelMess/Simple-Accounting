@@ -8,6 +8,7 @@ import android.widget.TextView
 import com.emmanuelmess.simpleaccounting.BuildConfig
 
 import org.acra.ACRA
+import org.w3c.dom.Text
 
 /**
  * @author Emmanuel
@@ -33,16 +34,24 @@ object ACRAHelper {
 			s.append("Year: $year Month: $month |")
 
 			for (i in 1 until t.childCount - 1) { //t.getChildCount() -1 because of last item being blank view?
-				val r = t.getChildAt(i) as TableRow
+				val r = t.get<TableRow>(i)
+				r ?: continue
 
 				for (j in 0 until r.childCount) {
-					if (r.getChildAt(j).visibility == View.VISIBLE) {
+					if (r.get<View>(j)!!.visibility == View.VISIBLE) {
 						s.append(" [")
 
-						if (j != 8)
-							s.append((r.getChildAt(j) as TextView).text.length)
-						else
-							s.append((r.getChildAt(j) as TextView).text.length - 2) //for "$ " chars
+						val text = r.get<TextView>(j)?.text
+
+						if (text == null) {
+							s.append("null")
+						} else {
+							if (j != 8) {
+								s.append(text.length)
+							} else {
+								s.append(text.length - 2)//for "$ " chars
+							}
+						}
 
 						s.append("],")
 					}

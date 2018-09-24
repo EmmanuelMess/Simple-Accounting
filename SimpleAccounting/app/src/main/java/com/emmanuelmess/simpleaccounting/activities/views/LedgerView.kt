@@ -15,6 +15,7 @@ import java.math.BigDecimal
 
 import com.emmanuelmess.simpleaccounting.activities.MainActivity.EDIT_IDS
 import com.emmanuelmess.simpleaccounting.activities.MainActivity.TEXT_IDS
+import com.emmanuelmess.simpleaccounting.utils.get
 
 class LedgerView(context: Context, attrs: AttributeSet) : TableLayout(context, attrs) {
 
@@ -30,10 +31,10 @@ class LedgerView(context: Context, attrs: AttributeSet) : TableLayout(context, a
 
 	private lateinit var formatter: BalanceFormatter
 
-	val lastRow: TableRow
+	val lastRow: TableRow?
 		get() {
 			val rowViewIndex = childCount - 1
-			return getChildAt(rowViewIndex) as TableRow
+			return get(rowViewIndex)
 		}
 
 	val isEditingRow: Boolean
@@ -80,7 +81,7 @@ class LedgerView(context: Context, attrs: AttributeSet) : TableLayout(context, a
 	fun rowViewToEditable(index: Int) {
 		if (index <= 0) throw IllegalArgumentException("Can't edit table header!")
 
-		val row = getChildAt(index) as LedgerRow
+		val row = get<LedgerRow>(index) ?: throw IllegalArgumentException("View at index doesn't exist!")
 
 		row.makeRowEditable()
 
@@ -102,7 +103,7 @@ class LedgerView(context: Context, attrs: AttributeSet) : TableLayout(context, a
 	 * Converts editable row into not editable.
 	 */
 	fun editableRowToView() {
-		val row = getChildAt(editableRow) as? LedgerRow
+		val row = get<LedgerRow>(editableRow)
 		if (row != null && editableRow >= 0) {
 			listener.onBeforeMakeRowNotEditable(row)
 
@@ -125,7 +126,7 @@ class LedgerView(context: Context, attrs: AttributeSet) : TableLayout(context, a
 	private fun inflateRow(): LedgerRow {
 		inflater.inflate(R.layout.row_main, this)
 		editableRow = childCount - 1
-		val row = getChildAt(editableRow) as LedgerRow
+		val row = get<LedgerRow>(editableRow)!!
 		row.formatter = formatter
 
 		if (invertCreditAndDebit) {
