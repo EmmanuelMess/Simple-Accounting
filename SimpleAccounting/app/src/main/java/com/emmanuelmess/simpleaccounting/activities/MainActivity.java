@@ -62,8 +62,6 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.emmanuelmess.simpleaccounting.constants.SettingsConstants.INVERT_CREDIT_DEBIT_SETTING;
 import static com.emmanuelmess.simpleaccounting.activities.preferences.CurrencyPicker.DFLT;
-import static com.emmanuelmess.simpleaccounting.utils.Utils.equal;
-import static com.emmanuelmess.simpleaccounting.utils.Utils.parseString;
 
 /**
  * @author Emmanuel
@@ -267,7 +265,7 @@ public class MainActivity extends AppCompatActivity
 		ArrayList<String> currencies = tinyDB.getListString(CurrencyPicker.KEY); //DO NOT save this List (first item changed)
 
 		if (currencies.size() != 0 && !isSelectedMonthOlderThanUpdate()) {
-			if(Utils.equal(currencies.get(0), DFLT))
+			if(Utils.INSTANCE.equal(currencies.get(0), DFLT))
 				currencies.set(0, getString(R.string.default_short));
 
 			MenuItem item = menu.findItem(R.id.action_currency);
@@ -288,7 +286,7 @@ public class MainActivity extends AppCompatActivity
 					else
 						editableCurrency = ((TextView) view).getText().toString();
 
-					currencyName = Utils.equal(editableCurrency, "")?
+					currencyName = Utils.INSTANCE.equal(editableCurrency, "")?
 							((TextView) view).getText().toString():editableCurrency;//repeated code at end of lambda
 
 					loadMonth(editableMonth, editableYear, editableCurrency);
@@ -299,7 +297,7 @@ public class MainActivity extends AppCompatActivity
 				}
 			});
 
-			currencyName = Utils.equal(editableCurrency, "")? currencies.get(0):editableCurrency;
+			currencyName = Utils.INSTANCE.equal(editableCurrency, "")? currencies.get(0):editableCurrency;
 		} else {
 			menu.removeItem(R.id.action_currency);
 
@@ -402,18 +400,18 @@ public class MainActivity extends AppCompatActivity
 				if (table.getEditableRow() == editedTableIndex) {
 					final int dataManagerIndex = getCorrectedIndexForDataManager(editedTableIndex);
 
-					if (equal(row.getCreditText().toString(), ".")) {
+					if (Utils.INSTANCE.equal(row.getCreditText().toString(), ".")) {
 						tableDataManager.updateCredit(dataManagerIndex, BigDecimal.ZERO);
 						row.setCredit("0");
 					}
 
-					if (equal(row.getDebitText().toString(), ".")) {
+					if (Utils.INSTANCE.equal(row.getDebitText().toString(), ".")) {
 						tableDataManager.updateCredit(dataManagerIndex, BigDecimal.ZERO);
 						row.setDebit("0");
 					}
 
-					tableDataManager.updateCredit(dataManagerIndex, parseString(row.getCreditText().toString()));
-					tableDataManager.updateDebit(dataManagerIndex, parseString((row.getDebitText().toString())));
+					tableDataManager.updateCredit(dataManagerIndex, Utils.INSTANCE.parseString(row.getCreditText().toString()));
+					tableDataManager.updateDebit(dataManagerIndex, Utils.INSTANCE.parseString((row.getDebitText().toString())));
 
 					if (tableDataManager.getTotal(dataManagerIndex).toPlainString().isEmpty())
 						throw new IllegalStateException();
@@ -508,7 +506,7 @@ public class MainActivity extends AppCompatActivity
 						+ " " + getString(MONTH_STRINGS[updateMonth]).toLowerCase() + "-" + updateYear);
 				loadingMonthTask.execute();
 			}
-		} else if(editableMonth != month || editableYear != year || !Utils.equal(editableCurrency, currency)) {
+		} else if(editableMonth != month || editableYear != year || !Utils.INSTANCE.equal(editableCurrency, currency)) {
 			loadPrevBalance.cancel(true);
 			loadingMonthTask.cancel(true);
 		}
@@ -543,9 +541,9 @@ public class MainActivity extends AppCompatActivity
 			}
 
 			if (dbRow[2] != null)
-				tableDataManager.updateCredit(dataManagerIndex, Utils.parseString(dbRow[2]));
+				tableDataManager.updateCredit(dataManagerIndex, Utils.INSTANCE.parseString(dbRow[2]));
 			if (dbRow[3] != null)
-				tableDataManager.updateDebit(dataManagerIndex, Utils.parseString(dbRow[3]));
+				tableDataManager.updateDebit(dataManagerIndex, Utils.INSTANCE.parseString(dbRow[3]));
 
 			row.setBalance(tableDataManager.getTotal(dataManagerIndex));
 		dataManagerIndex++;

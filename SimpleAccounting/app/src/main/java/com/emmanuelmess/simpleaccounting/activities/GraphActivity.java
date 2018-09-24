@@ -65,7 +65,7 @@ public class GraphActivity extends AppCompatActivity {
 		int[] updateDate = {getIntent().getIntExtra(GRAPH_UPDATE_MONTH, -1),
 				getIntent().getIntExtra(GRAPH_UPDATE_YEAR, -1)};
 
-		((TextView) findViewById(R.id.title)).setText(Utils.getTitle(this, month, year, currency, updateDate));
+		((TextView) findViewById(R.id.title)).setText(Utils.INSTANCE.getTitle(this, month, year, currency, updateDate));
 
 		loadMonthAsyncTask = new LoadMonthAsyncTask(month, year, currency, new TableGeneral(this), (result) -> {
 			if(result.getDbRows().length > 0) {
