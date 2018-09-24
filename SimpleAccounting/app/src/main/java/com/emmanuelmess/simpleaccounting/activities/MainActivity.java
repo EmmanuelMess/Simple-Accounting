@@ -26,6 +26,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.emmanuelmess.simpleaccounting.PPrintDocumentAdapter;
@@ -270,7 +271,7 @@ public class MainActivity extends AppCompatActivity
 
 			MenuItem item = menu.findItem(R.id.action_currency);
 			SpinnerNoUnwantedOnClick spinner =
-					new SpinnerNoUnwantedOnClick(MenuItemCompat.getActionView(item));
+					new SpinnerNoUnwantedOnClick((Spinner) MenuItemCompat.getActionView(item));
 			ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_toolbar,
 					currencies.toArray(new String[currencies.size()]));
 			adapter.setDropDownViewResource(R.layout.item_spinner);
