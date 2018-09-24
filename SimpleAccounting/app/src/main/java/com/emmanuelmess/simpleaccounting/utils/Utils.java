@@ -62,18 +62,6 @@ public class Utils {
 		return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && Objects.equals(o1, o2)) || o1.equals(o2);
 	}
 
-	public static class SimpleTextWatcher implements TextWatcher {
-
-		@Override
-		public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
-
-		@Override
-		public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
-
-		@Override
-		public void afterTextChanged(Editable editable) {}
-	}
-
 	public static int getBackgroundColor(Drawable drawable, @ColorRes int defaultColor) {
 		if(Build.VERSION.SDK_INT >= 21)
 			return defaultColor;//Other method will fail

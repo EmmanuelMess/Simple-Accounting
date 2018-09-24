@@ -24,6 +24,7 @@ import com.emmanuelmess.simpleaccounting.activities.views.LockableScrollView;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
 import com.emmanuelmess.simpleaccounting.utils.RangedStructure;
+import com.emmanuelmess.simpleaccounting.utils.SimpleTextWatcher;
 import com.emmanuelmess.simpleaccounting.utils.Utils;
 
 import java.util.ArrayList;
@@ -96,7 +97,7 @@ public class CurrencyPickerFragment extends PreferenceDialogFragmentCompat imple
 		else
 			currentValue.add("");
 
-		textDefault.addTextChangedListener(new Utils.SimpleTextWatcher() {
+		textDefault.addTextChangedListener(new SimpleTextWatcher() {
 			@Override
 			public void afterTextChanged(Editable s) {
 				currentValue.set(0, s.toString());
@@ -256,7 +257,7 @@ public class CurrencyPickerFragment extends PreferenceDialogFragmentCompat imple
 		text.setOnFocusChangeListener((v1, hasFocus)->{
 			item.findViewById(R.id.delete).setVisibility(hasFocus? VISIBLE:View.INVISIBLE);
 		});
-		text.addTextChangedListener(new Utils.SimpleTextWatcher() {
+		text.addTextChangedListener(new SimpleTextWatcher() {
 			@Override
 			public void afterTextChanged(Editable s) {
 				currentValue.set(getChildIndex(item)+1, s.toString());

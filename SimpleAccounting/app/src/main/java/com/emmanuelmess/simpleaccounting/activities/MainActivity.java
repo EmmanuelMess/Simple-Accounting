@@ -44,6 +44,7 @@ import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
 import com.emmanuelmess.simpleaccounting.utils.ACRAHelper;
 import com.emmanuelmess.simpleaccounting.utils.SimpleBalanceFormatter;
+import com.emmanuelmess.simpleaccounting.utils.SimpleTextWatcher;
 import com.emmanuelmess.simpleaccounting.utils.TinyDB;
 import com.emmanuelmess.simpleaccounting.utils.Utils;
 import com.github.amlcurran.showcaseview.ShowcaseView;
@@ -395,7 +396,7 @@ public class MainActivity extends AppCompatActivity
 		TextView lastBalance = editedTableIndex > 1?
 				(TextView) table.getChildAt(editedTableIndex - 1).findViewById(R.id.textBalance):null;
 
-		TextWatcher watcher = new Utils.SimpleTextWatcher() {
+		TextWatcher watcher = new SimpleTextWatcher() {
 			@Override
 			public void afterTextChanged(Editable editable) {
 				if (table.getEditableRow() == editedTableIndex) {
