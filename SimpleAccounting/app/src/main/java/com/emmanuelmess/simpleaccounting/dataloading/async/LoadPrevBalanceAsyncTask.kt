@@ -1,5 +1,6 @@
 package com.emmanuelmess.simpleaccounting.dataloading.async
 
+import android.arch.lifecycle.MutableLiveData
 import android.os.AsyncTask
 
 import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance
@@ -14,7 +15,7 @@ class LoadPrevBalanceAsyncTask(
 	private val year: Int,
 	private val currency: String,
 	private val tableMonthlyBalance: TableMonthlyBalance,
-	private val listener: AsyncFinishedListener<Double?>
+	private val listener: MutableLiveData<Double?>
 ) : AsyncTask<Void, Void, Double>() {
 
 	@Suppress("UsePropertyAccessSyntax")
@@ -28,7 +29,7 @@ class LoadPrevBalanceAsyncTask(
 
 	override fun onPostExecute(lastMonthData: Double?) {
 		if (!isCancelled) {
-			listener.onAsyncFinished(lastMonthData)
+			listener.value = lastMonthData
 		}
 	}
 }

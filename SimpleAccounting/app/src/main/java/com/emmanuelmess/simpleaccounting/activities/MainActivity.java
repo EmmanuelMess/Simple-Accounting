@@ -1,5 +1,7 @@
 package com.emmanuelmess.simpleaccounting.activities;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,6 +10,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.print.PrintManager;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
@@ -32,6 +36,7 @@ import android.widget.TextView;
 import com.emmanuelmess.simpleaccounting.PPrintDocumentAdapter;
 import com.emmanuelmess.simpleaccounting.R;
 import com.emmanuelmess.simpleaccounting.activities.preferences.CurrencyPicker;
+import com.emmanuelmess.simpleaccounting.activities.viewmodels.TableData;
 import com.emmanuelmess.simpleaccounting.activities.views.LedgerRow;
 import com.emmanuelmess.simpleaccounting.activities.views.LedgerView;
 import com.emmanuelmess.simpleaccounting.activities.views.SpinnerNoUnwantedOnClick;
@@ -40,6 +45,7 @@ import com.emmanuelmess.simpleaccounting.dataloading.TableDataManager;
 import com.emmanuelmess.simpleaccounting.dataloading.async.LoadMonthAsyncTask;
 import com.emmanuelmess.simpleaccounting.dataloading.async.LoadPrevBalanceAsyncTask;
 import com.emmanuelmess.simpleaccounting.dataloading.data.MonthData;
+import com.emmanuelmess.simpleaccounting.dataloading.data.Session;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
 import com.emmanuelmess.simpleaccounting.utils.ACRAHelper;
@@ -67,7 +73,7 @@ import static com.emmanuelmess.simpleaccounting.activities.preferences.CurrencyP
  * @author Emmanuel
  */
 public class MainActivity extends AppCompatActivity
-		implements AsyncFinishedListener<MonthData>, LedgerView.LedgeCallbacks{
+		implements Observer<MonthData>, LedgerView.LedgeCallbacks{
 
 	public static final String UPDATE_YEAR_SETTING = "update 1.2 year";
 	public static final String UPDATE_MONTH_SETTING = "update 1.2 month";
@@ -93,8 +99,6 @@ public class MainActivity extends AppCompatActivity
 	private TableMonthlyBalance tableMonthlyBalance;
 	private LayoutInflater inflater;
 	private ScrollView scrollView;
-	private LoadMonthAsyncTask loadingMonthTask = null;
-	private LoadPrevBalanceAsyncTask loadPrevBalance = null;
 
 	private int updateYear, updateMonth;
 
@@ -237,7 +241,7 @@ public class MainActivity extends AppCompatActivity
 		super.onResume();
 		table.setInvertCreditAndDebit(getDefaultSharedPreferences(this).getBoolean(INVERT_CREDIT_DEBIT_SETTING, false));
 
-		if (invalidateTable && (loadingMonthTask == null || loadingMonthTask.getStatus() != AsyncTask.Status.RUNNING)) {
+		if (invalidateTable && ViewModelProviders.of(this).get(TableData.class).loadMonthIsNotRunning()) {
 			loadMonth(editableMonth, editableYear, editableCurrency);
 
 			fab.setVisibility(isSelectedMonthOlderThanUpdate()? GONE:VISIBLE);
@@ -458,62 +462,62 @@ public class MainActivity extends AppCompatActivity
 	}
 
 	private void loadMonth(int month, int year, String currency) {
-		if(!LoadMonthAsyncTask.Companion.isAlreadyLoading()) {
-			findViewById(R.id.progressBar).setVisibility(VISIBLE);
+		findViewById(R.id.progressBar).setVisibility(VISIBLE);
 
-			FIRST_REAL_ROW = 1;
+		FIRST_REAL_ROW = 1;
 
-			if (table.getChildCount() > 1) {//DO NOT remove first line, the column titles
-				table.clear();
-			}
+		if (table.getChildCount() > 1) {//DO NOT remove first line, the column titles
+			table.clear();
+		}
 
-			tableGeneral.getReadableDatabase();//triggers onUpdate()
+		tableGeneral.getReadableDatabase();//triggers onUpdate()
 
-			tableDataManager.clear();
+		tableDataManager.clear();
 
-			loadingMonthTask = new LoadMonthAsyncTask(month, year, currency, tableGeneral, this);
+		editableMonth = month;
+		editableYear = year;
+		editableCurrency = currency;
 
-			editableMonth = month;
-			editableYear = year;
-			editableCurrency = currency;
+		TextView monthText = findViewById(R.id.textMonth);
 
-			TextView monthText = findViewById(R.id.textMonth);
+		if (month != -1 && !isSelectedMonthOlderThanUpdate()) {
+			((TextView) findViewById(R.id.textMonth)).setText(MONTH_STRINGS[month]);
 
-			if (month != -1 && !isSelectedMonthOlderThanUpdate()) {
-				((TextView) findViewById(R.id.textMonth)).setText(MONTH_STRINGS[month]);
+			ViewModelProviders.of(this)
+					.get(TableData.class)
+					.getLoadPrevBalance(new Session(month, year, currency), tableMonthlyBalance)
+					.observe(this, (lastMonthData) -> {
+						if (lastMonthData != null) {
+							LedgerRow row = (LedgerRow) table.inflateEmptyRow();
 
-				loadPrevBalance = new LoadPrevBalanceAsyncTask(month, year, editableCurrency, tableMonthlyBalance,
-						(lastMonthData) -> {
-							if (lastMonthData != null) {
-								LedgerRow row = (LedgerRow) table.inflateEmptyRow();
+							setFirstRealRow(2);
+							table.editableRowToView();
 
-								setFirstRealRow(2);
-								table.editableRowToView();
+							tableDataManager.updateStartingTotal(new BigDecimal(lastMonthData));
 
-								tableDataManager.updateStartingTotal(new BigDecimal(lastMonthData));
+							row.setReference(R.string.previous_balance);
+							row.setCredit("");
+							row.setDebit("");
+							row.setBalance(tableDataManager.getStartingTotal());
+						}
 
-								row.setReference(R.string.previous_balance);
-								row.setCredit("");
-								row.setDebit("");
-								row.setBalance(tableDataManager.getStartingTotal());
-							}
-							loadingMonthTask.execute();
-						});
-
-				loadPrevBalance.execute();
-			} else {
-				monthText.setText(getString(R.string.before_update_1_2)
-						+ " " + getString(MONTH_STRINGS[updateMonth]).toLowerCase() + "-" + updateYear);
-				loadingMonthTask.execute();
-			}
-		} else if(editableMonth != month || editableYear != year || !Utils.INSTANCE.equal(editableCurrency, currency)) {
-			loadPrevBalance.cancel(true);
-			loadingMonthTask.cancel(true);
+						ViewModelProviders.of(this)
+								.get(TableData.class)
+								.getMonthData(new Session(month, year, currency), tableGeneral)
+								.observe(this, this);
+					});
+		} else {
+			monthText.setText(getString(R.string.before_update_1_2)
+					+ " " + getString(MONTH_STRINGS[updateMonth]).toLowerCase() + "-" + updateYear);
+			ViewModelProviders.of(this)
+					.get(TableData.class)
+					.getMonthData(new Session(month, year, currency), tableGeneral)
+					.observe(this, this);
 		}
 	}
 
 	@Override
-	public void onAsyncFinished(MonthData dbData) {
+	public void onChanged(@NonNull MonthData dbData) {
 		if(table.getChildCount() - getFirstRealRow() > 0)
 			throw new IllegalArgumentException("Table already contains "
 					+ (table.getChildCount() - getFirstRealRow()) + " elements; " +

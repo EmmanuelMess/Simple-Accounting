@@ -1,5 +1,6 @@
 package com.emmanuelmess.simpleaccounting.activities;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -9,7 +10,9 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.emmanuelmess.simpleaccounting.R;
+import com.emmanuelmess.simpleaccounting.activities.viewmodels.TableData;
 import com.emmanuelmess.simpleaccounting.dataloading.async.LoadMonthAsyncTask;
+import com.emmanuelmess.simpleaccounting.dataloading.data.Session;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 import com.emmanuelmess.simpleaccounting.utils.Utils;
 import com.github.mikephil.charting.charts.LineChart;
@@ -39,8 +42,6 @@ public class GraphActivity extends AppCompatActivity {
 			GRAPH_UPDATE_MONTH = "com.emmanuelmess.simpleaccounting.IntentGraphUpdateMonth",
 			GRAPH_UPDATE_YEAR = "com.emmanuelmess.simpleaccounting.IntentGraphUpdateYear";
 
-	private LoadMonthAsyncTask loadMonthAsyncTask;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -67,7 +68,11 @@ public class GraphActivity extends AppCompatActivity {
 
 		((TextView) findViewById(R.id.title)).setText(Utils.INSTANCE.getTitle(this, month, year, currency, updateDate));
 
-		loadMonthAsyncTask = new LoadMonthAsyncTask(month, year, currency, new TableGeneral(this), (result) -> {
+		ViewModelProviders
+				.of(this)
+				.get(TableData.class)
+				.getMonthData(new Session(month, year, currency), new TableGeneral(this))
+				.observe(this, (result) -> {
 			if(result.getDbRows().length > 0) {
 				List<Entry> entries = new ArrayList<>();
 				BigDecimal bigDecimal = BigDecimal.ZERO;
@@ -116,8 +121,6 @@ public class GraphActivity extends AppCompatActivity {
 			chart.invalidate();
 		});
 
-		loadMonthAsyncTask.execute();
-
 		chart.getAxisRight().setEnabled(false);
 		chart.getXAxis().setValueFormatter(new DeleteNonWholeFormatter());
 		chart.getXAxis().setAxisMinimum(0);
@@ -127,15 +130,6 @@ public class GraphActivity extends AppCompatActivity {
 		chart.getLegend().setEnabled(false);
 		chart.setDescription(null);
 		chart.setNoDataText(getString(R.string.loading));
-	}
-
-	@Override
-	public void onPause() {
-		super.onPause();
-
-		if(loadMonthAsyncTask.getStatus() == AsyncTask.Status.RUNNING) {
-			loadMonthAsyncTask.cancel(true);
-		}
 	}
 
 	@Override
