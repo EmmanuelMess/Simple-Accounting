@@ -42,7 +42,7 @@ android {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-    def supportVersion = '28.0.0-rc02'
+    def supportVersion = '28.0.0'
     implementation "com.android.support:design:$supportVersion"
     implementation "com.android.support:support-vector-drawable:$supportVersion"
     implementation "com.android.support:appcompat-v7:$supportVersion"
