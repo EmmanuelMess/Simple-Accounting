@@ -26,6 +26,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.emmanuelmess.simpleaccounting.PPrintDocumentAdapter;
@@ -34,14 +35,16 @@ import com.emmanuelmess.simpleaccounting.activities.preferences.CurrencyPicker;
 import com.emmanuelmess.simpleaccounting.activities.views.LedgerRow;
 import com.emmanuelmess.simpleaccounting.activities.views.LedgerView;
 import com.emmanuelmess.simpleaccounting.activities.views.SpinnerNoUnwantedOnClick;
-import com.emmanuelmess.simpleaccounting.dataloading.AsyncFinishedListener;
+import com.emmanuelmess.simpleaccounting.dataloading.async.AsyncFinishedListener;
 import com.emmanuelmess.simpleaccounting.dataloading.TableDataManager;
-import com.emmanuelmess.simpleaccounting.dataloading.LoadMonthAsyncTask;
-import com.emmanuelmess.simpleaccounting.dataloading.LoadPrevBalanceAsyncTask;
+import com.emmanuelmess.simpleaccounting.dataloading.async.LoadMonthAsyncTask;
+import com.emmanuelmess.simpleaccounting.dataloading.async.LoadPrevBalanceAsyncTask;
+import com.emmanuelmess.simpleaccounting.dataloading.data.MonthData;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
 import com.emmanuelmess.simpleaccounting.utils.ACRAHelper;
 import com.emmanuelmess.simpleaccounting.utils.SimpleBalanceFormatter;
+import com.emmanuelmess.simpleaccounting.utils.SimpleTextWatcher;
 import com.emmanuelmess.simpleaccounting.utils.TinyDB;
 import com.emmanuelmess.simpleaccounting.utils.Utils;
 import com.github.amlcurran.showcaseview.ShowcaseView;
@@ -59,14 +62,12 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.emmanuelmess.simpleaccounting.constants.SettingsConstants.INVERT_CREDIT_DEBIT_SETTING;
 import static com.emmanuelmess.simpleaccounting.activities.preferences.CurrencyPicker.DFLT;
-import static com.emmanuelmess.simpleaccounting.utils.Utils.equal;
-import static com.emmanuelmess.simpleaccounting.utils.Utils.parseString;
 
 /**
  * @author Emmanuel
  */
 public class MainActivity extends AppCompatActivity
-		implements AsyncFinishedListener<Pair<String[][], ArrayList<Integer>>>, LedgerView.LedgeCallbacks{
+		implements AsyncFinishedListener<MonthData>, LedgerView.LedgeCallbacks{
 
 	public static final String UPDATE_YEAR_SETTING = "update 1.2 year";
 	public static final String UPDATE_MONTH_SETTING = "update 1.2 month";
@@ -264,12 +265,12 @@ public class MainActivity extends AppCompatActivity
 		ArrayList<String> currencies = tinyDB.getListString(CurrencyPicker.KEY); //DO NOT save this List (first item changed)
 
 		if (currencies.size() != 0 && !isSelectedMonthOlderThanUpdate()) {
-			if(Utils.equal(currencies.get(0), DFLT))
+			if(Utils.INSTANCE.equal(currencies.get(0), DFLT))
 				currencies.set(0, getString(R.string.default_short));
 
 			MenuItem item = menu.findItem(R.id.action_currency);
 			SpinnerNoUnwantedOnClick spinner =
-					new SpinnerNoUnwantedOnClick(MenuItemCompat.getActionView(item));
+					new SpinnerNoUnwantedOnClick((Spinner) MenuItemCompat.getActionView(item));
 			ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_toolbar,
 					currencies.toArray(new String[currencies.size()]));
 			adapter.setDropDownViewResource(R.layout.item_spinner);
@@ -285,7 +286,7 @@ public class MainActivity extends AppCompatActivity
 					else
 						editableCurrency = ((TextView) view).getText().toString();
 
-					currencyName = Utils.equal(editableCurrency, "")?
+					currencyName = Utils.INSTANCE.equal(editableCurrency, "")?
 							((TextView) view).getText().toString():editableCurrency;//repeated code at end of lambda
 
 					loadMonth(editableMonth, editableYear, editableCurrency);
@@ -296,7 +297,7 @@ public class MainActivity extends AppCompatActivity
 				}
 			});
 
-			currencyName = Utils.equal(editableCurrency, "")? currencies.get(0):editableCurrency;
+			currencyName = Utils.INSTANCE.equal(editableCurrency, "")? currencies.get(0):editableCurrency;
 		} else {
 			menu.removeItem(R.id.action_currency);
 
@@ -393,24 +394,24 @@ public class MainActivity extends AppCompatActivity
 		TextView lastBalance = editedTableIndex > 1?
 				(TextView) table.getChildAt(editedTableIndex - 1).findViewById(R.id.textBalance):null;
 
-		TextWatcher watcher = new Utils.SimpleTextWatcher() {
+		TextWatcher watcher = new SimpleTextWatcher() {
 			@Override
 			public void afterTextChanged(Editable editable) {
 				if (table.getEditableRow() == editedTableIndex) {
 					final int dataManagerIndex = getCorrectedIndexForDataManager(editedTableIndex);
 
-					if (equal(row.getCreditText().toString(), ".")) {
+					if (Utils.INSTANCE.equal(row.getCreditText().toString(), ".")) {
 						tableDataManager.updateCredit(dataManagerIndex, BigDecimal.ZERO);
 						row.setCredit("0");
 					}
 
-					if (equal(row.getDebitText().toString(), ".")) {
+					if (Utils.INSTANCE.equal(row.getDebitText().toString(), ".")) {
 						tableDataManager.updateCredit(dataManagerIndex, BigDecimal.ZERO);
 						row.setDebit("0");
 					}
 
-					tableDataManager.updateCredit(dataManagerIndex, parseString(row.getCreditText().toString()));
-					tableDataManager.updateDebit(dataManagerIndex, parseString((row.getDebitText().toString())));
+					tableDataManager.updateCredit(dataManagerIndex, Utils.INSTANCE.parseString(row.getCreditText().toString()));
+					tableDataManager.updateDebit(dataManagerIndex, Utils.INSTANCE.parseString((row.getDebitText().toString())));
 
 					if (tableDataManager.getTotal(dataManagerIndex).toPlainString().isEmpty())
 						throw new IllegalStateException();
@@ -457,7 +458,7 @@ public class MainActivity extends AppCompatActivity
 	}
 
 	private void loadMonth(int month, int year, String currency) {
-		if(!LoadMonthAsyncTask.isAlreadyLoading()) {
+		if(!LoadMonthAsyncTask.Companion.isAlreadyLoading()) {
 			findViewById(R.id.progressBar).setVisibility(VISIBLE);
 
 			FIRST_REAL_ROW = 1;
@@ -505,14 +506,14 @@ public class MainActivity extends AppCompatActivity
 						+ " " + getString(MONTH_STRINGS[updateMonth]).toLowerCase() + "-" + updateYear);
 				loadingMonthTask.execute();
 			}
-		} else if(editableMonth != month || editableYear != year || !Utils.equal(editableCurrency, currency)) {
+		} else if(editableMonth != month || editableYear != year || !Utils.INSTANCE.equal(editableCurrency, currency)) {
 			loadPrevBalance.cancel(true);
 			loadingMonthTask.cancel(true);
 		}
 	}
 
 	@Override
-	public void OnAsyncFinished(Pair<String[][], ArrayList<Integer>> dbRowsPairedRowToDBConversion) {
+	public void onAsyncFinished(MonthData dbData) {
 		if(table.getChildCount() - getFirstRealRow() > 0)
 			throw new IllegalArgumentException("Table already contains "
 					+ (table.getChildCount() - getFirstRealRow()) + " elements; " +
@@ -520,9 +521,9 @@ public class MainActivity extends AppCompatActivity
 
 		int dataManagerIndex = 1;
 
-		this.rowToDBRowConversion = dbRowsPairedRowToDBConversion.second;
+		this.rowToDBRowConversion = dbData.getRowToDBConversion();
 
-		for (String[] dbRow : dbRowsPairedRowToDBConversion.first) {
+		for (String[] dbRow : dbData.getDbRows()) {
 			table.inflateEmptyRow();
 
 			LedgerRow row = loadRow();
@@ -540,9 +541,9 @@ public class MainActivity extends AppCompatActivity
 			}
 
 			if (dbRow[2] != null)
-				tableDataManager.updateCredit(dataManagerIndex, Utils.parseString(dbRow[2]));
+				tableDataManager.updateCredit(dataManagerIndex, Utils.INSTANCE.parseString(dbRow[2]));
 			if (dbRow[3] != null)
-				tableDataManager.updateDebit(dataManagerIndex, Utils.parseString(dbRow[3]));
+				tableDataManager.updateDebit(dataManagerIndex, Utils.INSTANCE.parseString(dbRow[3]));
 
 			row.setBalance(tableDataManager.getTotal(dataManagerIndex));
 		dataManagerIndex++;
@@ -647,9 +648,9 @@ public class MainActivity extends AppCompatActivity
 	@Override
 	public void onUpdateEditableRow(int index) {
 		if (index == -1 || table == null)
-			ACRAHelper.reset();
+			ACRAHelper.INSTANCE.reset();
 		else
-			ACRAHelper.writeData(table, editableYear, editableMonth);
+			ACRAHelper.INSTANCE.writeData(table, editableYear, editableMonth);
 	}
 
 	@Override

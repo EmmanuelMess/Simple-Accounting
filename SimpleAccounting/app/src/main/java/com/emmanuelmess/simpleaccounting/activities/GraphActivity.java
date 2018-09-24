@@ -9,7 +9,7 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.emmanuelmess.simpleaccounting.R;
-import com.emmanuelmess.simpleaccounting.dataloading.LoadMonthAsyncTask;
+import com.emmanuelmess.simpleaccounting.dataloading.async.LoadMonthAsyncTask;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 import com.emmanuelmess.simpleaccounting.utils.Utils;
 import com.github.mikephil.charting.charts.LineChart;
@@ -65,14 +65,14 @@ public class GraphActivity extends AppCompatActivity {
 		int[] updateDate = {getIntent().getIntExtra(GRAPH_UPDATE_MONTH, -1),
 				getIntent().getIntExtra(GRAPH_UPDATE_YEAR, -1)};
 
-		((TextView) findViewById(R.id.title)).setText(Utils.getTitle(this, month, year, currency, updateDate));
+		((TextView) findViewById(R.id.title)).setText(Utils.INSTANCE.getTitle(this, month, year, currency, updateDate));
 
 		loadMonthAsyncTask = new LoadMonthAsyncTask(month, year, currency, new TableGeneral(this), (result) -> {
-			if(result.first.length > 0) {
+			if(result.getDbRows().length > 0) {
 				List<Entry> entries = new ArrayList<>();
 				BigDecimal bigDecimal = BigDecimal.ZERO;
 
-				for (String[] s : result.first) {
+				for (String[] s : result.getDbRows()) {
 					if(s[0] != null) {
 						int day = parseInt(s[0]);
 

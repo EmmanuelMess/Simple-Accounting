@@ -24,6 +24,7 @@ import com.emmanuelmess.simpleaccounting.activities.views.LockableScrollView;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
 import com.emmanuelmess.simpleaccounting.utils.RangedStructure;
+import com.emmanuelmess.simpleaccounting.utils.SimpleTextWatcher;
 import com.emmanuelmess.simpleaccounting.utils.Utils;
 
 import java.util.ArrayList;
@@ -92,11 +93,11 @@ public class CurrencyPickerFragment extends PreferenceDialogFragmentCompat imple
 		textDefault = view.findViewById(R.id.textDefault);
 
 		if(currentValue.size() > 0)
-			textDefault.setText(Utils.equal(currentValue.get(0), DFLT)? "":currentValue.get(0));
+			textDefault.setText(Utils.INSTANCE.equal(currentValue.get(0), DFLT)? "":currentValue.get(0));
 		else
 			currentValue.add("");
 
-		textDefault.addTextChangedListener(new Utils.SimpleTextWatcher() {
+		textDefault.addTextChangedListener(new SimpleTextWatcher() {
 			@Override
 			public void afterTextChanged(Editable s) {
 				currentValue.set(0, s.toString());
@@ -124,7 +125,7 @@ public class CurrencyPickerFragment extends PreferenceDialogFragmentCompat imple
 		Dialog dialog = super.onCreateDialog(savedInstanceState);
 
 		dialogBackground =
-				Utils.getBackgroundColor(dialog.getWindow().getDecorView().getBackground(), -1);
+				Utils.INSTANCE.getBackgroundColor(dialog.getWindow().getDecorView().getBackground(), -1);
 
 		for(int i = 1; i < currentValue.size(); i++)
 			isItemNew.add(false);
@@ -256,7 +257,7 @@ public class CurrencyPickerFragment extends PreferenceDialogFragmentCompat imple
 		text.setOnFocusChangeListener((v1, hasFocus)->{
 			item.findViewById(R.id.delete).setVisibility(hasFocus? VISIBLE:View.INVISIBLE);
 		});
-		text.addTextChangedListener(new Utils.SimpleTextWatcher() {
+		text.addTextChangedListener(new SimpleTextWatcher() {
 			@Override
 			public void afterTextChanged(Editable s) {
 				currentValue.set(getChildIndex(item)+1, s.toString());
@@ -349,10 +350,10 @@ public class CurrencyPickerFragment extends PreferenceDialogFragmentCompat imple
 		// When the user selects "OK", persist the new value
 		if (positiveResult) {
 			for (int i = 1; i < currentValue.size(); i++) // STARTS on 1 to save default
-				if (Utils.equal(currentValue.get(i).replace(" ", ""), ""))
+				if (Utils.INSTANCE.equal(currentValue.get(i).replace(" ", ""), ""))
 					currentValue.remove(i);
 
-			if(Utils.equal(currentValue.get(0).replace(" ", ""), "")) {
+			if(Utils.INSTANCE.equal(currentValue.get(0).replace(" ", ""), "")) {
 				if(currentValue.size() == 1)
 					currentValue.remove(0);
 				else
@@ -366,7 +367,7 @@ public class CurrencyPickerFragment extends PreferenceDialogFragmentCompat imple
 				boolean deletedCurrencyWasSelected = false;
 
 				for (String s : deleteElements) {
-					if(Utils.equal(MainActivity.getCurrency(), s))
+					if(Utils.INSTANCE.equal(MainActivity.getCurrency(), s))
 						deletedCurrencyWasSelected = true;
 
 					tableGeneral.deleteAllForCurrency(s);
