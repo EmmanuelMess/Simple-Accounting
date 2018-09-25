@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.emmanuelmess.simpleaccounting.dataloading.data.Session;
 import com.emmanuelmess.simpleaccounting.utils.Utils;
 
 import java.math.BigDecimal;
@@ -127,7 +128,7 @@ public class TableGeneral extends Database {
 		CV.clear();
 	}
 
-	public int newRowInMonth(int month, int year, String currency) {
+	public int newRowInMonth(Session session) {
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[]{NUMBER_COLUMN},
 				null, null, null, null, null);
 		int i;
@@ -141,9 +142,9 @@ public class TableGeneral extends Database {
 		}
 
 		CV.put(NUMBER_COLUMN, i);
-		CV.put(COLUMNS[4], month);
-		CV.put(COLUMNS[5], year);
-		CV.put(COLUMNS[6], currency);
+		CV.put(COLUMNS[4], session.getMonth());
+		CV.put(COLUMNS[5], session.getYear());
+		CV.put(COLUMNS[6], session.getCurrency());
 		getWritableDatabase().insert(TABLE_NAME, null, CV);
 		CV.clear();
 

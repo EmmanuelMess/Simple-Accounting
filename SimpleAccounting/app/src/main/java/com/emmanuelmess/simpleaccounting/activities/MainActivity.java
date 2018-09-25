@@ -105,15 +105,7 @@ public class MainActivity extends AppCompatActivity
 	private int[] editableRowColumnsHash = new int[4];
 	private boolean reloadMonthOnChangeToView;
 
-	/**
-	 * Pointer to month being viewed
-	 * CAN BE -1, -2 OR >=0.
-	 * -1: no value
-	 * -2: older that update 1.2
-	 * >=0: 'normal' (month or year) value
-	 */
-	private static int editableMonth = -1, editableYear = -1;
-	private static String editableCurrency = "";//same as currencyName, except when it is the default in that case it is ""
+	private static Session editableSession = new Session(-1, -1, "");
 	private static String currencyName = "";// the string the user entered on PreferenceActivity
 
 	private static boolean invalidateTable = false, invalidateToolbar = false;
@@ -124,17 +116,17 @@ public class MainActivity extends AppCompatActivity
 	private boolean createNewRowWhenMonthLoaded = false;
 
 	public static void setDate(int month, int year) {
-		editableMonth = month;
-		editableYear = year;
+		editableSession = new Session(month, year, editableSession.getCurrency());
 		invalidateTable();
 	}
 
 	public static String getCurrency() {
-		return editableCurrency;
+		return editableSession.getCurrency();
 	}
 
 	public static void setCurrency(String currency) {
-		editableCurrency = currency;
+		editableSession = new Session(editableSession.getMonth(), editableSession.getYear(),
+				currency);
 		//invalidateTable(); TODO why is this unnecessary?
 	}
 
@@ -184,8 +176,7 @@ public class MainActivity extends AppCompatActivity
 		updateMonth = preferences.getInt(UPDATE_MONTH_SETTING, -1);
 		updateYear = preferences.getInt(UPDATE_YEAR_SETTING, -1);
 
-		editableMonth = currentMonthYear[0];
-		editableYear = currentMonthYear[1];
+		editableSession = new Session(currentMonthYear[0], currentMonthYear[1], editableSession.getCurrency());
 
 		table.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
 			@Override
@@ -199,7 +190,7 @@ public class MainActivity extends AppCompatActivity
 				space.setMinimumHeight(findViewById(R.id.fab).getHeight()
 						- findViewById(R.id.fab).getPaddingTop());
 
-				loadMonth(editableMonth, editableYear, editableCurrency);
+				loadMonth(editableSession);
 				//in case the activity gets destroyed
 				invalidateTable = false;
 				invalidateToolbar = false;
@@ -219,7 +210,7 @@ public class MainActivity extends AppCompatActivity
 			if (table.getChildCount() > FIRST_REAL_ROW) {
 				String day = new SimpleDateFormat("dd", Locale.getDefault()).format(new Date());
 
-				int index = tableGeneral.newRowInMonth(editableMonth, editableYear, editableCurrency);
+				int index = tableGeneral.newRowInMonth(editableSession);
 				tableGeneral.update(index, TableGeneral.COLUMNS[0], day);
 
 				rowToDBRowConversion.add(tableGeneral.getLastIndex());
@@ -242,7 +233,7 @@ public class MainActivity extends AppCompatActivity
 		table.setInvertCreditAndDebit(getDefaultSharedPreferences(this).getBoolean(INVERT_CREDIT_DEBIT_SETTING, false));
 
 		if (invalidateTable && ViewModelProviders.of(this).get(TableData.class).loadMonthIsNotRunning()) {
-			loadMonth(editableMonth, editableYear, editableCurrency);
+			loadMonth(editableSession);
 
 			fab.setVisibility(isSelectedMonthOlderThanUpdate()? GONE:VISIBLE);
 
@@ -285,15 +276,18 @@ public class MainActivity extends AppCompatActivity
 					if(table.isEditingRow())
 						table.editableRowToView(true);
 
-					if (pos == DEFAULT_CURRENCY)
-						editableCurrency = "";
-					else
-						editableCurrency = ((TextView) view).getText().toString();
+					if (pos == DEFAULT_CURRENCY) {
+						editableSession = new Session(editableSession.getMonth(), editableSession.getYear(),
+								"");
+					} else {
+						editableSession = new Session(editableSession.getMonth(), editableSession.getYear(),
+								((TextView) view).getText().toString());
+					}
 
-					currencyName = Utils.INSTANCE.equal(editableCurrency, "")?
-							((TextView) view).getText().toString():editableCurrency;//repeated code at end of lambda
+					currencyName = Utils.INSTANCE.equal(editableSession.getCurrency(), "")?
+							((TextView) view).getText().toString():editableSession.getCurrency();//repeated code at end of lambda
 
-					loadMonth(editableMonth, editableYear, editableCurrency);
+					loadMonth(editableSession);
 				}
 
 				@Override
@@ -301,11 +295,14 @@ public class MainActivity extends AppCompatActivity
 				}
 			});
 
-			currencyName = Utils.INSTANCE.equal(editableCurrency, "")? currencies.get(0):editableCurrency;
+			currencyName = Utils.INSTANCE.equal(editableSession.getCurrency(), "")? currencies.get(0):editableSession.getCurrency();
 		} else {
 			menu.removeItem(R.id.action_currency);
 
-			if(isSelectedMonthOlderThanUpdate()) editableCurrency = "";//make sure
+			if(isSelectedMonthOlderThanUpdate()) {
+				editableSession = new Session(editableSession.getMonth(), editableSession.getYear(),
+						"");//make sure
+			}
 		}
 
 		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.KITKAT)
@@ -323,9 +320,9 @@ public class MainActivity extends AppCompatActivity
 		switch (id) {
 			case R.id.action_graph:
 				Intent i = new Intent(getApplicationContext(), GraphActivity.class);
-				i.putExtra(GraphActivity.GRAPH_MONTH, editableMonth);
-				i.putExtra(GraphActivity.GRAPH_YEAR, editableYear);
-				i.putExtra(GraphActivity.GRAPH_CURRENCY, editableCurrency);
+				i.putExtra(GraphActivity.GRAPH_MONTH, editableSession.getMonth());
+				i.putExtra(GraphActivity.GRAPH_YEAR, editableSession.getYear());
+				i.putExtra(GraphActivity.GRAPH_CURRENCY, editableSession.getCurrency());
 				i.putExtra(GraphActivity.GRAPH_UPDATE_MONTH, updateMonth);
 				i.putExtra(GraphActivity.GRAPH_UPDATE_YEAR, updateYear);
 				startActivity(i);
@@ -340,9 +337,10 @@ public class MainActivity extends AppCompatActivity
 
 						String job = getString(R.string.app_name) + ": " +
 								(!isSelectedMonthOlderThanUpdate()?
-										getString(MONTH_STRINGS[editableMonth]):getString(MONTH_STRINGS[updateMonth]));
+										getString(MONTH_STRINGS[editableSession.getMonth()]):getString(MONTH_STRINGS[updateMonth]));
 						printM.print(job,
-								new PPrintDocumentAdapter(this, table, editableMonth, editableYear,
+								new PPrintDocumentAdapter(this, table,
+										editableSession.getMonth(), editableSession.getYear(),
 										currencyName, new int[]{updateMonth, updateYear}),
 								null);
 					}
@@ -462,15 +460,15 @@ public class MainActivity extends AppCompatActivity
 		}
 	}
 
-	private void loadMonth(int month, int year, String currency) {
+	private void loadMonth(Session session) {
 		findViewById(R.id.progressBar).setVisibility(VISIBLE);
 
 		FIRST_REAL_ROW = 1;
 
 		TextView monthText = findViewById(R.id.textMonth);
 
-		if (month != -1 && !isSelectedMonthOlderThanUpdate()) {
-			monthText.setText(MONTH_STRINGS[month]);
+		if (session.getMonth() != -1 && !isSelectedMonthOlderThanUpdate()) {
+			monthText.setText(MONTH_STRINGS[session.getMonth()]);
 		} else {
 			monthText.setText(getString(R.string.before_update_1_2)
 					+ " " + getString(MONTH_STRINGS[updateMonth]).toLowerCase() + "-" + updateYear);
@@ -478,7 +476,7 @@ public class MainActivity extends AppCompatActivity
 
 		ViewModelProviders.of(this)
 				.get(TableData.class)
-				.getMonthData(new Session(month, year, currency), tableGeneral, tableMonthlyBalance)
+				.getMonthData(session, tableGeneral, tableMonthlyBalance)
 				.observe(this, this);
 	}
 
@@ -490,11 +488,7 @@ public class MainActivity extends AppCompatActivity
 
 		tableDataManager.clear();
 
-		Session newSession = dbData.getSession();
-
-		editableMonth = newSession.getMonth();
-		editableYear = newSession.getYear();
-		editableCurrency = newSession.getCurrency();
+		editableSession = dbData.getSession();
 
 		if (dbData.getPrevMonthBalance() != null) {
 			setFirstRealRow(2);
@@ -542,7 +536,7 @@ public class MainActivity extends AppCompatActivity
 
 			table.editableRowToView(true);
 
-			tableGeneral.newRowInMonth(editableMonth, editableYear, editableCurrency);
+			tableGeneral.newRowInMonth(editableSession);
 			this.rowToDBRowConversion.add(tableGeneral.getLastIndex());
 
 			String date = new SimpleDateFormat("dd", Locale.getDefault()).format(new Date());
@@ -622,8 +616,8 @@ public class MainActivity extends AppCompatActivity
 	 * @return if the month selected is older than the update that added month selection
 	 */
 	private boolean isSelectedMonthOlderThanUpdate() {
-		return editableMonth == TableGeneral.OLDER_THAN_UPDATE
-				|| editableYear == TableGeneral.OLDER_THAN_UPDATE;
+		return editableSession.getMonth() == TableGeneral.OLDER_THAN_UPDATE
+				|| editableSession.getYear() == TableGeneral.OLDER_THAN_UPDATE;
 	}
 
 	@Override
@@ -631,7 +625,7 @@ public class MainActivity extends AppCompatActivity
 		if (index == -1 || table == null)
 			ACRAHelper.INSTANCE.reset();
 		else
-			ACRAHelper.INSTANCE.writeData(table, editableYear, editableMonth);
+			ACRAHelper.INSTANCE.writeData(table, editableSession.getYear(), editableSession.getMonth());
 	}
 
 	@Override
@@ -645,7 +639,8 @@ public class MainActivity extends AppCompatActivity
 			String editDebitText = ((EditText) row.findViewById(R.id.editDebit)).getText().toString();
 			if(editableRowColumnsHash[2] != editCreditText.hashCode()
 					|| editableRowColumnsHash[3] != editDebitText.hashCode()) {
-				tableMonthlyBalance.updateMonth(editableMonth, editableYear, editableCurrency,
+				tableMonthlyBalance.updateMonth(editableSession.getMonth(), editableSession.getYear(),
+						editableSession.getCurrency(),
 						tableDataManager.getTotal(getCorrectedIndexForDataManager(table.getEditableRow())).doubleValue());
 			}
 
@@ -677,7 +672,7 @@ public class MainActivity extends AppCompatActivity
 	public void onAfterMakeRowNotEditable(View row) {
 		if (reloadMonthOnChangeToView) {
 			reloadMonthOnChangeToView = false;
-			loadMonth(editableMonth, editableYear, editableCurrency);
+			loadMonth(editableSession);
 		}
 	}
 }
