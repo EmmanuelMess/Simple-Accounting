@@ -17,9 +17,7 @@ import java.util.ArrayList
  */
 
 class LoadMonthAsyncTask(
-	private val month: Int,
-	private val year: Int,
-	private val currency: String,
+	private val session: Session,
 	private val tableGeneral: TableGeneral,
 	private val tableMonthlyBalance: TableMonthlyBalance?,
 	private val listener: MutableLiveData<MonthData>
@@ -32,7 +30,7 @@ class LoadMonthAsyncTask(
 	}
 
 	override fun doInBackground(vararg p: Void): MonthData? {
-		val data = tableGeneral.getIndexesForMonth(month, year, currency)
+		val data = tableGeneral.getIndexesForMonth(session)
 		val rowToDBRowConversion = ArrayList<Int>()
 
 		if (isCancelled) return null
@@ -43,9 +41,9 @@ class LoadMonthAsyncTask(
 		return (
 			if (isCancelled) null
 			else {
-				MonthData(Session(month, year, currency),
-					tableMonthlyBalance?.getBalanceLastMonthWithData(month, year, currency),
-					tableGeneral.getAllForMonth(month, year, currency),
+				MonthData(session,
+					tableMonthlyBalance?.getBalanceLastMonthWithData(session),
+					tableGeneral.getAllForMonth(session),
 					rowToDBRowConversion)
 			}
 		)

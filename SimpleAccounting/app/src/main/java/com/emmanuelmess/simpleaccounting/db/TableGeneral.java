@@ -108,7 +108,9 @@ public class TableGeneral extends Database {
 							currentBalance = currentBalance.subtract(Utils.INSTANCE.parseString(data[3]));
 					}
 
-					tableMonthlyBalance.updateMonth(OLDER_THAN_UPDATE, OLDER_THAN_UPDATE, "", currentBalance.doubleValue());
+					tableMonthlyBalance.updateMonth(
+							new Session(OLDER_THAN_UPDATE, OLDER_THAN_UPDATE, ""),
+							currentBalance.doubleValue());
 				}
 			case 4:
 				sql = "ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + COLUMNS[6] + " TEXT;";
@@ -177,11 +179,13 @@ public class TableGeneral extends Database {
 		return data;
 	}
 
-	public String[][] getAllForMonth(int month, int year, String currency) {
-		return getAllForMonth(month, year, currency, getReadableDatabase());
+	public String[][] getAllForMonth(Session session) {
+		return getAllForMonth(session, getReadableDatabase());
 	}
 
-	private String[][] getAllForMonth(int month, int year, String currency, SQLiteDatabase db) {
+	private String[][] getAllForMonth(Session session, SQLiteDatabase db) {
+		int month = session.getMonth(), year = session.getYear();
+		String currency = session.getCurrency();
 		String [][] data;
 
 		Cursor c = db.query(TABLE_NAME, COLUMNS,
@@ -204,12 +208,13 @@ public class TableGeneral extends Database {
 		return data;
 	}
 
-	public int[] getIndexesForMonth(int month, int year, String currency) {
+	public int[] getIndexesForMonth(Session session) {
 		int[] data;
 
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[]{NUMBER_COLUMN},
-				format("%1$s = %2$s AND %3$s = %4$s AND %5$s = ?", COLUMNS[4], month, COLUMNS[5], year, COLUMNS[6]),
-				new String[] {currency}, null, null, COLUMNS[0]);
+				format("%1$s = %2$s AND %3$s = %4$s AND %5$s = ?", COLUMNS[4], session.getMonth(),
+						COLUMNS[5], session.getYear(), COLUMNS[6]),
+				new String[] {session.getCurrency()}, null, null, COLUMNS[0]);
 
 		if (c != null) {
 			c.moveToFirst();

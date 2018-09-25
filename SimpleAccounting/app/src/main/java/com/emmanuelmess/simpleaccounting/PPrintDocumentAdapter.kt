@@ -20,6 +20,7 @@ import android.widget.TableLayout
 import android.widget.TextView
 
 import com.emmanuelmess.simpleaccounting.activities.MainActivity
+import com.emmanuelmess.simpleaccounting.dataloading.data.Session
 import com.emmanuelmess.simpleaccounting.utils.Utils
 import com.emmanuelmess.simpleaccounting.utils.get
 
@@ -96,7 +97,7 @@ class PPrintDocumentAdapter(private val context: Context, private val table: Tab
 
             writtenPages = BooleanArray(amountOfPages)
 
-            title = Utils.getTitle(context, month, year, currency, updateDate)
+            title = Utils.getTitle(context, Session(month, year, currency), updateDate)
 
             val info = PrintDocumentInfo.Builder(title + ".pdf")
                     .setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)

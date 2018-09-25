@@ -28,8 +28,7 @@ class TableData: ViewModel() {
 			}
 		}
 
-		loadMonthTask = LoadMonthAsyncTask(session.month, session.year, session.currency,
-			tableGeneral, tableMonthlyBalance, monthDataLiveData)
+		loadMonthTask = LoadMonthAsyncTask(session, tableGeneral, tableMonthlyBalance, monthDataLiveData)
 		loadMonthTask!!.execute()
 	}
 

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.emmanuelmess.simpleaccounting.dataloading.data.Session;
+
 import java.util.ArrayList;
 import java.util.List;
 import static android.database.Cursor.FIELD_TYPE_NULL;
@@ -48,9 +50,12 @@ public class TableMonthlyBalance extends Database {
 		}
 	}
 
-	public void updateMonth(int month, int year, String currency, double balance) {
-		if(!isMonthInBD(month, year, currency))
-			createMonth(month, year, currency);
+	public void updateMonth(Session session, double balance) {
+		int month = session.getMonth(), year = session.getYear();
+		String currency = session.getCurrency();
+
+		if(!isMonthInBD(session))
+			createMonth(session);
 
 		CV.put(COLUMNS[3], balance);
 		getWritableDatabase().update(TABLE_NAME, CV, SQLShort(AND, format("%1$s=%2$s" , COLUMNS[0], month),
@@ -58,7 +63,10 @@ public class TableMonthlyBalance extends Database {
 		CV.clear();
 	}
 
-	public Double getBalanceLastMonthWithData(int month, int year, String currency) {
+	public Double getBalanceLastMonthWithData(Session session) {
+		int month = session.getMonth(), year = session.getYear();
+		String currency = session.getCurrency();
+
 		String querySum =
 				select(COLUMNS[3])
 				.from(TABLE_NAME)
@@ -90,7 +98,9 @@ public class TableMonthlyBalance extends Database {
 		getWritableDatabase().delete(TABLE_NAME, condition, new String[] {currency});
 	}
 
-	private boolean isMonthInBD(int month, int year, String currency) {
+	private boolean isMonthInBD(Session session) {
+		int month = session.getMonth(), year = session.getYear();
+		String currency = session.getCurrency();
 		boolean data;
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[] {COLUMNS[3]},
 				SQLShort(AND, format("%1$s=%2$s" , COLUMNS[0], month),
@@ -104,8 +114,11 @@ public class TableMonthlyBalance extends Database {
 		return data;
 	}
 
-	private void createMonth(int month, int year, String currency) {
-		if(!isMonthInBD(month, year, currency)) {
+	private void createMonth(Session session) {
+		int month = session.getMonth(), year = session.getYear();
+		String currency = session.getCurrency();
+
+		if(!isMonthInBD(session)) {
 			CV.put(COLUMNS[0], month);
 			CV.put(COLUMNS[1], year);
 			CV.put(COLUMNS[2], currency);

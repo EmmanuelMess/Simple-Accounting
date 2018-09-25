@@ -632,8 +632,7 @@ public class MainActivity extends AppCompatActivity
 			String editDebitText = ((EditText) row.findViewById(R.id.editDebit)).getText().toString();
 			if(editableRowColumnsHash[2] != editCreditText.hashCode()
 					|| editableRowColumnsHash[3] != editDebitText.hashCode()) {
-				tableMonthlyBalance.updateMonth(editableSession.getMonth(), editableSession.getYear(),
-						editableSession.getCurrency(),
+				tableMonthlyBalance.updateMonth(editableSession,
 						tableDataManager.getTotal(getCorrectedIndexForDataManager(table.getEditableRow())).doubleValue());
 			}
 
