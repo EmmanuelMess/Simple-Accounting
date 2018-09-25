@@ -15,9 +15,13 @@ import java.math.BigDecimal
 
 import com.emmanuelmess.simpleaccounting.activities.MainActivity.EDIT_IDS
 import com.emmanuelmess.simpleaccounting.activities.MainActivity.TEXT_IDS
+import com.emmanuelmess.simpleaccounting.dataloading.data.RowData
 import com.emmanuelmess.simpleaccounting.utils.get
 
-class LedgerView(context: Context, attrs: AttributeSet) : TableLayout(context, attrs) {
+class LedgerView @JvmOverloads constructor(
+	context: Context,
+	attrs: AttributeSet? = null
+) : TableLayout(context, attrs) {
 
 	private val inflater: LayoutInflater
 	private lateinit var listener: LedgeCallbacks
@@ -73,7 +77,7 @@ class LedgerView(context: Context, attrs: AttributeSet) : TableLayout(context, a
 	 * Creates and inflates a new row.
 	 * Restores editable row to view.
 	 */
-	fun inflateEmptyRow(): View {
+	fun inflateEmptyRow(): LedgerRow {
 		editableRowToView()
 		return inflateRow()
 	}
@@ -102,16 +106,34 @@ class LedgerView(context: Context, attrs: AttributeSet) : TableLayout(context, a
 	/**
 	 * Converts editable row into not editable.
 	 */
-	fun editableRowToView() {
+	fun editableRowToView(callCallbacks: Boolean = true) {
 		val row = get<LedgerRow>(editableRow)
 		if (row != null && editableRow >= 0) {
-			listener.onBeforeMakeRowNotEditable(row)
+			if(callCallbacks) {
+				listener.onBeforeMakeRowNotEditable(row)
+			}
 
 			updateEditableRow(-1)
 
 			row.makeRowNotEditable()
 
-			listener.onAfterMakeRowNotEditable(row)
+			if(callCallbacks) {
+				listener.onAfterMakeRowNotEditable(row)
+			}
+		}
+	}
+
+	fun createRow(rowData: RowData): LedgerRow {
+		with(inflateEmptyRow()) {
+			editableRowToView(false)
+
+			setDate(rowData.date ?: "")
+			setReference(rowData.reference ?: "")
+			setCredit(rowData.credit ?: "")
+			setDebit(rowData.debit ?: "")
+			setBalance(rowData.balance)
+
+			return this
 		}
 	}
 

@@ -71,7 +71,7 @@ public class GraphActivity extends AppCompatActivity {
 		ViewModelProviders
 				.of(this)
 				.get(TableData.class)
-				.getMonthData(new Session(month, year, currency), new TableGeneral(this))
+				.getMonthData(new Session(month, year, currency), new TableGeneral(this), null)
 				.observe(this, (result) -> {
 			if(result.getDbRows().length > 0) {
 				List<Entry> entries = new ArrayList<>();

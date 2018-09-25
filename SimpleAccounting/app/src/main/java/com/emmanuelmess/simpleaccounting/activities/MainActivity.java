@@ -43,8 +43,8 @@ import com.emmanuelmess.simpleaccounting.activities.views.SpinnerNoUnwantedOnCli
 import com.emmanuelmess.simpleaccounting.dataloading.async.AsyncFinishedListener;
 import com.emmanuelmess.simpleaccounting.dataloading.TableDataManager;
 import com.emmanuelmess.simpleaccounting.dataloading.async.LoadMonthAsyncTask;
-import com.emmanuelmess.simpleaccounting.dataloading.async.LoadPrevBalanceAsyncTask;
 import com.emmanuelmess.simpleaccounting.dataloading.data.MonthData;
+import com.emmanuelmess.simpleaccounting.dataloading.data.RowData;
 import com.emmanuelmess.simpleaccounting.dataloading.data.Session;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
@@ -223,7 +223,7 @@ public class MainActivity extends AppCompatActivity
 				tableGeneral.update(index, TableGeneral.COLUMNS[0], day);
 
 				rowToDBRowConversion.add(tableGeneral.getLastIndex());
-				LedgerRow row = loadRow();
+				LedgerRow row = loadRow(day, "", "", "");
 
 				row.setDate(day);
 				row.requestFocus();
@@ -257,7 +257,7 @@ public class MainActivity extends AppCompatActivity
 
 	@Override
 	public void onBackPressed() {
-		if (table.isEditingRow()) table.editableRowToView();
+		if (table.isEditingRow()) table.editableRowToView(true);
 		else super.onBackPressed();
 	}
 
@@ -283,7 +283,7 @@ public class MainActivity extends AppCompatActivity
 				@Override
 				public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
 					if(table.isEditingRow())
-						table.editableRowToView();
+						table.editableRowToView(true);
 
 					if (pos == DEFAULT_CURRENCY)
 						editableCurrency = "";
@@ -373,13 +373,14 @@ public class MainActivity extends AppCompatActivity
 		return super.onOptionsItemSelected(item);
 	}
 
-	public LedgerRow loadRow() {
-		int rowViewIndex = table.getChildCount() - 1;
-
-		LedgerRow row = (LedgerRow) table.getLastRow();
+	public LedgerRow loadRow(String date, String reference, String credit, String debit) {
 		tableDataManager.addRow();
 
-		row.setBalance(tableDataManager.getTotal(getCorrectedIndexForDataManager(rowViewIndex)));
+		int rowViewIndex = table.getChildCount();//The row view is the next to be created so index is last + 1
+
+		BigDecimal balance = tableDataManager.getTotal(getCorrectedIndexForDataManager(rowViewIndex));
+
+		LedgerRow row = table.createRow(new RowData(date, reference, credit, debit, balance));
 
 		setListener(rowViewIndex);
 		checkEditInBalance(rowViewIndex, row);
@@ -448,7 +449,7 @@ public class MainActivity extends AppCompatActivity
 	private void setListener(final int rowIndex) {
 		resetEditableHash(rowIndex);
 		table.getChildAt(rowIndex).setOnLongClickListener(v->{
-			table.editableRowToView();
+			table.editableRowToView(true);
 			table.rowViewToEditable(rowIndex);
 			return true;
 		});
@@ -466,83 +467,57 @@ public class MainActivity extends AppCompatActivity
 
 		FIRST_REAL_ROW = 1;
 
-		if (table.getChildCount() > 1) {//DO NOT remove first line, the column titles
-			table.clear();
-		}
-
-		tableGeneral.getReadableDatabase();//triggers onUpdate()
-
-		tableDataManager.clear();
-
-		editableMonth = month;
-		editableYear = year;
-		editableCurrency = currency;
-
 		TextView monthText = findViewById(R.id.textMonth);
 
 		if (month != -1 && !isSelectedMonthOlderThanUpdate()) {
-			((TextView) findViewById(R.id.textMonth)).setText(MONTH_STRINGS[month]);
-
-			ViewModelProviders.of(this)
-					.get(TableData.class)
-					.getLoadPrevBalance(new Session(month, year, currency), tableMonthlyBalance)
-					.observe(this, (lastMonthData) -> {
-						if (lastMonthData != null) {
-							LedgerRow row = (LedgerRow) table.inflateEmptyRow();
-
-							setFirstRealRow(2);
-							table.editableRowToView();
-
-							tableDataManager.updateStartingTotal(new BigDecimal(lastMonthData));
-
-							row.setReference(R.string.previous_balance);
-							row.setCredit("");
-							row.setDebit("");
-							row.setBalance(tableDataManager.getStartingTotal());
-						}
-
-						ViewModelProviders.of(this)
-								.get(TableData.class)
-								.getMonthData(new Session(month, year, currency), tableGeneral)
-								.observe(this, this);
-					});
+			monthText.setText(MONTH_STRINGS[month]);
 		} else {
 			monthText.setText(getString(R.string.before_update_1_2)
 					+ " " + getString(MONTH_STRINGS[updateMonth]).toLowerCase() + "-" + updateYear);
-			ViewModelProviders.of(this)
-					.get(TableData.class)
-					.getMonthData(new Session(month, year, currency), tableGeneral)
-					.observe(this, this);
 		}
+
+		ViewModelProviders.of(this)
+				.get(TableData.class)
+				.getMonthData(new Session(month, year, currency), tableGeneral, tableMonthlyBalance)
+				.observe(this, this);
 	}
 
 	@Override
 	public void onChanged(@NonNull MonthData dbData) {
-		if(table.getChildCount() - getFirstRealRow() > 0)
-			throw new IllegalArgumentException("Table already contains "
-					+ (table.getChildCount() - getFirstRealRow()) + " elements; " +
-					"delete all rows before executing LoadMonthAsyncTask!");
+		if (table.getChildCount() > 1) {//DO NOT remove first line, the column titles
+			table.clear();
+		}
+
+		tableDataManager.clear();
+
+		Session newSession = dbData.getSession();
+
+		editableMonth = newSession.getMonth();
+		editableYear = newSession.getYear();
+		editableCurrency = newSession.getCurrency();
+
+		if (dbData.getPrevMonthBalance() != null) {
+			setFirstRealRow(2);
+			table.editableRowToView(true);
+
+			tableDataManager.updateStartingTotal(new BigDecimal(dbData.getPrevMonthBalance()));
+
+			table.createRow(new RowData("",
+					getString(R.string.previous_balance), "", "",
+					tableDataManager.getStartingTotal()));
+		}
 
 		int dataManagerIndex = 1;
 
 		this.rowToDBRowConversion = dbData.getRowToDBConversion();
 
 		for (String[] dbRow : dbData.getDbRows()) {
-			table.inflateEmptyRow();
-
-			LedgerRow row = loadRow();
-			table.editableRowToView();
-
-			int[] textIds = MainActivity.TEXT_IDS;
-
-			for (int j = 0; j < textIds.length; j++) {
+			for (int j = 0; j < MainActivity.TEXT_IDS.length; j++) {
 				if(dbRow[j] == null) continue;
-
-				TextView v = row.findViewById(textIds[j]);
-
-				v.setText(dbRow[j]);
 				editableRowColumnsHash[j] = dbRow[j].hashCode();
 			}
+
+			LedgerRow row = loadRow(dbRow[0], dbRow[1],  dbRow[2],  dbRow[3]);
 
 			if (dbRow[2] != null)
 				tableDataManager.updateCredit(dataManagerIndex, Utils.INSTANCE.parseString(dbRow[2]));
@@ -550,7 +525,8 @@ public class MainActivity extends AppCompatActivity
 				tableDataManager.updateDebit(dataManagerIndex, Utils.INSTANCE.parseString(dbRow[3]));
 
 			row.setBalance(tableDataManager.getTotal(dataManagerIndex));
-		dataManagerIndex++;
+
+			dataManagerIndex++;
 		}
 
 		scrollView.fullScroll(View.FOCUS_DOWN);
@@ -564,13 +540,14 @@ public class MainActivity extends AppCompatActivity
 
 			scrollView.fullScroll(View.FOCUS_DOWN);
 
-			table.editableRowToView();
+			table.editableRowToView(true);
 
 			tableGeneral.newRowInMonth(editableMonth, editableYear, editableCurrency);
 			this.rowToDBRowConversion.add(tableGeneral.getLastIndex());
-			LedgerRow row = loadRow();
 
-			row.setDate(new SimpleDateFormat("dd", Locale.getDefault()).format(new Date()));
+			String date = new SimpleDateFormat("dd", Locale.getDefault()).format(new Date());
+
+			LedgerRow row = loadRow(date, "", "", "");
 			row.requestFocus();
 
 			editableRowColumnsHash[0] = row.getDate().toString().hashCode();
@@ -589,14 +566,14 @@ public class MainActivity extends AppCompatActivity
 			final int rowToEdit = FIRST_REAL_ROW;
 
 			if (table.getChildAt(rowToEdit) == null) {
-				table.inflateEmptyRow();
+				table.inflateEmptyRow();// TODO: 27/09/18 use loadRow()
 				scrollView.fullScroll(View.FOCUS_DOWN);
 
 				tableDataManager.addRow();
 				tableDataManager.updateCredit(1, BigDecimal.ZERO);
 				tableDataManager.updateDebit(1, new BigDecimal(100));
 
-				table.editableRowToView();
+				table.editableRowToView(true);
 				LedgerRow row = (LedgerRow) table.getChildAt(rowToEdit);
 
 				row.setDate(new SimpleDateFormat("dd", Locale.getDefault()).format(new Date()));
