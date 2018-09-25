@@ -18,10 +18,12 @@ import java.math.BigDecimal
 import java.util.Objects
 
 import com.emmanuelmess.simpleaccounting.activities.MainActivity.MONTH_STRINGS
+import com.emmanuelmess.simpleaccounting.dataloading.data.Session
 
 object Utils {
-	fun getTitle(context: Context, month: Int, year: Int, currency: String,
-	             updateDate: IntArray): String = with(context) {
+	fun getTitle(context: Context, session: Session, updateDate: IntArray): String = with(context) {
+		val (month, year, currency) = session
+
 		var title: String = if (year != TableGeneral.OLDER_THAN_UPDATE) {
 				"${getString(MONTH_STRINGS[month])}-$year"
 			} else {

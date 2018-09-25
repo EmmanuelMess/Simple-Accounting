@@ -7,11 +7,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.print.PrintManager;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
@@ -19,7 +17,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,9 +37,7 @@ import com.emmanuelmess.simpleaccounting.activities.viewmodels.TableData;
 import com.emmanuelmess.simpleaccounting.activities.views.LedgerRow;
 import com.emmanuelmess.simpleaccounting.activities.views.LedgerView;
 import com.emmanuelmess.simpleaccounting.activities.views.SpinnerNoUnwantedOnClick;
-import com.emmanuelmess.simpleaccounting.dataloading.async.AsyncFinishedListener;
 import com.emmanuelmess.simpleaccounting.dataloading.TableDataManager;
-import com.emmanuelmess.simpleaccounting.dataloading.async.LoadMonthAsyncTask;
 import com.emmanuelmess.simpleaccounting.dataloading.data.MonthData;
 import com.emmanuelmess.simpleaccounting.dataloading.data.RowData;
 import com.emmanuelmess.simpleaccounting.dataloading.data.Session;
@@ -66,8 +61,8 @@ import java.util.Locale;
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
-import static com.emmanuelmess.simpleaccounting.constants.SettingsConstants.INVERT_CREDIT_DEBIT_SETTING;
 import static com.emmanuelmess.simpleaccounting.activities.preferences.CurrencyPicker.DFLT;
+import static com.emmanuelmess.simpleaccounting.constants.SettingsConstants.INVERT_CREDIT_DEBIT_SETTING;
 
 /**
  * @author Emmanuel
@@ -320,9 +315,7 @@ public class MainActivity extends AppCompatActivity
 		switch (id) {
 			case R.id.action_graph:
 				Intent i = new Intent(getApplicationContext(), GraphActivity.class);
-				i.putExtra(GraphActivity.GRAPH_MONTH, editableSession.getMonth());
-				i.putExtra(GraphActivity.GRAPH_YEAR, editableSession.getYear());
-				i.putExtra(GraphActivity.GRAPH_CURRENCY, editableSession.getCurrency());
+				i.putExtra(GraphActivity.GRAPH_SESSION, editableSession);
 				i.putExtra(GraphActivity.GRAPH_UPDATE_MONTH, updateMonth);
 				i.putExtra(GraphActivity.GRAPH_UPDATE_YEAR, updateYear);
 				startActivity(i);

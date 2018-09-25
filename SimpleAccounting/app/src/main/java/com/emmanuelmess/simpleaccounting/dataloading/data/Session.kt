@@ -1,5 +1,8 @@
 package com.emmanuelmess.simpleaccounting.dataloading.data
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
+
 /**
  * [month], [year]
  * Pointer to month being viewed
@@ -11,4 +14,5 @@ package com.emmanuelmess.simpleaccounting.dataloading.data
  * [currency]
  * same as [MainActivity.currencyName], except when it is the default in that case it is ""
  */
-data class Session(val month: Int, val year: Int, val currency: String)
+@Parcelize
+data class Session(val month: Int, val year: Int, val currency: String): Parcelable
