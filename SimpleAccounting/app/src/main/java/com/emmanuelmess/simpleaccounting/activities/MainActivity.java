@@ -38,6 +38,7 @@ import com.emmanuelmess.simpleaccounting.dataloading.TableDataManager;
 import com.emmanuelmess.simpleaccounting.dataloading.async.AsyncFinishedListener;
 import com.emmanuelmess.simpleaccounting.dataloading.async.LoadMonthAsyncTask;
 import com.emmanuelmess.simpleaccounting.dataloading.data.MonthData;
+import com.emmanuelmess.simpleaccounting.dataloading.data.Session;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
 import com.emmanuelmess.simpleaccounting.utils.ACRAHelper;
@@ -212,7 +213,7 @@ public class MainActivity extends AppCompatActivity
 			if (table.getChildCount() > FIRST_REAL_ROW) {
 				String day = new SimpleDateFormat("dd", Locale.getDefault()).format(new Date());
 
-				int index = tableGeneral.newRowInMonth(editableMonth, editableYear, editableCurrency);
+				int index = tableGeneral.newRowInMonth(new Session(editableMonth, editableYear, editableCurrency));
 				tableGeneral.update(index, TableGeneral.COLUMNS[0], day);
 
 				rowToDBRowConversion.add(tableGeneral.getLastIndex());
@@ -316,9 +317,7 @@ public class MainActivity extends AppCompatActivity
 		switch (id) {
 			case R.id.action_graph:
 				Intent i = new Intent(getApplicationContext(), GraphActivity.class);
-				i.putExtra(GraphActivity.GRAPH_MONTH, editableMonth);
-				i.putExtra(GraphActivity.GRAPH_YEAR, editableYear);
-				i.putExtra(GraphActivity.GRAPH_CURRENCY, editableCurrency);
+				i.putExtra(GraphActivity.GRAPH_SESSION, new Session(editableMonth, editableYear, editableCurrency));
 				i.putExtra(GraphActivity.GRAPH_UPDATE_MONTH, updateMonth);
 				i.putExtra(GraphActivity.GRAPH_UPDATE_YEAR, updateYear);
 				startActivity(i);
@@ -335,8 +334,8 @@ public class MainActivity extends AppCompatActivity
 								(!isSelectedMonthOlderThanUpdate()?
 										getString(MONTH_STRINGS[editableMonth]):getString(MONTH_STRINGS[updateMonth]));
 						printM.print(job,
-								new PPrintDocumentAdapter(this, table, editableMonth, editableYear,
-										currencyName, new int[]{updateMonth, updateYear}),
+								new PPrintDocumentAdapter(this, table, new Session(editableMonth, editableYear,
+										currencyName), new int[]{updateMonth, updateYear}),
 								null);
 					}
 				} else {
@@ -467,7 +466,8 @@ public class MainActivity extends AppCompatActivity
 						+ " " + getString(MONTH_STRINGS[updateMonth]).toLowerCase() + "-" + updateYear);
 			}
 
-			loadingMonthTask = new LoadMonthAsyncTask(month, year, currency, tableMonthlyBalance, tableGeneral, this);
+			loadingMonthTask = new LoadMonthAsyncTask(new Session(month, year, currency),
+					tableMonthlyBalance, tableGeneral, this);
 			loadingMonthTask.execute();
 		} else if(editableMonth != month || editableYear != year || !Utils.INSTANCE.equal(editableCurrency, currency)) {
 			loadingMonthTask.cancel(true);
@@ -484,9 +484,9 @@ public class MainActivity extends AppCompatActivity
 
 		tableDataManager.clear();
 
-		editableMonth = dbData.getMonth();
-		editableYear = dbData.getYear();
-		editableCurrency = dbData.getCurrency();
+		editableMonth = dbData.getSession().getMonth();
+		editableYear = dbData.getSession().getYear();
+		editableCurrency = dbData.getSession().getCurrency();
 
 		if (dbData.getPrevBalance() != null) {
 			LedgerRow row = (LedgerRow) table.inflateEmptyRow();
@@ -545,7 +545,7 @@ public class MainActivity extends AppCompatActivity
 
 			table.editableRowToView();
 
-			tableGeneral.newRowInMonth(editableMonth, editableYear, editableCurrency);
+			tableGeneral.newRowInMonth(new Session(editableMonth, editableYear, editableCurrency));
 			this.rowToDBRowConversion.add(tableGeneral.getLastIndex());
 			LedgerRow row = loadRow();
 

@@ -1,8 +1,8 @@
 package com.emmanuelmess.simpleaccounting.dataloading.async
 
 import android.os.AsyncTask
-import android.util.Pair
 import com.emmanuelmess.simpleaccounting.dataloading.data.MonthData
+import com.emmanuelmess.simpleaccounting.dataloading.data.Session
 
 import com.emmanuelmess.simpleaccounting.db.TableGeneral
 import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance
@@ -15,9 +15,7 @@ import java.util.ArrayList
  */
 
 class LoadMonthAsyncTask(
-	private val month: Int,
-	private val year: Int,
-	private val currency: String,
+	private val session: Session,
 	private val tableMonthlyBalance: TableMonthlyBalance?,
 	private val tableGeneral: TableGeneral,
 	private val listener: AsyncFinishedListener<MonthData>
@@ -34,9 +32,9 @@ class LoadMonthAsyncTask(
 		if (!isAlreadyLoading)
 			isAlreadyLoading = true
 		else
-			throw IllegalStateException("Already loading month: " + year + "-" + (month + 1))
+			throw IllegalStateException("Already loading month: ${session.year}-${session.month + 1}");
 
-		val data = tableGeneral.getIndexesForMonth(month, year, currency)
+		val data = tableGeneral.getIndexesForMonth(session)
 		val rowToDBRowConversion = ArrayList<Int>()
 
 		if (isCancelled) return null
@@ -47,11 +45,9 @@ class LoadMonthAsyncTask(
 		return (
 			if (isCancelled) null
 			else MonthData(
-				month,
-				year,
-				currency,
-				tableMonthlyBalance?.getBalanceLastMonthWithData(month, year, currency),
-				tableGeneral.getAllForMonth(month, year, currency),
+				session,
+				tableMonthlyBalance?.getBalanceLastMonthWithData(session),
+				tableGeneral.getAllForMonth(session),
 				rowToDBRowConversion)
 		)
 	}

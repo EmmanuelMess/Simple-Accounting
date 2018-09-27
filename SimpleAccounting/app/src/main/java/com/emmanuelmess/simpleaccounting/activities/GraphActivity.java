@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.emmanuelmess.simpleaccounting.R;
 import com.emmanuelmess.simpleaccounting.dataloading.async.LoadMonthAsyncTask;
+import com.emmanuelmess.simpleaccounting.dataloading.data.Session;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 import com.emmanuelmess.simpleaccounting.utils.Utils;
 import com.github.mikephil.charting.charts.LineChart;
@@ -33,9 +34,7 @@ import static java.lang.Integer.parseInt;
 
 public class GraphActivity extends AppCompatActivity {
 
-	public static final String GRAPH_MONTH = "com.emmanuelmess.simpleaccounting.IntentGraphMonth",
-			GRAPH_YEAR = "com.emmanuelmess.simpleaccounting.IntentGraphYear",
-			GRAPH_CURRENCY = "com.emmanuelmess.simpleaccounting.IntentGraphCurrency",
+	public static final String GRAPH_SESSION = "com.emmanuelmess.simpleaccounting.IntentGraphSession",
 			GRAPH_UPDATE_MONTH = "com.emmanuelmess.simpleaccounting.IntentGraphUpdateMonth",
 			GRAPH_UPDATE_YEAR = "com.emmanuelmess.simpleaccounting.IntentGraphUpdateYear";
 
@@ -55,19 +54,13 @@ public class GraphActivity extends AppCompatActivity {
 		// programmatically create a LineChart
 		LineChart chart = findViewById(R.id.chart);
 
-		Date d = new Date();
-		int currentMonth = parseInt(new SimpleDateFormat("M", Locale.getDefault()).format(d)) - 1,
-				currentYear = parseInt(new SimpleDateFormat("yyyy", Locale.getDefault()).format(d));
-
-		int month = getIntent().getIntExtra(GRAPH_MONTH, currentMonth);
-		int year = getIntent().getIntExtra(GRAPH_YEAR, currentYear);
-		String currency = getIntent().getStringExtra(GRAPH_CURRENCY);
+		Session session = getIntent().getParcelableExtra(GRAPH_SESSION);
 		int[] updateDate = {getIntent().getIntExtra(GRAPH_UPDATE_MONTH, -1),
 				getIntent().getIntExtra(GRAPH_UPDATE_YEAR, -1)};
 
-		((TextView) findViewById(R.id.title)).setText(Utils.INSTANCE.getTitle(this, month, year, currency, updateDate));
+		((TextView) findViewById(R.id.title)).setText(Utils.INSTANCE.getTitle(this, session, updateDate));
 
-		loadMonthAsyncTask = new LoadMonthAsyncTask(month, year, currency, null,
+		loadMonthAsyncTask = new LoadMonthAsyncTask(session, null,
 				new TableGeneral(this), (result) -> {
 			if(result.getDbRows().length > 0) {
 				List<Entry> entries = new ArrayList<>();
