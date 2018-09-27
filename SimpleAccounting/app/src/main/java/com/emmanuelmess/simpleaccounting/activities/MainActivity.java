@@ -458,22 +458,6 @@ public class MainActivity extends AppCompatActivity
 		if(!LoadMonthAsyncTask.Companion.isAlreadyLoading()) {
 			findViewById(R.id.progressBar).setVisibility(VISIBLE);
 
-			FIRST_REAL_ROW = 1;
-
-			if (table.getChildCount() > 1) {//DO NOT remove first line, the column titles
-				table.clear();
-			}
-
-			tableGeneral.getReadableDatabase();//triggers onUpdate()
-
-			tableDataManager.clear();
-
-			loadingMonthTask = new LoadMonthAsyncTask(month, year, currency, tableMonthlyBalance, tableGeneral, this);
-
-			editableMonth = month;
-			editableYear = year;
-			editableCurrency = currency;
-
 			TextView monthText = findViewById(R.id.textMonth);
 
 			if (month != -1 && !isSelectedMonthOlderThanUpdate()) {
@@ -483,6 +467,7 @@ public class MainActivity extends AppCompatActivity
 						+ " " + getString(MONTH_STRINGS[updateMonth]).toLowerCase() + "-" + updateYear);
 			}
 
+			loadingMonthTask = new LoadMonthAsyncTask(month, year, currency, tableMonthlyBalance, tableGeneral, this);
 			loadingMonthTask.execute();
 		} else if(editableMonth != month || editableYear != year || !Utils.INSTANCE.equal(editableCurrency, currency)) {
 			loadingMonthTask.cancel(true);
@@ -491,10 +476,17 @@ public class MainActivity extends AppCompatActivity
 
 	@Override
 	public void onAsyncFinished(MonthData dbData) {
-		if(table.getChildCount() - getFirstRealRow() > 0)
-			throw new IllegalArgumentException("Table already contains "
-					+ (table.getChildCount() - getFirstRealRow()) + " elements; " +
-					"delete all rows before executing LoadMonthAsyncTask!");
+		FIRST_REAL_ROW = 1;
+
+		if (table.getChildCount() > 1) {//DO NOT remove first line, the column titles
+			table.clear();
+		}
+
+		tableDataManager.clear();
+
+		editableMonth = dbData.getMonth();
+		editableYear = dbData.getYear();
+		editableCurrency = dbData.getCurrency();
 
 		if (dbData.getPrevBalance() != null) {
 			LedgerRow row = (LedgerRow) table.inflateEmptyRow();
