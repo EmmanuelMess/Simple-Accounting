@@ -15,7 +15,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,10 +34,9 @@ import com.emmanuelmess.simpleaccounting.activities.preferences.CurrencyPicker;
 import com.emmanuelmess.simpleaccounting.activities.views.LedgerRow;
 import com.emmanuelmess.simpleaccounting.activities.views.LedgerView;
 import com.emmanuelmess.simpleaccounting.activities.views.SpinnerNoUnwantedOnClick;
-import com.emmanuelmess.simpleaccounting.dataloading.async.AsyncFinishedListener;
 import com.emmanuelmess.simpleaccounting.dataloading.TableDataManager;
+import com.emmanuelmess.simpleaccounting.dataloading.async.AsyncFinishedListener;
 import com.emmanuelmess.simpleaccounting.dataloading.async.LoadMonthAsyncTask;
-import com.emmanuelmess.simpleaccounting.dataloading.async.LoadPrevBalanceAsyncTask;
 import com.emmanuelmess.simpleaccounting.dataloading.data.MonthData;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
@@ -60,8 +58,8 @@ import java.util.Locale;
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
-import static com.emmanuelmess.simpleaccounting.constants.SettingsConstants.INVERT_CREDIT_DEBIT_SETTING;
 import static com.emmanuelmess.simpleaccounting.activities.preferences.CurrencyPicker.DFLT;
+import static com.emmanuelmess.simpleaccounting.constants.SettingsConstants.INVERT_CREDIT_DEBIT_SETTING;
 
 /**
  * @author Emmanuel
@@ -94,7 +92,6 @@ public class MainActivity extends AppCompatActivity
 	private LayoutInflater inflater;
 	private ScrollView scrollView;
 	private LoadMonthAsyncTask loadingMonthTask = null;
-	private LoadPrevBalanceAsyncTask loadPrevBalance = null;
 
 	private int updateYear, updateMonth;
 
@@ -471,7 +468,7 @@ public class MainActivity extends AppCompatActivity
 
 			tableDataManager.clear();
 
-			loadingMonthTask = new LoadMonthAsyncTask(month, year, currency, tableGeneral, this);
+			loadingMonthTask = new LoadMonthAsyncTask(month, year, currency, tableMonthlyBalance, tableGeneral, this);
 
 			editableMonth = month;
 			editableYear = year;
@@ -480,34 +477,14 @@ public class MainActivity extends AppCompatActivity
 			TextView monthText = findViewById(R.id.textMonth);
 
 			if (month != -1 && !isSelectedMonthOlderThanUpdate()) {
-				((TextView) findViewById(R.id.textMonth)).setText(MONTH_STRINGS[month]);
-
-				loadPrevBalance = new LoadPrevBalanceAsyncTask(month, year, editableCurrency, tableMonthlyBalance,
-						(lastMonthData) -> {
-							if (lastMonthData != null) {
-								LedgerRow row = (LedgerRow) table.inflateEmptyRow();
-
-								setFirstRealRow(2);
-								table.editableRowToView();
-
-								tableDataManager.updateStartingTotal(new BigDecimal(lastMonthData));
-
-								row.setReference(R.string.previous_balance);
-								row.setCredit("");
-								row.setDebit("");
-								row.setBalance(tableDataManager.getStartingTotal());
-							}
-							loadingMonthTask.execute();
-						});
-
-				loadPrevBalance.execute();
+				monthText.setText(MONTH_STRINGS[month]);
 			} else {
 				monthText.setText(getString(R.string.before_update_1_2)
 						+ " " + getString(MONTH_STRINGS[updateMonth]).toLowerCase() + "-" + updateYear);
-				loadingMonthTask.execute();
 			}
+
+			loadingMonthTask.execute();
 		} else if(editableMonth != month || editableYear != year || !Utils.INSTANCE.equal(editableCurrency, currency)) {
-			loadPrevBalance.cancel(true);
 			loadingMonthTask.cancel(true);
 		}
 	}
@@ -518,6 +495,20 @@ public class MainActivity extends AppCompatActivity
 			throw new IllegalArgumentException("Table already contains "
 					+ (table.getChildCount() - getFirstRealRow()) + " elements; " +
 					"delete all rows before executing LoadMonthAsyncTask!");
+
+		if (dbData.getPrevBalance() != null) {
+			LedgerRow row = (LedgerRow) table.inflateEmptyRow();
+
+			setFirstRealRow(2);
+			table.editableRowToView();
+
+			tableDataManager.updateStartingTotal(new BigDecimal(dbData.getPrevBalance()));
+
+			row.setReference(R.string.previous_balance);
+			row.setCredit("");
+			row.setDebit("");
+			row.setBalance(tableDataManager.getStartingTotal());
+		}
 
 		int dataManagerIndex = 1;
 
