@@ -624,8 +624,7 @@ public class MainActivity extends AppCompatActivity
 	 * @return if the month selected is older than the update that added month selection
 	 */
 	private boolean isSelectedMonthOlderThanUpdate() {
-		return editableMonth == TableGeneral.OLDER_THAN_UPDATE
-				|| editableYear == TableGeneral.OLDER_THAN_UPDATE;
+		return new Session(editableMonth, editableYear, editableCurrency).isOlderThanUpdate();
 	}
 
 	@Override

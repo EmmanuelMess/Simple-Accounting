@@ -20,13 +20,15 @@ object Utils {
 	             updateDate: IntArray): String = with(context) {
 		val (month, year, currency) = session
 
-		var title: String = if (year != TableGeneral.OLDER_THAN_UPDATE) {
-				"${getString(MONTH_STRINGS[month])}-$year"
-			} else {
+		var title = (
+			if(session.isOlderThanUpdate()) {
 				(getString(R.string.before_update_1_2)
 					+ " ${getString(MainActivity.MONTH_STRINGS[updateDate[0]]).toLowerCase()}"
 					+ "-${updateDate[1]}")
+			} else {
+				"${getString(MONTH_STRINGS[month])}-$year"
 			}
+		)
 
 		if (currency != "") {
 			title += " [$currency]"
