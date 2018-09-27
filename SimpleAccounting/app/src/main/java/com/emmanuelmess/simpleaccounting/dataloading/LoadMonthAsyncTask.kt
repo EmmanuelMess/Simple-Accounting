@@ -1,8 +1,8 @@
-package com.emmanuelmess.simpleaccounting.dataloading.async
+package com.emmanuelmess.simpleaccounting.dataloading
 
 import android.os.AsyncTask
-import com.emmanuelmess.simpleaccounting.dataloading.data.MonthData
-import com.emmanuelmess.simpleaccounting.dataloading.data.Session
+import com.emmanuelmess.simpleaccounting.data.MonthData
+import com.emmanuelmess.simpleaccounting.data.Session
 
 import com.emmanuelmess.simpleaccounting.db.TableGeneral
 import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance

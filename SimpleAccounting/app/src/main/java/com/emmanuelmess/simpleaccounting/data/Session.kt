@@ -1,4 +1,4 @@
-package com.emmanuelmess.simpleaccounting.dataloading.data
+package com.emmanuelmess.simpleaccounting.data
 
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize

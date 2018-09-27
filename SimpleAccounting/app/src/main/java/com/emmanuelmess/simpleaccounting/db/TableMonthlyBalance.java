@@ -4,10 +4,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.emmanuelmess.simpleaccounting.dataloading.data.Session;
+import com.emmanuelmess.simpleaccounting.data.Session;
 
-import java.util.ArrayList;
-import java.util.List;
 import static android.database.Cursor.FIELD_TYPE_NULL;
 import static com.alexfu.sqlitequerybuilder.api.SQLiteClauseBuilder.clause;
 import static com.alexfu.sqlitequerybuilder.api.SQLiteExpressionBuilder.caseExp;

@@ -1,4 +1,4 @@
-package com.emmanuelmess.simpleaccounting.dataloading
+package com.emmanuelmess.simpleaccounting.data
 
 import java.math.BigDecimal
 import java.util.ArrayList

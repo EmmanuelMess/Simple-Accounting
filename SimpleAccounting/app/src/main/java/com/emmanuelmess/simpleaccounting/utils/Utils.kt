@@ -5,20 +5,15 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.support.annotation.ColorRes
-import android.text.Editable
-import android.text.TextWatcher
-import android.widget.TextView
 
 import com.emmanuelmess.simpleaccounting.activities.MainActivity
 import com.emmanuelmess.simpleaccounting.R
 import com.emmanuelmess.simpleaccounting.db.TableGeneral
 
-import java.lang.reflect.Field
 import java.math.BigDecimal
-import java.util.Objects
 
 import com.emmanuelmess.simpleaccounting.activities.MainActivity.MONTH_STRINGS
-import com.emmanuelmess.simpleaccounting.dataloading.data.Session
+import com.emmanuelmess.simpleaccounting.data.Session
 
 object Utils {
 	fun getTitle(context: Context, session: Session,
