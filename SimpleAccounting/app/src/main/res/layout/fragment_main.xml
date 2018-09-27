@@ -1,0 +1,60 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.emmanuelmess.simpleaccounting.fragments.MainFragment"
+    android:id="@+id/relativeLayout">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:id="@+id/scrollView">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_height="match_parent"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:id="@+id/textMonth"
+                android:gravity="center"
+                android:maxLines="1"
+                android:textSize="@dimen/title"
+                android:layout_width="match_parent"
+                android:textStyle="normal|bold"/>
+
+            <com.emmanuelmess.simpleaccounting.activities.views.LedgerView
+                android:id="@+id/table"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/textMonth"/>
+
+            <android.support.v4.widget.Space
+                android:id="@+id/space"
+                android:layout_width="match_parent"
+                android:layout_height="72dp"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentBottom="true"
+                android:layout_below="@+id/table"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentStart="true"/>
+
+        </RelativeLayout>
+    </ScrollView>
+
+    <ProgressBar
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBar"
+        android:layout_centerInParent="true"/>
+
+</RelativeLayout>
