@@ -1,10 +1,8 @@
 package com.emmanuelmess.simpleaccounting
 
 import android.content.Context
-import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.pdf.PdfDocument
 import android.os.Build
 import android.os.Bundle
 import android.os.CancellationSignal
@@ -20,7 +18,7 @@ import android.widget.TableLayout
 import android.widget.TextView
 
 import com.emmanuelmess.simpleaccounting.activities.MainActivity
-import com.emmanuelmess.simpleaccounting.dataloading.data.Session
+import com.emmanuelmess.simpleaccounting.data.Session
 import com.emmanuelmess.simpleaccounting.utils.Utils
 import com.emmanuelmess.simpleaccounting.utils.get
 

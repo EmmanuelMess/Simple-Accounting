@@ -3,7 +3,6 @@ package com.emmanuelmess.simpleaccounting.activities;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -22,8 +21,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.emmanuelmess.simpleaccounting.R;
-import com.emmanuelmess.simpleaccounting.dataloading.async.AsyncFinishedListener;
-import com.emmanuelmess.simpleaccounting.dataloading.async.GetMonthsWithDataAsyncTask;
+import com.emmanuelmess.simpleaccounting.dataloading.GetMonthsWithDataAsyncTask;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 
 import java.text.SimpleDateFormat;

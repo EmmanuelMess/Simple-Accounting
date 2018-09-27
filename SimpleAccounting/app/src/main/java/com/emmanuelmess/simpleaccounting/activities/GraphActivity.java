@@ -9,8 +9,8 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.emmanuelmess.simpleaccounting.R;
-import com.emmanuelmess.simpleaccounting.dataloading.async.LoadMonthAsyncTask;
-import com.emmanuelmess.simpleaccounting.dataloading.data.Session;
+import com.emmanuelmess.simpleaccounting.dataloading.LoadMonthAsyncTask;
+import com.emmanuelmess.simpleaccounting.data.Session;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 import com.emmanuelmess.simpleaccounting.utils.Utils;
 import com.github.mikephil.charting.charts.LineChart;
@@ -24,11 +24,8 @@ import com.github.mikephil.charting.formatter.IValueFormatter;
 import com.github.mikephil.charting.utils.ViewPortHandler;
 
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import static java.lang.Integer.parseInt;
 

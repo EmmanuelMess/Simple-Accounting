@@ -1,4 +1,4 @@
-package com.emmanuelmess.simpleaccounting.dataloading.data
+package com.emmanuelmess.simpleaccounting.data
 
 data class MonthData(
 	val session: Session,

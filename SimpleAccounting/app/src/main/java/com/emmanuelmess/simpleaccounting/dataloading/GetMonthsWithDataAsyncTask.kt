@@ -1,4 +1,4 @@
-package com.emmanuelmess.simpleaccounting.dataloading.async
+package com.emmanuelmess.simpleaccounting.dataloading
 
 import android.os.AsyncTask
 import com.emmanuelmess.simpleaccounting.db.TableGeneral

@@ -5,7 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.emmanuelmess.simpleaccounting.dataloading.data.Session;
+import com.emmanuelmess.simpleaccounting.data.Session;
 import com.emmanuelmess.simpleaccounting.utils.Utils;
 
 import java.math.BigDecimal;
