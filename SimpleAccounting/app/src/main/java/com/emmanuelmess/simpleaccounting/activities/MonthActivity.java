@@ -22,6 +22,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.emmanuelmess.simpleaccounting.R;
+import com.emmanuelmess.simpleaccounting.dataloading.async.AsyncFinishedListener;
+import com.emmanuelmess.simpleaccounting.dataloading.async.GetMonthsWithDataAsyncTask;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 
 import java.text.SimpleDateFormat;
@@ -35,7 +37,6 @@ import java.util.Locale;
  */
 public class MonthActivity extends ListActivity {
 
-	private TableGeneral tableGeneral;
 	private MonthListAdapter monthListAdapter;
 	private ArrayList<Integer[]> dateIntValues = new ArrayList<>();
 	private int updateYear, updateMonth;
@@ -71,62 +72,51 @@ public class MonthActivity extends ListActivity {
 		ActionBar ab = delegate.getSupportActionBar();
 		ab.setDisplayHomeAsUpEnabled(true);
 
-
-		tableGeneral = new TableGeneral(this);
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
+		new GetMonthsWithDataAsyncTask(new TableGeneral(this), existingMonths -> {
+			ArrayList<String[]> monthListData = new ArrayList<>();
+			boolean olderThanAlreadyPut = false;
 
-		(new AsyncTask<Void, Void, int[][]>() {
-			@Override
-			protected int[][] doInBackground(Void... p) {
-				return tableGeneral.getMonthsWithData();
+			for (int d[] : existingMonths) {
+				int m = d[0], y = d[1];
+
+				if (m == TableGeneral.OLDER_THAN_UPDATE && y == TableGeneral.OLDER_THAN_UPDATE
+						&& olderThanAlreadyPut)
+					continue;
+
+				if (m == TableGeneral.OLDER_THAN_UPDATE && y == TableGeneral.OLDER_THAN_UPDATE) {
+					olderThanAlreadyPut = true;
+
+					updateYear = preferences.getInt(MainActivity.UPDATE_YEAR_SETTING, -1);
+					updateMonth = preferences.getInt(MainActivity.UPDATE_MONTH_SETTING, -1);
+
+					monthListData.add(new String[]{getString(R.string.before_update_1_2)
+							+ " " + getString(MainActivity.MONTH_STRINGS[updateMonth]).toLowerCase(), String.valueOf(updateYear)});
+					dateIntValues.add(new Integer[]{m, y});
+				} else {
+					monthListData.add(new String[]{getString(MainActivity.MONTH_STRINGS[m]),
+							String.valueOf(y)});
+					dateIntValues.add(new Integer[]{m, y});
+				}
 			}
 
-			@Override
-			protected void onPostExecute(int[][] existingMonths) {
-				ArrayList<String[]> monthListData = new ArrayList<>();
-				boolean olderThanAlreadyPut = false;
+			int currentM = Integer.parseInt(new SimpleDateFormat("M", Locale.getDefault()).format(new Date())) - 1;
+			//YEARS ALREADY START IN 0!!!
+			int currentY = Integer.parseInt(new SimpleDateFormat("yyyy", Locale.getDefault()).format(new Date()));
 
-				for (int d[] : existingMonths) {
-					int m = d[0], y = d[1];
-
-					if(m == TableGeneral.OLDER_THAN_UPDATE && y == TableGeneral.OLDER_THAN_UPDATE
-							&& olderThanAlreadyPut)
-						continue;
-
-					if(m == TableGeneral.OLDER_THAN_UPDATE && y == TableGeneral.OLDER_THAN_UPDATE) {
-						olderThanAlreadyPut = true;
-
-						updateYear = preferences.getInt(MainActivity.UPDATE_YEAR_SETTING, -1);
-						updateMonth = preferences.getInt(MainActivity.UPDATE_MONTH_SETTING, -1);
-
-						monthListData.add(new String[]{getString(R.string.before_update_1_2)
-								+ " " + getString(MainActivity.MONTH_STRINGS[updateMonth]).toLowerCase(), String.valueOf(updateYear)});
-						dateIntValues.add(new Integer[]{m, y});
-					} else {
-						monthListData.add(new String[]{getString(MainActivity.MONTH_STRINGS[m]),
-								String.valueOf(y)});
-						dateIntValues.add(new Integer[]{m, y});
-					}
-				}
-
-				int currentM = Integer.parseInt(new SimpleDateFormat("M", Locale.getDefault()).format(new Date())) - 1;
-				//YEARS ALREADY START IN 0!!!
-				int currentY = Integer.parseInt(new SimpleDateFormat("yyyy", Locale.getDefault()).format(new Date()));
-
-				if (dateIntValues.size() == 0
-						|| !Arrays.equals(dateIntValues.get(dateIntValues.size()-1), new Integer[]{currentM, currentY})) {
-					monthListData.add(new String[]{getString(MainActivity.MONTH_STRINGS[currentM]), String.valueOf(currentY)});
-					dateIntValues.add(new Integer[]{currentM, currentY});
-				}
-
-				Collections.reverse(monthListData);
-				Collections.reverse(dateIntValues);
-
-				monthListAdapter = new MonthListAdapter(getApplicationContext(),
-						monthListData.toArray(new String[monthListData.size()][2]));
-				setListAdapter(monthListAdapter);
+			if (dateIntValues.size() == 0
+					|| !Arrays.equals(dateIntValues.get(dateIntValues.size() - 1), new Integer[]{currentM, currentY})) {
+				monthListData.add(new String[]{getString(MainActivity.MONTH_STRINGS[currentM]), String.valueOf(currentY)});
+				dateIntValues.add(new Integer[]{currentM, currentY});
 			}
+
+			Collections.reverse(monthListData);
+			Collections.reverse(dateIntValues);
+
+			monthListAdapter = new MonthListAdapter(getApplicationContext(),
+					monthListData.toArray(new String[monthListData.size()][2]));
+			setListAdapter(monthListAdapter);
 		}).execute();
 	}
 
