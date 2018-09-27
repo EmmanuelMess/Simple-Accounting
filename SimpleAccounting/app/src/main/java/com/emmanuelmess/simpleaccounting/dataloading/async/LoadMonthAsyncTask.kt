@@ -26,6 +26,8 @@ class LoadMonthAsyncTask(
 	@Suppress("UsePropertyAccessSyntax")
 	override fun onPreExecute() {
 		tableMonthlyBalance?.getReadableDatabase()//updates the database, calls onUpgrade()
+		tableGeneral.getReadableDatabase()//triggers onUpdate()
+
 	}
 
 	override fun doInBackground(vararg p: Void): MonthData? {
@@ -45,6 +47,9 @@ class LoadMonthAsyncTask(
 		return (
 			if (isCancelled) null
 			else MonthData(
+				month,
+				year,
+				currency,
 				tableMonthlyBalance?.getBalanceLastMonthWithData(month, year, currency),
 				tableGeneral.getAllForMonth(month, year, currency),
 				rowToDBRowConversion)
