@@ -4,6 +4,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.emmanuelmess.simpleaccounting.dataloading.data.Session;
+
 import java.util.ArrayList;
 import java.util.List;
 import static android.database.Cursor.FIELD_TYPE_NULL;
@@ -58,7 +60,10 @@ public class TableMonthlyBalance extends Database {
 		CV.clear();
 	}
 
-	public Double getBalanceLastMonthWithData(int month, int year, String currency) {
+	public Double getBalanceLastMonthWithData(Session session) {
+		int month = session.getMonth();
+		int year = session.getYear();
+		String currency = session.getCurrency();
 		String querySum =
 				select(COLUMNS[3])
 				.from(TABLE_NAME)

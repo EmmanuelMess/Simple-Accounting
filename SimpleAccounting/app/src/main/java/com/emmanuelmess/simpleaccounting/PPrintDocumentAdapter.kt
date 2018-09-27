@@ -20,6 +20,7 @@ import android.widget.TableLayout
 import android.widget.TextView
 
 import com.emmanuelmess.simpleaccounting.activities.MainActivity
+import com.emmanuelmess.simpleaccounting.dataloading.data.Session
 import com.emmanuelmess.simpleaccounting.utils.Utils
 import com.emmanuelmess.simpleaccounting.utils.get
 
@@ -27,7 +28,12 @@ import java.io.FileOutputStream
 import java.io.IOException
 
 @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-class PPrintDocumentAdapter(private val context: Context, private val table: TableLayout, private val month: Int, private val year: Int, private val currency: String, private val updateDate: IntArray) : PrintDocumentAdapter() {
+class PPrintDocumentAdapter(
+    private val context: Context,
+    private val table: TableLayout,
+    private val session: Session,
+    private val updateDate: IntArray
+) : PrintDocumentAdapter() {
 
     companion object {
         //IN  1/72"
@@ -96,7 +102,7 @@ class PPrintDocumentAdapter(private val context: Context, private val table: Tab
 
             writtenPages = BooleanArray(amountOfPages)
 
-            title = Utils.getTitle(context, month, year, currency, updateDate)
+            title = Utils.getTitle(context, session, updateDate)
 
             val info = PrintDocumentInfo.Builder(title + ".pdf")
                     .setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
