@@ -51,7 +51,8 @@
         android:layout_height="36dp"
         android:id="@+id/add"
         android:clickable="true"
-        android:background="?android:attr/selectableItemBackground">
+        android:background="?android:attr/selectableItemBackground"
+        android:focusable="true">
 
         <TextView
             android:text="@string/add_item"
