@@ -4,9 +4,8 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.support.design.widget.Snackbar
-import android.support.v7.app.ActionBar
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.ActionBar
+import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ListAdapter
@@ -14,6 +13,7 @@ import android.widget.ListView
 import android.widget.SimpleAdapter
 
 import com.emmanuelmess.simpleaccounting.R
+import com.google.android.material.snackbar.Snackbar
 
 import java.util.ArrayList
 import java.util.HashMap
@@ -49,8 +49,7 @@ class DonateActivity : AppCompatActivity() {
 								startActivity(this@with)
 							}
 						} catch (e: ActivityNotFoundException) {
-							Snackbar.make(it, R.string.no_bitcoin_app,
-								Snackbar.LENGTH_LONG).show()
+							Snackbar.make(it, R.string.no_bitcoin_app, Snackbar.LENGTH_LONG).show()
 						}
 					}
 				}
