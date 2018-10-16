@@ -65,7 +65,7 @@ dependencies {
     implementation 'com.github.amlcurran.showcaseview:library:5.4.3'
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
 
-    implementation 'com.mikepenz:aboutlibraries:6.0.8'
+    implementation 'com.mikepenz:aboutlibraries:6.2.0'
 
     // --From here for testing--
     testImplementation "org.robolectric:robolectric:3.8"
