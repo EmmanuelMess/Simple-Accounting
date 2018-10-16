@@ -4,7 +4,7 @@ import android.content.Context
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
-import android.support.annotation.ColorRes
+import androidx.annotation.ColorRes
 
 import com.emmanuelmess.simpleaccounting.activities.MainActivity
 import com.emmanuelmess.simpleaccounting.R
