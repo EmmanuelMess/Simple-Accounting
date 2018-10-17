@@ -62,4 +62,7 @@
     <string name="easier">These people made my job easier</string>
     <string name="simpleaccounting_description">Android app that helps you balance</string>
     <string name="license">License</string>
+
+    <string name="patreon_dialog_title">We need you!</string>
+    <string name="patreon_dialog_text">Would you enjoy a new feature?\nJust by pledging $1, you can! :)</string>
 </resources>

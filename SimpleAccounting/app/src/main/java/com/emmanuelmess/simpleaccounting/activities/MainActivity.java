@@ -41,6 +41,7 @@ import com.emmanuelmess.simpleaccounting.data.MonthData;
 import com.emmanuelmess.simpleaccounting.data.Session;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
+import com.emmanuelmess.simpleaccounting.patreon.PatreonDialogKt;
 import com.emmanuelmess.simpleaccounting.utils.ACRAHelper;
 import com.emmanuelmess.simpleaccounting.utils.SimpleBalanceFormatter;
 import com.emmanuelmess.simpleaccounting.utils.SimpleTextWatcher;
@@ -247,6 +248,8 @@ public class MainActivity extends AppCompatActivity
 
 			invalidateToolbar = false;
 		}
+
+		PatreonDialogKt.createPatreonDialog(this).show();
 	}
 
 	@Override
