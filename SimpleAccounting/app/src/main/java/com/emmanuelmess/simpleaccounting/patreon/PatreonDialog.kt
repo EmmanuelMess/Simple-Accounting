@@ -16,6 +16,8 @@ fun Context.createPatreonDialog(): AlertDialog = with(AlertDialog.Builder(this))
 		alertDialog.dismiss()
 	}
 	setPositiveButton("OK!") { _, _ ->
+		PatreonController.Metrics.okWasClicked()
+
 		Intent(ACTION_VIEW).let {
 			it.data = Uri.parse("https://patreon.com/emmanuelmess")
 			context.startActivity(it)

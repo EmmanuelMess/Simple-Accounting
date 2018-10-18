@@ -41,7 +41,7 @@ import com.emmanuelmess.simpleaccounting.data.MonthData;
 import com.emmanuelmess.simpleaccounting.data.Session;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
-import com.emmanuelmess.simpleaccounting.patreon.PatreonDialogKt;
+import com.emmanuelmess.simpleaccounting.patreon.PatreonController;
 import com.emmanuelmess.simpleaccounting.utils.ACRAHelper;
 import com.emmanuelmess.simpleaccounting.utils.SimpleBalanceFormatter;
 import com.emmanuelmess.simpleaccounting.utils.SimpleTextWatcher;
@@ -201,6 +201,8 @@ public class MainActivity extends AppCompatActivity
 			}
 		});
 
+		PatreonController.Metrics.INSTANCE.appWasStarted(this, preferences);
+
 		fab = findViewById(R.id.fab);
 		if (isSelectedMonthOlderThanUpdate()) {
 			fab.setVisibility(GONE);
@@ -232,8 +234,16 @@ public class MainActivity extends AppCompatActivity
 	}
 
 	@Override
+	protected void onPause() {
+		PatreonController.Metrics.INSTANCE.onPauseWasCalled(this);
+		super.onPause();
+	}
+
+	@Override
 	protected void onResume() {
+		PatreonController.Metrics.INSTANCE.onResumeWasCalled(this);
 		super.onResume();
+
 		table.setInvertCreditAndDebit(getDefaultSharedPreferences(this).getBoolean(INVERT_CREDIT_DEBIT_SETTING, false));
 
 		if (invalidateTable && (loadingMonthTask == null || loadingMonthTask.getStatus() != AsyncTask.Status.RUNNING)) {
@@ -248,8 +258,6 @@ public class MainActivity extends AppCompatActivity
 
 			invalidateToolbar = false;
 		}
-
-		PatreonDialogKt.createPatreonDialog(this).show();
 	}
 
 	@Override
