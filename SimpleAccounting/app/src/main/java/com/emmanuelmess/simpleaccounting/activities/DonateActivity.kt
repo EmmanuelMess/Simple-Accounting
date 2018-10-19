@@ -48,4 +48,11 @@ class DonateActivity : AppCompatActivity() {
 		}
 	}
 
+	fun onClickPaypal(view: View) {
+		Intent(Intent.ACTION_VIEW).let {
+			it.data = Uri.parse("https://www.paypal.com/invoice/p/#NNT9XYPXLB69BG3A")
+			startActivity(it)
+		}
+	}
+
 }
