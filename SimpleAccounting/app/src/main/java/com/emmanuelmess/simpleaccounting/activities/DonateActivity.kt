@@ -14,6 +14,8 @@ import android.widget.ListView
 import android.widget.SimpleAdapter
 
 import com.emmanuelmess.simpleaccounting.R
+import com.emmanuelmess.simpleaccounting.patreon.PatreonController
+import kotlinx.android.synthetic.main.activity_donate.*
 
 import java.util.ArrayList
 import java.util.HashMap
@@ -29,32 +31,20 @@ class DonateActivity : AppCompatActivity() {
 		setContentView(R.layout.activity_donate)
 
 		supportActionBar?.setDisplayHomeAsUpEnabled(true)
+	}
 
-		// create a new ListView, set the adapter and item click listener
-		findViewById<ListView>(R.id.listView).let {
-			val adapterData = listOf(mapOf(
-				"title" to getString(R.string.bitcoin),
-				"summary" to BITCOIN_DIRECTION
-			))
+	fun onClickDonate(view: View) {
+		PatreonController.openPage(this)
+	}
 
-			it.adapter = SimpleAdapter(this, adapterData, R.layout.item_donate,
-				arrayOf("title", "summary"), intArrayOf(R.id.title, R.id.summary))
-
-			it.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
-				when (position) {
-					0 -> {
-						try {
-							with(Intent(Intent.ACTION_VIEW)) {
-								data = Uri.parse("bitcoin:$BITCOIN_DIRECTION?amount=0.0005")
-								startActivity(this@with)
-							}
-						} catch (e: ActivityNotFoundException) {
-							Snackbar.make(it, R.string.no_bitcoin_app,
-								Snackbar.LENGTH_LONG).show()
-						}
-					}
-				}
+	fun onClickBitcoin(view: View) {
+		try {
+			with(Intent(Intent.ACTION_VIEW)) {
+				data = Uri.parse("bitcoin:$BITCOIN_DIRECTION?amount=0.0005")
+				startActivity(this@with)
 			}
+		} catch (e: ActivityNotFoundException) {
+			Snackbar.make(view, R.string.no_bitcoin_app, Snackbar.LENGTH_LONG).show()
 		}
 	}
 

@@ -1,7 +1,9 @@
 package com.emmanuelmess.simpleaccounting.patreon
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.support.v7.preference.PreferenceManager.getDefaultSharedPreferences
 import android.util.Log
 import com.emmanuelmess.simpleaccounting.BuildConfig
@@ -78,5 +80,12 @@ object PatreonController {
 	}
 
 	fun startDialog(context: Context) = context.createPatreonDialog().show()
+
+	fun openPage(context: Context) {
+		Intent(Intent.ACTION_VIEW).let {
+			it.data = Uri.parse("https://patreon.com/emmanuelmess")
+			context.startActivity(it)
+		}
+	}
 
 }
