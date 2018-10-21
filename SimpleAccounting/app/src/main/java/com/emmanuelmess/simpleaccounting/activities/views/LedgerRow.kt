@@ -14,6 +14,7 @@ import java.math.BigDecimal
 
 import com.emmanuelmess.simpleaccounting.activities.MainActivity.EDIT_IDS
 import com.emmanuelmess.simpleaccounting.activities.MainActivity.TEXT_IDS
+import com.emmanuelmess.simpleaccounting.activities.controllers.LedgerRowContextualActionBarController
 
 class LedgerRow(context: Context, attrs: AttributeSet) : TableRow(context, attrs) {
 
@@ -25,6 +26,8 @@ class LedgerRow(context: Context, attrs: AttributeSet) : TableRow(context, attrs
     private lateinit var debitPair: EditableViewPair<TextView, TextView, EditText>
 
     private lateinit var balanceText: TextView
+
+    lateinit var contextualActionBarController: LedgerRowContextualActionBarController
 
     val date: CharSequence
         get() = datePair.get().text
@@ -111,9 +114,13 @@ class LedgerRow(context: Context, attrs: AttributeSet) : TableRow(context, attrs
         referencePair.isBeingEdited = true
         creditPair.isBeingEdited = true
         debitPair.isBeingEdited = true
+
+        contextualActionBarController.startEditing()
     }
 
     fun makeRowNotEditable() {
+        contextualActionBarController.stopEditing()
+
         datePair.isBeingEdited = false
         referencePair.isBeingEdited = false
         creditPair.isBeingEdited = false

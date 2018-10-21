@@ -15,12 +15,14 @@ import java.math.BigDecimal
 
 import com.emmanuelmess.simpleaccounting.activities.MainActivity.EDIT_IDS
 import com.emmanuelmess.simpleaccounting.activities.MainActivity.TEXT_IDS
+import com.emmanuelmess.simpleaccounting.activities.controllers.LedgerRowContextualActionBarController
 import com.emmanuelmess.simpleaccounting.utils.get
 
 class LedgerView(context: Context, attrs: AttributeSet) : TableLayout(context, attrs) {
 
 	private val inflater: LayoutInflater
 	private lateinit var listener: LedgeCallbacks
+	private lateinit var contextualActionBarController: LedgerRowContextualActionBarController
 
 	private var invertCreditAndDebit = false
 	/**
@@ -52,6 +54,10 @@ class LedgerView(context: Context, attrs: AttributeSet) : TableLayout(context, a
 
 	fun setListener(l: LedgeCallbacks) {
 		listener = l
+	}
+
+	fun setActionBarController(c: LedgerRowContextualActionBarController) {
+		contextualActionBarController = c
 	}
 
 	fun setInvertCreditAndDebit(invert: Boolean) {
@@ -128,6 +134,7 @@ class LedgerView(context: Context, attrs: AttributeSet) : TableLayout(context, a
 		editableRow = childCount - 1
 		val row = get<LedgerRow>(editableRow)!!
 		row.formatter = formatter
+		row.contextualActionBarController = contextualActionBarController
 
 		if (invertCreditAndDebit) {
 			row.invertDebitCredit()
