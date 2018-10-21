@@ -45,7 +45,6 @@
     <string name="pref_summary_invertcreditdebit">Credito y debito intercambian lugares en la tabla</string>
     <string name="item_hint">Ingrese u. monet.</string>
     <string name="no_bitcoin_app">No hay applicación de billetera bitcoin</string>
-    <string name="donate">Donar</string>
     <string name="graph">Graficar</string>
     <string name="nothing_to_graph">No hay nada que graficar</string>
     <string name="feedback">Enviar comentarios</string>
@@ -57,4 +56,8 @@
     <string name="easier">Estas personas facilitaron mi trabajo</string>
     <string name="simpleaccounting_description">La app que te facilita guardar tu balance!</string>
     <string name="license">Licencias</string>
+    <string name="patreon_dialog_title">Te necesitamos!</string>
+    <string name="patreon_dialog_text">Te gustarian mejoras?\nPor solo $1, son tuyas! :)</string>
+    <string name="support_features">Ayudar a mejorar la app</string>
+    <string name="other_methods">Otros metodos</string>
 </resources>

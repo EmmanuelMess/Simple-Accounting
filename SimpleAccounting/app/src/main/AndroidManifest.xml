@@ -44,7 +44,7 @@
         </activity>
         <activity
             android:name=".activities.DonateActivity"
-            android:label="@string/donate"
+            android:label="@string/support_features"
             android:parentActivityName=".activities.MainActivity">
 
             <!-- Parent activity meta-data to support 4.0 and lower -->

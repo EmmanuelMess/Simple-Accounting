@@ -46,7 +46,6 @@
     <string name="pref_title_invertcreditdebit">Invert credit and debit</string>
     <string name="pref_summary_invertcreditdebit">Credit and debit interchange places in table</string>
     <string name="item_hint">Set currency</string>
-    <string name="donate">Donate</string>
     <string name="bitcoin" translatable="false">Bitcoins</string>
     <string name="no_bitcoin_app">No bitcoin wallet app installed</string>
     <string name="graph">Graph</string>
@@ -62,4 +61,10 @@
     <string name="easier">These people made my job easier</string>
     <string name="simpleaccounting_description">Android app that helps you balance</string>
     <string name="license">License</string>
+
+    <string name="patreon_dialog_title">We need you!</string>
+    <string name="patreon_dialog_text">Would you enjoy a new feature?\nJust by pledging $1, you can! :)</string>
+    <string name="patreon_username" translatable="false">EmmanuelMess</string>
+    <string name="support_features">Support features</string>
+    <string name="other_methods">Other methods</string>
 </resources>

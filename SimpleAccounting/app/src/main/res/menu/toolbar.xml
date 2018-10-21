@@ -30,7 +30,7 @@
 
     <item
         android:id="@+id/action_donate"
-        android:title="@string/donate"
+        android:title="@string/support_features"
         app:showAsAction="never"/>
 
     <!-- Settings, should always be in the overflow-->
