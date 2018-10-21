@@ -66,4 +66,5 @@
     <string name="patreon_dialog_text">Would you enjoy a new feature?\nJust by pledging $1, you can! :)</string>
     <string name="patreon_username" translatable="false">EmmanuelMess</string>
     <string name="support_features">Support features</string>
+    <string name="other_methods">Other methods</string>
 </resources>
