@@ -2,6 +2,7 @@ package com.emmanuelmess.simpleaccounting.activities.views
 
 import android.content.Context
 import android.support.annotation.StringRes
+import android.support.v4.view.ViewCompat
 import android.util.AttributeSet
 import android.view.View
 import android.widget.EditText
@@ -115,6 +116,8 @@ class LedgerRow(context: Context, attrs: AttributeSet) : TableRow(context, attrs
         creditPair.isBeingEdited = true
         debitPair.isBeingEdited = true
 
+        ViewCompat.setElevation(this, 50f)
+
         contextualActionBarController.startEditing()
     }
 
@@ -125,6 +128,8 @@ class LedgerRow(context: Context, attrs: AttributeSet) : TableRow(context, attrs
         referencePair.isBeingEdited = false
         creditPair.isBeingEdited = false
         debitPair.isBeingEdited = false
+
+        ViewCompat.setElevation(this, 0f)
 
         for (i in TEXT_IDS.indices) {
             val t = findViewById<EditText>(EDIT_IDS[i])

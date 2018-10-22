@@ -140,6 +140,8 @@ class LedgerView(context: Context, attrs: AttributeSet) : TableLayout(context, a
 			row.invertDebitCredit()
 		}
 
+		contextualActionBarController.startEditing()
+
 		return row
 	}
 
