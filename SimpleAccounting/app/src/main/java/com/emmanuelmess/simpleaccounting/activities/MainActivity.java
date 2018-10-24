@@ -30,10 +30,9 @@ import android.widget.TextView;
 
 import com.emmanuelmess.simpleaccounting.PPrintDocumentAdapter;
 import com.emmanuelmess.simpleaccounting.R;
-import com.emmanuelmess.simpleaccounting.activities.controllers.LedgerRowContextualActionBarController;
+import com.emmanuelmess.simpleaccounting.activities.controllers.LedgerRowEditingController;
 import com.emmanuelmess.simpleaccounting.activities.preferences.CurrencyPicker;
 import com.emmanuelmess.simpleaccounting.activities.views.LedgerRow;
-import com.emmanuelmess.simpleaccounting.activities.views.LedgerRowContextualActionBar;
 import com.emmanuelmess.simpleaccounting.activities.views.LedgerView;
 import com.emmanuelmess.simpleaccounting.activities.views.SpinnerNoUnwantedOnClick;
 import com.emmanuelmess.simpleaccounting.data.TableDataManager;
@@ -43,6 +42,7 @@ import com.emmanuelmess.simpleaccounting.data.MonthData;
 import com.emmanuelmess.simpleaccounting.data.Session;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
+import com.emmanuelmess.simpleaccounting.fragments.EditLedgerRowFragment;
 import com.emmanuelmess.simpleaccounting.patreon.PatreonController;
 import com.emmanuelmess.simpleaccounting.utils.ACRAHelper;
 import com.emmanuelmess.simpleaccounting.utils.SimpleBalanceFormatter;
@@ -160,7 +160,7 @@ public class MainActivity extends AppCompatActivity
 		table = findViewById(R.id.table);
 		table.setFormatter(new SimpleBalanceFormatter());
 		table.setListener(this);
-		table.setActionBarController(new LedgerRowContextualActionBarController(this));
+		table.setActionBarController(new LedgerRowEditingController(this));
 		tableDataManager = new TableDataManager();
 		tableGeneral = new TableGeneral(this);//DO NOT change the order of table creation!
 		tableMonthlyBalance = new TableMonthlyBalance(this);
@@ -263,9 +263,17 @@ public class MainActivity extends AppCompatActivity
 		}
 	}
 
-	public void stopEditing() {
+	public void startEditingRow(EditLedgerRowFragment editLedgerRowFragment) {
+		getSupportFragmentManager().beginTransaction()
+				.add(R.id.relativeLayout, editLedgerRowFragment).commit();
+	}
+
+	public void stopEditingRow(EditLedgerRowFragment editLedgerRowFragment) {
 		if (table.isEditingRow()){
 			table.editableRowToView();
+
+			getSupportFragmentManager().beginTransaction()
+					.remove(editLedgerRowFragment).commit();
 		}
 	}
 

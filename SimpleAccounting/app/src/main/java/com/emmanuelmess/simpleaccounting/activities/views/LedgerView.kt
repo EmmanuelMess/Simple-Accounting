@@ -15,14 +15,14 @@ import java.math.BigDecimal
 
 import com.emmanuelmess.simpleaccounting.activities.MainActivity.EDIT_IDS
 import com.emmanuelmess.simpleaccounting.activities.MainActivity.TEXT_IDS
-import com.emmanuelmess.simpleaccounting.activities.controllers.LedgerRowContextualActionBarController
+import com.emmanuelmess.simpleaccounting.activities.controllers.LedgerRowEditingController
 import com.emmanuelmess.simpleaccounting.utils.get
 
 class LedgerView(context: Context, attrs: AttributeSet) : TableLayout(context, attrs) {
 
 	private val inflater: LayoutInflater
 	private lateinit var listener: LedgeCallbacks
-	private lateinit var contextualActionBarController: LedgerRowContextualActionBarController
+	private lateinit var editingController: LedgerRowEditingController
 
 	private var invertCreditAndDebit = false
 	/**
@@ -56,8 +56,8 @@ class LedgerView(context: Context, attrs: AttributeSet) : TableLayout(context, a
 		listener = l
 	}
 
-	fun setActionBarController(c: LedgerRowContextualActionBarController) {
-		contextualActionBarController = c
+	fun setActionBarController(c: LedgerRowEditingController) {
+		editingController = c
 	}
 
 	fun setInvertCreditAndDebit(invert: Boolean) {
@@ -90,6 +90,7 @@ class LedgerView(context: Context, attrs: AttributeSet) : TableLayout(context, a
 		val row = get<LedgerRow>(index) ?: throw IllegalArgumentException("View at index doesn't exist!")
 
 		row.makeRowEditable()
+		editingController.startEditing()
 
 		for (i in TEXT_IDS.indices) {
 			val t1 = row.findViewById<TextView>(TEXT_IDS[i])
@@ -115,6 +116,7 @@ class LedgerView(context: Context, attrs: AttributeSet) : TableLayout(context, a
 
 			updateEditableRow(-1)
 
+			editingController.stopEditing()
 			row.makeRowNotEditable()
 
 			listener.onAfterMakeRowNotEditable(row)
@@ -134,13 +136,11 @@ class LedgerView(context: Context, attrs: AttributeSet) : TableLayout(context, a
 		editableRow = childCount - 1
 		val row = get<LedgerRow>(editableRow)!!
 		row.formatter = formatter
-		row.contextualActionBarController = contextualActionBarController
+		row.editingController = editingController
 
 		if (invertCreditAndDebit) {
 			row.invertDebitCredit()
 		}
-
-		contextualActionBarController.startEditing()
 
 		return row
 	}

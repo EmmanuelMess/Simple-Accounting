@@ -15,7 +15,7 @@ import java.math.BigDecimal
 
 import com.emmanuelmess.simpleaccounting.activities.MainActivity.EDIT_IDS
 import com.emmanuelmess.simpleaccounting.activities.MainActivity.TEXT_IDS
-import com.emmanuelmess.simpleaccounting.activities.controllers.LedgerRowContextualActionBarController
+import com.emmanuelmess.simpleaccounting.activities.controllers.LedgerRowEditingController
 
 class LedgerRow(context: Context, attrs: AttributeSet) : TableRow(context, attrs) {
 
@@ -28,7 +28,7 @@ class LedgerRow(context: Context, attrs: AttributeSet) : TableRow(context, attrs
 
     private lateinit var balanceText: TextView
 
-    lateinit var contextualActionBarController: LedgerRowContextualActionBarController
+    lateinit var editingController: LedgerRowEditingController
 
     val date: CharSequence
         get() = datePair.get().text
@@ -116,20 +116,16 @@ class LedgerRow(context: Context, attrs: AttributeSet) : TableRow(context, attrs
         creditPair.isBeingEdited = true
         debitPair.isBeingEdited = true
 
-        ViewCompat.setElevation(this, 50f)
-
-        contextualActionBarController.startEditing()
+        editingController.startEditing()
     }
 
     fun makeRowNotEditable() {
-        contextualActionBarController.stopEditing()
+        editingController.stopEditing()
 
         datePair.isBeingEdited = false
         referencePair.isBeingEdited = false
         creditPair.isBeingEdited = false
         debitPair.isBeingEdited = false
-
-        ViewCompat.setElevation(this, 0f)
 
         for (i in TEXT_IDS.indices) {
             val t = findViewById<EditText>(EDIT_IDS[i])
