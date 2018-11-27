@@ -348,9 +348,11 @@ public class MainActivity extends AppCompatActivity
 				}
 
 				return true;
+				/*TODO Google has removed my app from the Play Store, I will deal with this in due time
 			case R.id.action_donate:
 				startActivity(new Intent(getApplicationContext(), DonateActivity.class));
 				return true;
+				*/
 			case R.id.action_settings:
 				startActivity(new Intent(this, SettingsActivity.class));
 				return true;
