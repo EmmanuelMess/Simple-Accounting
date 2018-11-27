@@ -8,8 +8,8 @@ android {
         applicationId "com.emmanuelmess.simpleaccounting"
         minSdkVersion 14
         targetSdkVersion 27
-        versionCode 19
-        versionName "1.5.1.1rc1"
+        versionCode 20
+        versionName "1.5.2"
         vectorDrawables.useSupportLibrary = true
     }
 
