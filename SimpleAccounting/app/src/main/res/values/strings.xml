@@ -67,4 +67,6 @@
     <string name="patreon_username" translatable="false">EmmanuelMess</string>
     <string name="support_features">Support features</string>
     <string name="other_methods">Other methods</string>
+
+    <string name="done">DONE</string>
 </resources>

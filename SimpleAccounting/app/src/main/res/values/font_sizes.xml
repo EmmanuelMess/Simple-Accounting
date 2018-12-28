@@ -2,4 +2,5 @@
 <resources>
     <dimen name="title">14.9sp</dimen>
     <dimen name="normal">12sp</dimen>
+    <dimen name="editRow">14sp</dimen>
 </resources>
