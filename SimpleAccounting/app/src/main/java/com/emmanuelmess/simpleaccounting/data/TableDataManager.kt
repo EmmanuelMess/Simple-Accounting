@@ -1,5 +1,6 @@
 package com.emmanuelmess.simpleaccounting.data
 
+import java.lang.IllegalStateException
 import java.math.BigDecimal
 import java.util.ArrayList
 
@@ -38,6 +39,16 @@ class TableDataManager {
 		}
 	}
 
+	fun getCredit(i: Int): BigDecimal {
+		if (i == 0) throw IllegalArgumentException("Did you mean getStartingTotal()?")
+		return data[i].credit
+	}
+
+	fun getDebit(i: Int): BigDecimal {
+		if (i == 0) throw IllegalArgumentException("Did you mean getStartingTotal()?")
+		return data[i].debit
+	}
+
 	fun getTotal(i: Int): BigDecimal {
 		if (i == 0) throw IllegalArgumentException("Did you mean getStartingTotal()?")
 		return data[i].total
@@ -50,8 +61,8 @@ class TableDataManager {
 }
 
 private open class RowDataHandler constructor(private var last: BigDecimal) {
-	private var credit = BigDecimal.ZERO
-	private var debit = BigDecimal.ZERO
+	open var credit = BigDecimal.ZERO
+	open var debit = BigDecimal.ZERO
 	open var total: BigDecimal = last
 
 	fun updateLast(last: BigDecimal) {
@@ -78,6 +89,12 @@ private open class RowDataHandler constructor(private var last: BigDecimal) {
 }
 
 private class FirstRowDataHandler : RowDataHandler(BigDecimal.ZERO) {
+	override var credit: BigDecimal?
+		get() = throw UnsupportedOperationException()
+		set(value) { throw UnsupportedOperationException() }
+	override var debit: BigDecimal?
+		get() = throw UnsupportedOperationException()
+		set(value) { throw UnsupportedOperationException() }
 	override var total: BigDecimal = BigDecimal.ZERO
 		set(value) {
 			super.total = value

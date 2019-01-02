@@ -8,4 +8,5 @@
     <color name="colorTextHintWhite">#dedede</color>
     <color name="white">#ffffff</color>
     <color name="button_tint">#FFA000</color>
+    <color name="background_edit_fragment">#7f0e0606</color>
 </resources>

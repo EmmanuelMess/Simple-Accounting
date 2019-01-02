@@ -1,10 +1,10 @@
 package com.emmanuelmess.simpleaccounting.activities.views
 
 import android.content.Context
+import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.EditText
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
@@ -13,21 +13,15 @@ import com.emmanuelmess.simpleaccounting.R
 
 import java.math.BigDecimal
 
-import com.emmanuelmess.simpleaccounting.activities.MainActivity.EDIT_IDS
-import com.emmanuelmess.simpleaccounting.activities.MainActivity.TEXT_IDS
 import com.emmanuelmess.simpleaccounting.utils.get
 
 class LedgerView(context: Context, attrs: AttributeSet) : TableLayout(context, attrs) {
 
 	private val inflater: LayoutInflater
+
 	private lateinit var listener: LedgeCallbacks
 
 	private var invertCreditAndDebit = false
-	/**
-	 * pointer to row being edited STARTS IN 1
-	 */
-	var editableRow = -1
-		private set
 
 	private lateinit var formatter: BalanceFormatter
 
@@ -36,9 +30,6 @@ class LedgerView(context: Context, attrs: AttributeSet) : TableLayout(context, a
 			val rowViewIndex = childCount - 1
 			return get(rowViewIndex)
 		}
-
-	val isEditingRow: Boolean
-		get() = editableRow != -1
 
 	init {
 		addView(View.inflate(getContext(), R.layout.view_ledger, null))
@@ -73,60 +64,34 @@ class LedgerView(context: Context, attrs: AttributeSet) : TableLayout(context, a
 	 * Creates and inflates a new row.
 	 * Restores editable row to view.
 	 */
-	fun inflateEmptyRow(): View {
-		editableRowToView()
-		return inflateRow()
-	}
+	fun inflateEmptyRow(editOnLongClick: Boolean = true): View {
+		val row = inflateRow()
 
-	fun rowViewToEditable(index: Int) {
-		if (index <= 0) throw IllegalArgumentException("Can't edit table header!")
-
-		val row = get<LedgerRow>(index) ?: throw IllegalArgumentException("View at index doesn't exist!")
-
-		row.makeRowEditable()
-
-		for (i in TEXT_IDS.indices) {
-			val t1 = row.findViewById<TextView>(TEXT_IDS[i])
-			val t = row.findViewById<EditText>(EDIT_IDS[i])
-
-			t.setText(t1.text)
-			t1.text = ""
-
-			t1.visibility = View.GONE
-			t.visibility = View.VISIBLE
+		if(editOnLongClick) {
+			row.setOnLongClickListener { _ ->
+				rowViewToEditable(row)
+				true
+			}
+		} else {
+			row.removeSelectableItemBackground()
 		}
 
-		updateEditableRow(index)
+		return row
 	}
 
-	/**
-	 * Converts editable row into not editable.
-	 */
-	fun editableRowToView() {
-		val row = get<LedgerRow>(editableRow)
-		if (row != null && editableRow >= 0) {
-			listener.onBeforeMakeRowNotEditable(row)
-
-			updateEditableRow(-1)
-
-			row.makeRowNotEditable()
-
-			listener.onAfterMakeRowNotEditable(row)
-		}
+	fun rowViewToEditable(row: LedgerRow) {
+		listener.onLongPressItem(row)
 	}
 
 	fun clear() {
 		for (i in childCount - 1 downTo 1) {//DO NOT remove first line, the column titles
 			removeViewAt(i)
 		}
-
-		updateEditableRow(-1)
 	}
 
 	private fun inflateRow(): LedgerRow {
 		inflater.inflate(R.layout.row_main, this)
-		editableRow = childCount - 1
-		val row = get<LedgerRow>(editableRow)!!
+		val row = get<LedgerRow>(childCount -1)!!
 		row.formatter = formatter
 
 		if (invertCreditAndDebit) {
@@ -136,18 +101,11 @@ class LedgerView(context: Context, attrs: AttributeSet) : TableLayout(context, a
 		return row
 	}
 
-	private fun updateEditableRow(index: Int) {
-		listener.onUpdateEditableRow(index)
-		editableRow = index
-	}
-
 	interface LedgeCallbacks {
-		fun onUpdateEditableRow(index: Int)
-		fun onBeforeMakeRowNotEditable(row: View)
-		fun onAfterMakeRowNotEditable(row: View)
+		fun onLongPressItem(pressedRow: LedgerRow)
 	}
 
-	interface BalanceFormatter {
+	interface BalanceFormatter: Parcelable {
 		fun format(balance: BigDecimal): String
 	}
 

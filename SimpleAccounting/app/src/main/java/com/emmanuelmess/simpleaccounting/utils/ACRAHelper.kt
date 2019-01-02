@@ -6,6 +6,7 @@ import android.widget.TableRow
 import android.widget.TextView
 
 import com.emmanuelmess.simpleaccounting.BuildConfig
+import com.emmanuelmess.simpleaccounting.activities.views.LedgerView
 
 import org.acra.ACRA
 import org.w3c.dom.Text
@@ -18,6 +19,14 @@ import org.w3c.dom.Text
 object ACRAHelper {
 
 	const val ROWS = "rows"
+
+	fun updateEditableRow(index: Int, table: LedgerView?, editableYear: Int, editableMonth: Int) {
+		if (index == -1 || table == null)
+			ACRAHelper.reset()
+		else
+			ACRAHelper.writeData(table, editableYear, editableMonth)
+	}
+
 
 	fun writeData(t: TableLayout, year: Int, month: Int) {
 		setData(t, year, month)

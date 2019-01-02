@@ -6,31 +6,33 @@ import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.print.PrintManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.emmanuelmess.simpleaccounting.fragments.EditRowFragment;
 import com.emmanuelmess.simpleaccounting.PPrintDocumentAdapter;
 import com.emmanuelmess.simpleaccounting.R;
 import com.emmanuelmess.simpleaccounting.activities.preferences.CurrencyPicker;
+import com.emmanuelmess.simpleaccounting.activities.superclases.FragmentCanGoBackActivity;
 import com.emmanuelmess.simpleaccounting.activities.views.LedgerRow;
 import com.emmanuelmess.simpleaccounting.activities.views.LedgerView;
 import com.emmanuelmess.simpleaccounting.activities.views.SpinnerNoUnwantedOnClick;
@@ -44,12 +46,13 @@ import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
 import com.emmanuelmess.simpleaccounting.patreon.PatreonController;
 import com.emmanuelmess.simpleaccounting.utils.ACRAHelper;
 import com.emmanuelmess.simpleaccounting.utils.SimpleBalanceFormatter;
-import com.emmanuelmess.simpleaccounting.utils.SimpleTextWatcher;
 import com.emmanuelmess.simpleaccounting.utils.TinyDB;
 import com.emmanuelmess.simpleaccounting.utils.Utils;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.SimpleShowcaseEventListener;
 import com.github.amlcurran.showcaseview.targets.Target;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -66,8 +69,9 @@ import static com.emmanuelmess.simpleaccounting.constants.SettingsConstants.INVE
 /**
  * @author Emmanuel
  */
-public class MainActivity extends AppCompatActivity
-		implements AsyncFinishedListener<MonthData>, LedgerView.LedgeCallbacks{
+public class MainActivity extends FragmentCanGoBackActivity
+		implements AsyncFinishedListener<MonthData>, LedgerView.LedgeCallbacks,
+		EditRowFragment.EndEditCallback {
 
 	public static final String UPDATE_YEAR_SETTING = "update 1.2 year";
 	public static final String UPDATE_MONTH_SETTING = "update 1.2 month";
@@ -79,7 +83,6 @@ public class MainActivity extends AppCompatActivity
 	public static final String PREFS_NAME = "shared prefs", PREFS_FIRST_RUN = "first_run";
 
 	//THESE COULD NOT BE IN ORDER (because of posible inversion between credit and debit)
-	public static final int[] EDIT_IDS = {R.id.editDate, R.id.editRef, R.id.editCredit, R.id.editDebit, R.id.textBalance};
 	public static final int[] TEXT_IDS = {R.id.textDate, R.id.textRef, R.id.textCredit, R.id.textDebit};
 
 	private int FIRST_REAL_ROW = 1;//excluding header and previous balance. HAS 2 STATES: 1 & 2
@@ -156,7 +159,7 @@ public class MainActivity extends AppCompatActivity
 		inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		scrollView = findViewById(R.id.scrollView);
 		table = findViewById(R.id.table);
-		table.setFormatter(new SimpleBalanceFormatter());
+		table.setFormatter(SimpleBalanceFormatter.INSTANCE);
 		table.setListener(this);
 		tableDataManager = new TableDataManager();
 		tableGeneral = new TableGeneral(this);//DO NOT change the order of table creation!
@@ -210,7 +213,7 @@ public class MainActivity extends AppCompatActivity
 		}
 
 		fab.setOnClickListener(view->{
-			table.inflateEmptyRow();
+			table.inflateEmptyRow(true);
 			scrollView.fullScroll(View.FOCUS_DOWN);
 
 			if (table.getChildCount() > FIRST_REAL_ROW) {
@@ -221,14 +224,24 @@ public class MainActivity extends AppCompatActivity
 
 				rowToDBRowConversion.add(tableGeneral.getLastIndex());
 				LedgerRow row = loadRow();
+				LedgerRow.LedgerRowModel model = new LedgerRow.LedgerRowModel(day, "", "", "", "");
 
-				row.setDate(day);
-				row.requestFocus();
+				row.setModel(model);
+				resetEditableHash(model);
 
-				//editableRowColumnsHash[0] = row.getDate().toString().hashCode();
+				row.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+					@Override
+					public void onGlobalLayout() {
+						if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+							row.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+						} else {
+							row.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+						}
 
-				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-				imm.showSoftInput(row.findViewById(R.id.editDate), InputMethodManager.SHOW_IMPLICIT);
+						startEditingRow(row);
+					}
+				});
+
 			} else createNewRowWhenMonthLoaded = true;
 		});
 	}
@@ -261,12 +274,6 @@ public class MainActivity extends AppCompatActivity
 	}
 
 	@Override
-	public void onBackPressed() {
-		if (table.isEditingRow()) table.editableRowToView();
-		else super.onBackPressed();
-	}
-
-	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.toolbar, menu);
 
@@ -287,9 +294,6 @@ public class MainActivity extends AppCompatActivity
 			spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 				@Override
 				public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-					if(table.isEditingRow())
-						table.editableRowToView();
-
 					if (pos == DEFAULT_CURRENCY)
 						editableCurrency = "";
 					else
@@ -382,10 +386,9 @@ public class MainActivity extends AppCompatActivity
 		LedgerRow row = (LedgerRow) table.getLastRow();
 		tableDataManager.addRow();
 
-		row.setBalance(tableDataManager.getTotal(getCorrectedIndexForDataManager(rowViewIndex)));
+		row.setBalance(tableDataManager.getTotal(getCorrectedIndexForDataManager(rowViewIndex)).toPlainString());
 
-		setListener(rowViewIndex);
-		checkEditInBalance(rowViewIndex, row);
+		//checkEditInBalance(rowViewIndex, row); TODO check
 		return row;
 	}
 
@@ -395,73 +398,6 @@ public class MainActivity extends AppCompatActivity
 
 	public void setFirstRealRow(int firstRealRow) {
 		this.FIRST_REAL_ROW = firstRealRow;
-	}
-
-	private void checkEditInBalance(final int editedTableIndex, LedgerRow row) {
-		TextView lastBalance = editedTableIndex > 1?
-				(TextView) table.getChildAt(editedTableIndex - 1).findViewById(R.id.textBalance):null;
-
-		TextWatcher watcher = new SimpleTextWatcher() {
-			@Override
-			public void afterTextChanged(Editable editable) {
-				if (table.getEditableRow() == editedTableIndex) {
-					final int dataManagerIndex = getCorrectedIndexForDataManager(editedTableIndex);
-
-					if (Utils.INSTANCE.equal(row.getCreditText().toString(), ".")) {
-						tableDataManager.updateCredit(dataManagerIndex, BigDecimal.ZERO);
-						row.setCredit("0");
-					}
-
-					if (Utils.INSTANCE.equal(row.getDebitText().toString(), ".")) {
-						tableDataManager.updateCredit(dataManagerIndex, BigDecimal.ZERO);
-						row.setDebit("0");
-					}
-
-					tableDataManager.updateCredit(dataManagerIndex, Utils.INSTANCE.parseString(row.getCreditText().toString()));
-					tableDataManager.updateDebit(dataManagerIndex, Utils.INSTANCE.parseString((row.getDebitText().toString())));
-
-					if (tableDataManager.getTotal(dataManagerIndex).toPlainString().isEmpty())
-						throw new IllegalStateException();
-
-					row.setBalance(tableDataManager.getTotal(dataManagerIndex));
-
-					updateBalances(editedTableIndex+1,dataManagerIndex + 1);
-				}
-			}
-
-			private void updateBalances(int tableIndex, int dataManagerIndex) {
-			    if(tableIndex >= table.getChildCount()) return;
-
-			    LedgerRow row = (LedgerRow) table.getChildAt(tableIndex);
-
-				row.setBalance(tableDataManager.getTotal(dataManagerIndex));
-
-				if (tableIndex + 1 < row.getChildCount()){
-					updateBalances(tableIndex + 1, dataManagerIndex + 1);
-				}
-			}
-		};
-
-		((EditText) row.findViewById(R.id.editCredit)).addTextChangedListener(watcher);
-		((EditText) row.findViewById(R.id.editDebit)).addTextChangedListener(watcher);
-		if (lastBalance != null)
-			lastBalance.addTextChangedListener(watcher);
-	}
-	
-	private void setListener(final int rowIndex) {
-		resetEditableHash(rowIndex);
-		table.getChildAt(rowIndex).setOnLongClickListener(v->{
-			table.editableRowToView();
-			table.rowViewToEditable(rowIndex);
-			return true;
-		});
-	}
-
-	private void resetEditableHash(final int rowIndex) {
-		for (int i = 0; i < TEXT_IDS.length; i++) {
-			TextView t1 = table.getChildAt(rowIndex).findViewById(TEXT_IDS[i]);
-			editableRowColumnsHash[i] = t1.getText().toString().hashCode();
-		}
 	}
 
 	private void loadMonth(int month, int year, String currency) {
@@ -500,17 +436,14 @@ public class MainActivity extends AppCompatActivity
 		editableCurrency = dbData.getSession().getCurrency();
 
 		if (dbData.getPrevBalance() != null) {
-			LedgerRow row = (LedgerRow) table.inflateEmptyRow();
+			LedgerRow row = (LedgerRow) table.inflateEmptyRow(false);
 
 			setFirstRealRow(2);
-			table.editableRowToView();
 
 			tableDataManager.updateStartingTotal(new BigDecimal(dbData.getPrevBalance()));
 
-			row.setReference(R.string.previous_balance);
-			row.setCredit("");
-			row.setDebit("");
-			row.setBalance(tableDataManager.getStartingTotal());
+			row.setModel(new LedgerRow.LedgerRowModel("", getString(R.string.previous_balance),
+					"", "", tableDataManager.getStartingTotal().toPlainString()));
 		}
 
 		int dataManagerIndex = 1;
@@ -518,19 +451,17 @@ public class MainActivity extends AppCompatActivity
 		this.rowToDBRowConversion = dbData.getRowToDBConversion();
 
 		for (String[] dbRow : dbData.getDbRows()) {
-			table.inflateEmptyRow();
+			table.inflateEmptyRow(true);
 
 			LedgerRow row = loadRow();
-			table.editableRowToView();
 
-			int[] textIds = MainActivity.TEXT_IDS;
+			String day = dbRow[0] == null? "":dbRow[0];
+			String reference = dbRow[1] == null? "":dbRow[1];
+			String credit = dbRow[2] == null? "":dbRow[2];
+			String debit = dbRow[3] == null? "":dbRow[3];
 
-			for (int j = 0; j < textIds.length; j++) {
+			for (int j = 0; j < TEXT_IDS.length; j++) {
 				if(dbRow[j] == null) continue;
-
-				TextView v = row.findViewById(textIds[j]);
-
-				v.setText(dbRow[j]);
 				editableRowColumnsHash[j] = dbRow[j].hashCode();
 			}
 
@@ -539,8 +470,13 @@ public class MainActivity extends AppCompatActivity
 			if (dbRow[3] != null)
 				tableDataManager.updateDebit(dataManagerIndex, Utils.INSTANCE.parseString(dbRow[3]));
 
-			row.setBalance(tableDataManager.getTotal(dataManagerIndex));
-		dataManagerIndex++;
+			LedgerRow.LedgerRowModel model
+					= new LedgerRow.LedgerRowModel(day, reference, credit, debit,
+					tableDataManager.getTotal(dataManagerIndex).toPlainString());
+
+			row.setModel(model);
+
+			dataManagerIndex++;
 		}
 
 		scrollView.fullScroll(View.FOCUS_DOWN);
@@ -550,20 +486,20 @@ public class MainActivity extends AppCompatActivity
 		loadShowcaseView(inflater, scrollView);
 
 		if (createNewRowWhenMonthLoaded && table != null) {// TODO: 24/06/18 duplicated code
-			table.inflateEmptyRow();
+			table.inflateEmptyRow(true);
 
 			scrollView.fullScroll(View.FOCUS_DOWN);
-
-			table.editableRowToView();
 
 			tableGeneral.newRowInMonth(new Session(editableMonth, editableYear, editableCurrency));
 			this.rowToDBRowConversion.add(tableGeneral.getLastIndex());
 			LedgerRow row = loadRow();
 
-			row.setDate(new SimpleDateFormat("dd", Locale.getDefault()).format(new Date()));
+			String day = new SimpleDateFormat("dd", Locale.getDefault()).format(new Date());
+			row.setModel(new LedgerRow.LedgerRowModel(day, "", "", "", ""));
+
 			row.requestFocus();
 
-			editableRowColumnsHash[0] = row.getDate().toString().hashCode();
+			editableRowColumnsHash[0] = String.valueOf(row.getModel().getDate()).hashCode();
 
 			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 			imm.showSoftInput(row.findViewById(R.id.editDate), InputMethodManager.SHOW_IMPLICIT);
@@ -579,21 +515,18 @@ public class MainActivity extends AppCompatActivity
 			final int rowToEdit = FIRST_REAL_ROW;
 
 			if (table.getChildAt(rowToEdit) == null) {
-				table.inflateEmptyRow();
+				table.inflateEmptyRow(false);
 				scrollView.fullScroll(View.FOCUS_DOWN);
 
 				tableDataManager.addRow();
 				tableDataManager.updateCredit(1, BigDecimal.ZERO);
 				tableDataManager.updateDebit(1, new BigDecimal(100));
 
-				table.editableRowToView();
 				LedgerRow row = (LedgerRow) table.getChildAt(rowToEdit);
 
-				row.setDate(new SimpleDateFormat("dd", Locale.getDefault()).format(new Date()));
-				row.setReference(R.string.showcase_example_ref);
-				row.setCredit(BigDecimal.ZERO);
-				row.setDebit(new BigDecimal(100));
-				row.setBalance(new BigDecimal(-100));
+				String day = new SimpleDateFormat("dd", Locale.getDefault()).format(new Date());
+				row.setModel(new LedgerRow.LedgerRowModel(day,
+						getString(R.string.showcase_example_ref), "", "100", "-100"));
 
 				destroyFirst = true;
 			}
@@ -639,57 +572,138 @@ public class MainActivity extends AppCompatActivity
 	}
 
 	@Override
-	public void onUpdateEditableRow(int index) {
-		if (index == -1 || table == null)
-			ACRAHelper.INSTANCE.reset();
-		else
-			ACRAHelper.INSTANCE.writeData(table, editableYear, editableMonth);
-	}
+	public void onAttachFragment(@NotNull Fragment fragment) {
+		super.onAttachFragment(fragment);
 
-	@Override
-	public void onBeforeMakeRowNotEditable(View row){
-		if(table.getEditableRow() >= FIRST_REAL_ROW) {//Last month total row is editable for some time
-			String editDateText = ((EditText) row.findViewById(R.id.editDate)).getText().toString();
-			reloadMonthOnChangeToView = !editDateText.isEmpty()
-					&& editableRowColumnsHash[0] != editDateText.hashCode();
-
-			String editCreditText = ((EditText) row.findViewById(R.id.editCredit)).getText().toString();
-			String editDebitText = ((EditText) row.findViewById(R.id.editDebit)).getText().toString();
-			if(editableRowColumnsHash[2] != editCreditText.hashCode()
-					|| editableRowColumnsHash[3] != editDebitText.hashCode()) {
-				tableMonthlyBalance.updateMonth(editableMonth, editableYear, editableCurrency,
-						tableDataManager.getTotal(getCorrectedIndexForDataManager(table.getEditableRow())).doubleValue());
-			}
-
-			for (int i = 0; i < EDIT_IDS.length - 1; i++) {
-				String t = ((EditText) row.findViewById(EDIT_IDS[i])).getText().toString();
-
-				if (editableRowColumnsHash[i] != t.hashCode()) {
-					tableGeneral.update(rowToDBRowConversion.get(table.getEditableRow() - FIRST_REAL_ROW),
-							TableGeneral.COLUMNS[i], (!t.isEmpty() ? t : null));
-					editableRowColumnsHash[i] = -1;
-				}
-			}
-		}
-
-		resetEditableHash(table.getEditableRow());
-
-		TextView balanceText = row.findViewById(R.id.textBalance);
-
-		if (balanceText != null && balanceText.getText() == "") {
-			View previousRow = table.getEditableRow() - 1 == 0 ? null : table.getChildAt(table.getEditableRow() - 1);
-			if (previousRow != null)
-				balanceText.setText("$ " + tableDataManager.getTotal(getCorrectedIndexForDataManager(table.getEditableRow())).toString());
-			else
-				balanceText.setText("$ 0.0");
+		if(fragment instanceof EditRowFragment) {
+			((EditRowFragment) fragment).setEndEditCallback(this);
 		}
 	}
 
 	@Override
-	public void onAfterMakeRowNotEditable(View row) {
+	public void onLongPressItem(@NotNull LedgerRow pressedRow) {
+		startEditingRow(pressedRow);
+	}
+
+	private void startEditingRow(LedgerRow row) {
+		fab.hide();
+
+		int[] locationRow = new int[2];
+		row.getLocationOnScreen(locationRow);
+
+		int[] locationScrollView = new int[2];
+		scrollView.getLocationOnScreen(locationScrollView);
+
+		int locationY = locationRow[1] - locationScrollView[1] - scrollView.getPaddingTop();
+
+		int indexForDataManager = getCorrectedIndexForDataManager(table.indexOfChild(row));
+
+		BigDecimal credit = tableDataManager.getCredit(indexForDataManager);
+		BigDecimal debit = tableDataManager.getDebit(indexForDataManager);
+		BigDecimal total = indexForDataManager > 1? tableDataManager.getTotal(indexForDataManager-1):BigDecimal.ZERO;
+
+		EditRowFragment.EditRowFragmentModel editRowFragmentModel =
+				new EditRowFragment.EditRowFragmentModel(row.getModel().getDate(),
+						row.getModel().getReference(), credit, debit, total,
+						SimpleBalanceFormatter.INSTANCE);
+
+		int rowIndex = table.indexOfChild(row);
+
+		ACRAHelper.INSTANCE.updateEditableRow(rowIndex, table, editableYear, editableMonth);
+
+		EditRowFragment fragment =  EditRowFragment.Companion.newInstance(editRowFragmentModel, rowIndex, locationY);
+
+		getSupportFragmentManager().beginTransaction()
+				.replace(R.id.fragmentContainer, fragment)
+				.commitNow();
+	}
+
+	@Override
+	public void onSaveEdit(@NotNull EditRowFragment fragment,
+	                       @NotNull LedgerRow.LedgerRowModel model, int rowIndex,
+	                       @NotNull BigDecimal credit, @NotNull BigDecimal debit) {
+		removeRowEditFragment(fragment);
+
+		if(rowIndex >= FIRST_REAL_ROW) {//Last month total row is editable for some time
+			performDatabaseSave(model, rowIndex);
+
+			performDataManagerSave(rowIndex, credit, debit);
+		}
+
+		LedgerRow row = (LedgerRow) table.getChildAt(rowIndex);
+		int correctedIndex = getCorrectedIndexForDataManager(rowIndex);
+
 		if (reloadMonthOnChangeToView) {
 			reloadMonthOnChangeToView = false;
 			loadMonth(editableMonth, editableYear, editableCurrency);
+		} else {
+			row.setModel(model);
+			updateBalances(rowIndex, correctedIndex);
+		}
+
+		resetEditableHash(model);
+	}
+
+	@Override
+	public void onDiscardEdit(@NotNull EditRowFragment fragment, int rowIndex) {
+		removeRowEditFragment(fragment);
+	}
+
+	private void removeRowEditFragment(@NotNull EditRowFragment fragment) {
+		getSupportFragmentManager().beginTransaction()
+				.remove(fragment)
+				.commitNow();
+
+		fab.show();
+	}
+
+	private void performDatabaseSave(@NonNull LedgerRow.LedgerRowModel model, int rowIndex) {
+		reloadMonthOnChangeToView = !model.getDate().isEmpty()
+				&& editableRowColumnsHash[0] != model.getDate().hashCode();
+
+		String editCreditText = model.getCredit();
+		String editDebitText = model.getDebit();
+		if(editableRowColumnsHash[2] != editCreditText.hashCode()
+				|| editableRowColumnsHash[3] != editDebitText.hashCode()) {
+			tableMonthlyBalance.updateMonth(editableMonth, editableYear, editableCurrency,
+					tableDataManager.getTotal(getCorrectedIndexForDataManager(rowIndex)).doubleValue());
+		}
+
+		String[] text = {model.getDate(), model.getReference(), model.getCredit(), model.getDebit()};
+
+		for (int i = 0; i < text.length; i++) {
+			String t = text[i];
+
+			if (editableRowColumnsHash[i] != t.hashCode()) {
+				tableGeneral.update(rowToDBRowConversion.get(rowIndex - FIRST_REAL_ROW),
+						TableGeneral.COLUMNS[i], (!t.isEmpty() ? t : null));
+				editableRowColumnsHash[i] = -1;
+			}
+		}
+	}
+
+	private void performDataManagerSave(int managerRowIndex,
+	                                    @NonNull BigDecimal credit, @NonNull BigDecimal debit) {
+		tableDataManager.updateCredit(managerRowIndex, credit);
+		tableDataManager.updateDebit(managerRowIndex, debit);
+	}
+
+	private void resetEditableHash(LedgerRow.LedgerRowModel model) {
+		editableRowColumnsHash[0] = model.getDate().hashCode();
+		editableRowColumnsHash[1] = model.getReference().hashCode();
+		editableRowColumnsHash[2] = model.getCredit().hashCode();
+		editableRowColumnsHash[3] = model.getDebit().hashCode();
+	}
+
+	private void updateBalances(int tableIndex, int dataManagerIndex) {
+		if(tableIndex >= table.getChildCount()) return;
+
+		LedgerRow row = (LedgerRow) table.getChildAt(tableIndex);
+
+		row.setBalance(tableDataManager.getTotal(dataManagerIndex).toPlainString());
+
+		if (tableIndex + 1 < table.getChildCount()){
+			updateBalances(tableIndex + 1, dataManagerIndex + 1);
 		}
 	}
 }
