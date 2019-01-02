@@ -2,9 +2,9 @@ package com.emmanuelmess.simpleaccounting.activities.preferences
 
 import android.content.Context
 import android.content.res.TypedArray
-import android.support.v7.preference.DialogPreference
 import android.text.TextUtils
 import android.util.AttributeSet
+import androidx.preference.DialogPreference
 
 import com.emmanuelmess.simpleaccounting.R
 import com.emmanuelmess.simpleaccounting.utils.TinyDB

@@ -1,8 +1,8 @@
 package com.emmanuelmess.simpleaccounting.activities.superclases
 
-import android.support.annotation.CallSuper
-import android.support.v4.app.Fragment
-import android.support.v7.app.AppCompatActivity
+import androidx.annotation.CallSuper
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import com.emmanuelmess.simpleaccounting.fragments.superclasses.OnBackPressableFragment
 
 open class FragmentCanGoBackActivity : AppCompatActivity() {
