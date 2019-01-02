@@ -4,6 +4,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.widget.TableRow;
 
 import com.emmanuelmess.simpleaccounting.activities.views.LedgerRow;
+import com.emmanuelmess.simpleaccounting.data.Session;
 import com.emmanuelmess.simpleaccounting.db.TableGeneral;
 import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
 import com.emmanuelmess.simpleaccounting.utils.SimpleBalanceFormatter;
@@ -163,7 +164,7 @@ public class MainActivityDatabaseTest extends MainActivityTest {
 
     private void fakePastRow(int month, int year, String currency, int date, String reference,
                              BigDecimal credit, BigDecimal debit) {
-        tableGeneral.newRowInMonth(month, year, currency);
+        tableGeneral.newRowInMonth(new Session(month, year, currency));
         tableGeneral.update(0, TableGeneral.COLUMNS[0], date+"");
         tableGeneral.update(0, TableGeneral.COLUMNS[1], reference);
         tableGeneral.update(0, TableGeneral.COLUMNS[2], credit.toPlainString());
@@ -172,16 +173,16 @@ public class MainActivityDatabaseTest extends MainActivityTest {
     }
 
     private void getDataForMonth(int month, int year, String currency, Consumer<DatabaseResult> callback) {
-        String[][] wholeMonth = tableGeneral.getAllForMonth(month, year, currency);
+        String[][] wholeMonth = tableGeneral.getAllForMonth(new Session(month, year, currency));
         String[] lastRowInMonth = wholeMonth[wholeMonth.length-1];
 
-        Double resultForMonth = tableMonthlyBalance.getBalanceLastMonthWithData(month+1, year, currency);
+        Double resultForMonth = tableMonthlyBalance.getBalanceLastMonthWithData(new Session(month+1, year, currency));
 
         callback.accept(new DatabaseResult(resultForMonth, lastRowInMonth[0], lastRowInMonth[1], lastRowInMonth[2], lastRowInMonth[3]));
     }
 
     private void getLastBalanceForMonth(int month, int year, String currency, Consumer<Double> callback) {
-        Double resultForMonth = tableMonthlyBalance.getBalanceLastMonthWithData(month+1, year, currency);
+        Double resultForMonth = tableMonthlyBalance.getBalanceLastMonthWithData(new Session(month+1, year, currency));
 
         callback.accept(resultForMonth);
     }
