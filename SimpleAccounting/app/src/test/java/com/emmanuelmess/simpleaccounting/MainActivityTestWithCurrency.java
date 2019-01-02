@@ -1,6 +1,6 @@
 package com.emmanuelmess.simpleaccounting;
 
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Spinner;

@@ -15,7 +15,6 @@ import kotlinx.android.synthetic.main.fragment_editrow.*
 import kotlinx.android.synthetic.main.fragment_editrow.view.*
 import java.math.BigDecimal
 
-
 class EditRowFragment : OnBackPressableFragment() {
 
 	companion object {

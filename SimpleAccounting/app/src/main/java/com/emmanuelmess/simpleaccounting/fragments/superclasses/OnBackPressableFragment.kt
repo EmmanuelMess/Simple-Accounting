@@ -1,7 +1,6 @@
 package com.emmanuelmess.simpleaccounting.fragments.superclasses
 
-import android.support.annotation.CallSuper
-import android.support.v4.app.Fragment
+import androidx.annotation.CallSuper
 
 abstract class OnBackPressableFragment: KeyboardListenableFragment() {
 	lateinit var onDetachCallback: OnBackPressableFragment.() -> Unit

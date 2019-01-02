@@ -4,9 +4,11 @@ import android.app.Dialog;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.view.ViewCompat;
-import android.support.v7.preference.PreferenceDialogFragmentCompat;
+
+import androidx.annotation.NonNull;
+import androidx.core.view.ViewCompat;
+import androidx.preference.PreferenceDialogFragmentCompat;
+
 import android.text.Editable;
 import android.util.SparseIntArray;
 import android.view.LayoutInflater;

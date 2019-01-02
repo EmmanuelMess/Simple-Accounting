@@ -12,10 +12,10 @@ import android.print.PrintAttributes
 import android.print.PrintDocumentAdapter
 import android.print.PrintDocumentInfo
 import android.print.pdf.PrintedPdfDocument
-import android.support.annotation.RequiresApi
 import android.view.View
 import android.widget.TableLayout
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 
 import com.emmanuelmess.simpleaccounting.activities.MainActivity
 import com.emmanuelmess.simpleaccounting.data.Session

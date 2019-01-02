@@ -4,9 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
-import android.support.v7.preference.PreferenceManager.getDefaultSharedPreferences
 import android.util.Log
-import com.emmanuelmess.simpleaccounting.BuildConfig
+import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.emmanuelmess.simpleaccounting.utils.seconds
 
 object PatreonController {

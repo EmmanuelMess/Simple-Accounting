@@ -1,10 +1,7 @@
 package com.emmanuelmess.simpleaccounting.patreon
 
 import android.content.Context
-import android.content.Intent
-import android.content.Intent.ACTION_VIEW
-import android.net.Uri
-import android.support.v7.app.AlertDialog
+import androidx.appcompat.app.AlertDialog
 import com.emmanuelmess.simpleaccounting.R
 
 fun Context.createPatreonDialog(): AlertDialog = with(AlertDialog.Builder(this)) {

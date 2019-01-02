@@ -1,19 +1,13 @@
 package com.emmanuelmess.simpleaccounting.activities.views
 
 import android.content.Context
-import android.os.Build
 import android.os.Parcelable
-import android.support.annotation.StringRes
 import android.util.AttributeSet
 import android.view.View
-import android.widget.EditText
 import android.widget.TableRow
 import android.widget.TextView
-
 import com.emmanuelmess.simpleaccounting.R
 import com.emmanuelmess.simpleaccounting.utils.removeBackground
-
-import java.math.BigDecimal
 import com.emmanuelmess.simpleaccounting.utils.textDisplay
 import kotlinx.android.parcel.Parcelize
 
