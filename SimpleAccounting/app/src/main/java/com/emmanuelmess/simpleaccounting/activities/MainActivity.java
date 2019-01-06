@@ -625,14 +625,15 @@ public class MainActivity extends FragmentCanGoBackActivity
 	                       @NotNull BigDecimal credit, @NotNull BigDecimal debit) {
 		removeRowEditFragment(fragment);
 
+		int correctedIndex = getCorrectedIndexForDataManager(rowIndex);
+
 		if(rowIndex >= FIRST_REAL_ROW) {//Last month total row is editable for some time
 			performDatabaseSave(model, rowIndex);
 
-			performDataManagerSave(rowIndex, credit, debit);
+			performDataManagerSave(correctedIndex, credit, debit);
 		}
 
 		LedgerRow row = (LedgerRow) table.getChildAt(rowIndex);
-		int correctedIndex = getCorrectedIndexForDataManager(rowIndex);
 
 		if (reloadMonthOnChangeToView) {
 			reloadMonthOnChangeToView = false;
