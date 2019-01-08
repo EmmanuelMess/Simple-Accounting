@@ -4,11 +4,19 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.view.View
 import android.widget.TableRow
+import android.widget.TextView
+import androidx.test.espresso.NoMatchingViewException
+import androidx.test.espresso.ViewAssertion
+import androidx.test.espresso.ViewInteraction
+import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.withParent
+import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.platform.app.InstrumentationRegistry
 import com.emmanuelmess.simpleaccounting.activities.MainActivity
 import com.emmanuelmess.simpleaccounting.activities.views.LedgerRow
 import com.emmanuelmess.simpleaccounting.activities.views.LedgerView
+import junit.framework.AssertionFailedError
+import org.hamcrest.BaseMatcher
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
@@ -34,5 +42,21 @@ fun Any.lastRowOf(tableMatch: Matcher<View>) = object : TypeSafeMatcher<View>() 
 	}
 }
 
-fun Matcher<View>.andParent(parentMatcher: Matcher<View>)
-	= allOf(this, withParent(parentMatcher))!!
+fun Any.hasSameTextAs(sameTextInView: ViewInteraction) = ViewAssertion { view, noViewFoundException ->
+	noViewFoundException ?: return@ViewAssertion
+	if(view !is TextView) throw AssertionFailedError("expected TextView")
+
+	sameTextInView.check(matches(withText(view.text.toString())))
+}
+
+fun ViewInteraction.eitherOf(lhs: ViewAssertion, rhs: ViewAssertion): ViewInteraction {
+	return try {
+		check(lhs)
+	} catch (e: AssertionError) {
+		check(rhs)
+	}
+}
+
+fun Matcher<View>.andParent(parentMatcher: Matcher<View>): Matcher<View> {
+	return allOf(this, withParent(parentMatcher))
+}
