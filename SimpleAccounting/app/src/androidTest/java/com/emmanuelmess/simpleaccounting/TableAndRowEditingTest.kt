@@ -22,7 +22,7 @@ import java.math.BigDecimal
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class MainTest {
+class TableAndRowEditingTest {
 
 	@get:Rule
 	val activityRule = ActivityTestRule(MainActivity::class.java)
