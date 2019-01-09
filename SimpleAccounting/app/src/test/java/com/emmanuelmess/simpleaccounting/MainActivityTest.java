@@ -1,8 +1,11 @@
 package com.emmanuelmess.simpleaccounting;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.view.Menu;
 import android.widget.EditText;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.emmanuelmess.simpleaccounting.activities.MainActivity;
@@ -18,6 +21,9 @@ import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.android.controller.ActivityController;
+import org.robolectric.fakes.RoboMenu;
+
+import androidx.appcompat.widget.Toolbar;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
@@ -47,6 +53,8 @@ public class MainActivityTest {
         context = RuntimeEnvironment.application.getApplicationContext();
         sharedPreferences = context.getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE);
 
+        Robolectric.getForegroundThreadScheduler().pause();//Fragment throws IllegalStateException, this hack fixes Robolectric issue#4021
+
         setShowTutorial(false);
     }
 
@@ -57,9 +65,15 @@ public class MainActivityTest {
     protected void endSetUp() {
         activityController = Robolectric.buildActivity(MainActivity.class)
                 .create().start().resume().visible();
+
         activity =  activityController.get();
         table = activity.findViewById(R.id.table);
         fab = activity.findViewById(R.id.fab);
+    }
+
+    protected void createNewRow() {
+        fab.callOnClick();
+        shadowOf(activity).clickMenuItem(R.id.action_done);
     }
 
     private void setShowTutorial(boolean show) {
