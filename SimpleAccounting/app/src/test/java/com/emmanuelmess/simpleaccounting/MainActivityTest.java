@@ -76,6 +76,16 @@ public class MainActivityTest {
         shadowOf(activity).clickMenuItem(R.id.action_done);
     }
 
+    protected void createNewRow(String credit, String debit) {
+        fab.callOnClick();
+
+        EditRowFragment fragment = (EditRowFragment) activity
+                .getSupportFragmentManager()
+                .findFragmentById(R.id.fragmentContainer);
+
+        shadowOf(activity).clickMenuItem(R.id.action_done);
+    }
+
     private void setShowTutorial(boolean show) {
         sharedPreferences.edit().putBoolean(MainActivity.PREFS_FIRST_RUN, show).commit();
     }
