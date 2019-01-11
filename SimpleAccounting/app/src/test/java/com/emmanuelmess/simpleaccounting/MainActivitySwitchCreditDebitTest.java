@@ -1,5 +1,7 @@
 package com.emmanuelmess.simpleaccounting;
 
+import android.view.ViewTreeObserver;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -11,7 +13,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class)
 public class MainActivitySwitchCreditDebitTest extends MainActivityTest {
     protected void startSetUp() {
         super.startSetUp();
@@ -21,13 +22,18 @@ public class MainActivitySwitchCreditDebitTest extends MainActivityTest {
 
     @Test
     public void testSwitchCreditDebitTest() {
-        table.editableRowToView();
+	    table.getViewTreeObserver().addOnGlobalLayoutListener(
+			    new ViewTreeObserver.OnGlobalLayoutListener() {
+				    @Override
+				    public void onGlobalLayout() {
+					    table.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 
-        assertThat(table.findViewById(R.id.debit).getX(), lessThan(table.findViewById(R.id.credit).getX()));
+					    assertThat(table.findViewById(R.id.debit).getX(), lessThan(table.findViewById(R.id.credit).getX()));
 
-        table.setInvertCreditAndDebit(false);
+					    table.setInvertCreditAndDebit(false);
 
-        assertThat(table.findViewById(R.id.credit).getX(), lessThan(table.findViewById(R.id.debit).getX()));
+					    assertThat(table.findViewById(R.id.credit).getX(), lessThan(table.findViewById(R.id.debit).getX()));
+				    }
+			    });
     }
-
 }
