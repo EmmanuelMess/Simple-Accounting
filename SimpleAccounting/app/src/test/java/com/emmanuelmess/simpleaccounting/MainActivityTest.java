@@ -39,6 +39,8 @@ public class MainActivityTest {
     protected LedgerView table;
     protected FloatingActionButton fab;
 
+    private boolean useFragmentExceptionHack = true;
+
     @Before
     public void setUp() {
         startSetUp();
@@ -53,7 +55,9 @@ public class MainActivityTest {
         context = RuntimeEnvironment.application.getApplicationContext();
         sharedPreferences = context.getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE);
 
-        Robolectric.getForegroundThreadScheduler().pause();//Fragment throws IllegalStateException, this hack fixes Robolectric issue#4021
+        if(useFragmentExceptionHack) {
+            Robolectric.getForegroundThreadScheduler().pause();//Fragment throws IllegalStateException, this hack fixes Robolectric issue#4021
+        }
 
         setShowTutorial(false);
     }
@@ -69,6 +73,13 @@ public class MainActivityTest {
         activity =  activityController.get();
         table = activity.findViewById(R.id.table);
         fab = activity.findViewById(R.id.fab);
+    }
+
+    /**
+     * This hack fixes a IllegalStateException thrown by Fragments, but breaks AsyncTasks
+     */
+    protected void useFragmentExceptionHack(boolean useFragmentExceptionHack) {
+        this.useFragmentExceptionHack = useFragmentExceptionHack;
     }
 
     protected void createNewRow() {

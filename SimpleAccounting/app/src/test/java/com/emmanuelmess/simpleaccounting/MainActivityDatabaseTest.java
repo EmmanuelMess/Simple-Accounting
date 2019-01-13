@@ -1,6 +1,7 @@
 package com.emmanuelmess.simpleaccounting;
 
 import android.database.sqlite.SQLiteDatabase;
+import android.view.View;
 import android.widget.TableRow;
 
 import com.emmanuelmess.simpleaccounting.activities.views.LedgerRow;
@@ -28,13 +29,16 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(RobolectricTestRunner.class)
 public class MainActivityDatabaseTest extends MainActivityTest {
-	/*
-	TODO This test is broken and cannot be fixed until MainActivityTest.createNewRow(String, String) works
-
     private SQLiteDatabase database;
     private TableGeneral tableGeneral;
     private TableMonthlyBalance tableMonthlyBalance;
     private File databasePath;
+
+    @Override
+    protected void startSetUp() {
+        useFragmentExceptionHack(false);
+        super.startSetUp();
+    }
 
     @Override
     protected void endSetUp() {
@@ -47,7 +51,7 @@ public class MainActivityDatabaseTest extends MainActivityTest {
     }
 
     @Test
-    public void testDisplayNewRow() {
+    public void testDisplayNewRow() throws InterruptedException {
         String c = "200", d = "100";
 
         BigDecimal credit = new BigDecimal(c);
@@ -62,11 +66,15 @@ public class MainActivityDatabaseTest extends MainActivityTest {
 
         super.endSetUp();
 
-        LedgerRow balance = (LedgerRow) table.getChildAt(1);
+	    waitUntilLoadingEnds();
+
+        LedgerRow row = (LedgerRow) table.getChildAt(1);
 
         assertEquals(1, activity.getFirstRealRow());
-        assertEquals(total, balance.getBalanceText());
+        assertEquals(total, row.getBalanceText().toString());
     }
+	/*
+	TODO This test is broken and cannot be fixed until MainActivityTest.createNewRow(String, String) works
 
     @Test
     public void testSaveNewRow() {
@@ -95,9 +103,10 @@ public class MainActivityDatabaseTest extends MainActivityTest {
             assertEquals(credit.subtract(debit).doubleValue(), databaseResult.monthResult, 0.01);
         });
     }
+    */
 
     @Test
-    public void testLastBalance() {
+    public void testLastBalance() throws InterruptedException {
         String c = "200", d = "100";
 
         BigDecimal credit = new BigDecimal(c);
@@ -112,14 +121,16 @@ public class MainActivityDatabaseTest extends MainActivityTest {
 
         super.endSetUp();
 
-        LedgerRow lastBalance = (LedgerRow) table.getChildAt(1);
+        waitUntilLoadingEnds();
+
+        LedgerRow row = (LedgerRow) table.getChildAt(1);
 
         assertEquals(2, activity.getFirstRealRow());
-        assertEquals(total, lastBalance.getBalanceText());
+        assertEquals(total, row.getBalanceText().toString());
     }
 
     @Test
-    public void testLastBalanceSkippingMonths() {
+    public void testLastBalanceSkippingMonths() throws InterruptedException {
         String c = "200", d = "100";
 
         BigDecimal credit = new BigDecimal(c);
@@ -134,11 +145,16 @@ public class MainActivityDatabaseTest extends MainActivityTest {
 
         super.endSetUp();
 
-        LedgerRow lastBalance = (LedgerRow) table.getChildAt(1);
+        waitUntilLoadingEnds();
+
+        LedgerRow row = (LedgerRow) table.getChildAt(1);
 
         assertEquals(2, activity.getFirstRealRow());
-        assertEquals(total, lastBalance.getBalanceText());
+        assertEquals(total, row.getBalanceText().toString());
     }
+
+    /*
+	TODO This test is broken and cannot be fixed until MainActivityTest.createNewRow(String, String) works
 
     @Test
     public void testSaveLastBalanceMonth() {
@@ -161,6 +177,13 @@ public class MainActivityDatabaseTest extends MainActivityTest {
         getLastBalanceForMonth(month+2, year, "", (lastBalance) -> {
             assertEquals(credit.subtract(debit).doubleValue(), lastBalance, 0.01);
         });
+    }
+    */
+
+    private void waitUntilLoadingEnds() throws InterruptedException {
+    	while (activity.findViewById(R.id.progressBar).getVisibility() == View.VISIBLE) {
+    		Thread.sleep(1000);
+	    }
     }
 
     private void fakePastRow(int month, int year, String currency, int date, String reference,
@@ -200,5 +223,4 @@ public class MainActivityDatabaseTest extends MainActivityTest {
             this.debit = debit;
         }
     }
-    */
 }
