@@ -5,10 +5,12 @@ import android.graphics.Rect
 import android.os.Build
 import android.text.Editable
 import android.view.View
+import android.view.ViewTreeObserver
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.TextView
+import com.emmanuelmess.simpleaccounting.R
 
 val View.yInScreen: Int
 	get() {
@@ -89,4 +91,19 @@ fun View.removeBackground() {
 	} else {
 		background = null
 	}
+}
+
+inline fun View.addSingleUseOnGlobalLayoutListener(crossinline callback: () -> Unit) {
+	viewTreeObserver.addOnGlobalLayoutListener(
+		object : ViewTreeObserver.OnGlobalLayoutListener {
+			override fun onGlobalLayout() {
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+					viewTreeObserver.removeOnGlobalLayoutListener(this)
+				} else {
+					viewTreeObserver.removeGlobalOnLayoutListener(this)
+				}
+
+				callback()
+			}
+		})
 }
