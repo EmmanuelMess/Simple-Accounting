@@ -39,6 +39,12 @@ android {
             includeAndroidResources = true
         }
     }
+
+    android {
+        lintOptions {
+            abortOnError false
+        }
+    }
 }
 
 androidExtensions {
