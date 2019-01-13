@@ -2,7 +2,6 @@ package com.emmanuelmess.simpleaccounting;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.view.View;
-import android.widget.TableRow;
 
 import com.emmanuelmess.simpleaccounting.activities.views.LedgerRow;
 import com.emmanuelmess.simpleaccounting.data.Session;
@@ -14,7 +13,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -22,11 +20,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static com.emmanuelmess.simpleaccounting.utils.database.SQLiteHelper.setUpDatabase;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 @RunWith(RobolectricTestRunner.class)

@@ -1,35 +1,22 @@
 package com.emmanuelmess.simpleaccounting
 
-import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
-import android.view.Menu
-import android.widget.EditText
-import android.widget.TableRow
-import android.widget.TextView
-
 import com.emmanuelmess.simpleaccounting.activities.MainActivity
-import com.emmanuelmess.simpleaccounting.activities.views.LedgerRow
 import com.emmanuelmess.simpleaccounting.activities.views.LedgerView
 import com.emmanuelmess.simpleaccounting.fragments.EditRowFragment
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-
 import org.junit.Before
-import org.junit.Test
+import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
-import org.robolectric.android.controller.ActivityController
-import org.robolectric.fakes.RoboMenu
-
-import androidx.appcompat.widget.Toolbar
-
-import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertTrue
 import org.robolectric.Shadows.shadowOf
+import org.robolectric.android.controller.ActivityController
 
 @RunWith(RobolectricTestRunner::class)
+@Ignore
 open class MainActivityTest {
 
 	protected lateinit var context: Context
