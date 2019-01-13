@@ -81,10 +81,7 @@ private open class RowDataHandler constructor(private var last: BigDecimal) {
 	}
 
 	private fun recalculate() {
-		total = last.add(credit.subtract(debit))
-		if (total.compareTo(BigDecimal.ZERO) == 0) {
-			total = total.setScale(1, BigDecimal.ROUND_UNNECESSARY)
-		}
+		total = last + credit - debit
 	}
 }
 

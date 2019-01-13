@@ -387,7 +387,8 @@ public class MainActivity extends FragmentCanGoBackActivity
 		LedgerRow row = (LedgerRow) table.getLastRow();
 		tableDataManager.addRow();
 
-		row.setBalance(tableDataManager.getTotal(getCorrectedIndexForDataManager(rowViewIndex)).toPlainString());
+		row.setBalance(SimpleBalanceFormatter.INSTANCE
+				.format(tableDataManager.getTotal(getCorrectedIndexForDataManager(rowViewIndex))));
 
 		//checkEditInBalance(rowViewIndex, row); TODO check
 		return row;
@@ -444,7 +445,7 @@ public class MainActivity extends FragmentCanGoBackActivity
 			tableDataManager.updateStartingTotal(new BigDecimal(dbData.getPrevBalance()));
 
 			row.setModel(new LedgerRow.LedgerRowModel("", getString(R.string.previous_balance),
-					"", "", tableDataManager.getStartingTotal().toPlainString()));
+					"", "", SimpleBalanceFormatter.INSTANCE.format(tableDataManager.getStartingTotal())));
 		}
 
 		int dataManagerIndex = 1;
@@ -473,7 +474,7 @@ public class MainActivity extends FragmentCanGoBackActivity
 
 			LedgerRow.LedgerRowModel model
 					= new LedgerRow.LedgerRowModel(day, reference, credit, debit,
-					tableDataManager.getTotal(dataManagerIndex).toPlainString());
+					SimpleBalanceFormatter.INSTANCE.format(tableDataManager.getTotal(dataManagerIndex)));
 
 			row.setModel(model);
 
@@ -527,7 +528,7 @@ public class MainActivity extends FragmentCanGoBackActivity
 
 				String day = new SimpleDateFormat("dd", Locale.getDefault()).format(new Date());
 				row.setModel(new LedgerRow.LedgerRowModel(day,
-						getString(R.string.showcase_example_ref), "", "100", "-100"));
+						getString(R.string.showcase_example_ref), "", "100", "$ -100"));
 
 				destroyFirst = true;
 			}
@@ -702,7 +703,7 @@ public class MainActivity extends FragmentCanGoBackActivity
 
 		LedgerRow row = (LedgerRow) table.getChildAt(tableIndex);
 
-		row.setBalance(tableDataManager.getTotal(dataManagerIndex).toPlainString());
+		row.setBalance(SimpleBalanceFormatter.INSTANCE.format(tableDataManager.getTotal(dataManagerIndex)));
 
 		if (tableIndex + 1 < table.getChildCount()){
 			updateBalances(tableIndex + 1, dataManagerIndex + 1);
