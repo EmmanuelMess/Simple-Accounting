@@ -48,8 +48,8 @@ public class MainActivityDatabaseTest extends MainActivityTest {
 
         database = SQLiteDatabase.openOrCreateDatabase(databasePath, null);
 
-        tableGeneral = setUpDatabase(new TableGeneral(context), database);
-        tableMonthlyBalance = setUpDatabase(new TableMonthlyBalance(context), database);
+        tableGeneral = setUpDatabase(new TableGeneral(getContext()), database);
+        tableMonthlyBalance = setUpDatabase(new TableMonthlyBalance(getContext()), database);
     }
 
     @Test
@@ -70,9 +70,9 @@ public class MainActivityDatabaseTest extends MainActivityTest {
 
 	    waitUntilLoadingEnds();
 
-        LedgerRow row = (LedgerRow) table.getChildAt(1);
+        LedgerRow row = (LedgerRow) getTable().getChildAt(1);
 
-        assertThat(activity.getFirstRealRow(), is(1));
+        assertThat(getActivity().getFirstRealRow(), is(1));
         assertThat(row.getBalanceText().toString(), is(total));
     }
 	/*
@@ -125,9 +125,9 @@ public class MainActivityDatabaseTest extends MainActivityTest {
 
         waitUntilLoadingEnds();
 
-        LedgerRow row = (LedgerRow) table.getChildAt(1);
+        LedgerRow row = (LedgerRow) getTable().getChildAt(1);
 
-        assertThat(activity.getFirstRealRow(), is(2));
+        assertThat(getActivity().getFirstRealRow(), is(2));
         assertThat(row.getBalanceText().toString(), is(total));
     }
 
@@ -149,9 +149,9 @@ public class MainActivityDatabaseTest extends MainActivityTest {
 
         waitUntilLoadingEnds();
 
-        LedgerRow row = (LedgerRow) table.getChildAt(1);
+        LedgerRow row = (LedgerRow) getTable().getChildAt(1);
 
-        assertThat(activity.getFirstRealRow(), is(2));
+        assertThat(getActivity().getFirstRealRow(), is(2));
         assertThat(row.getBalanceText().toString(), is(total));
     }
 
@@ -183,7 +183,7 @@ public class MainActivityDatabaseTest extends MainActivityTest {
     */
 
     private void waitUntilLoadingEnds() throws InterruptedException {
-    	while (activity.findViewById(R.id.progressBar).getVisibility() == View.VISIBLE) {
+    	while (getActivity().findViewById(R.id.progressBar).getVisibility() == View.VISIBLE) {
     		Thread.sleep(1000);
 	    }
     }

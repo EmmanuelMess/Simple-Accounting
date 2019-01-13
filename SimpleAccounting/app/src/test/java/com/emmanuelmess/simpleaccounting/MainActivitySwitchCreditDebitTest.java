@@ -17,22 +17,22 @@ public class MainActivitySwitchCreditDebitTest extends MainActivityTest {
     protected void startSetUp() {
         super.startSetUp();
 
-        getDefaultSharedPreferences(context).edit().putBoolean(INVERT_CREDIT_DEBIT_SETTING, true).apply();
+        getDefaultSharedPreferences(getContext()).edit().putBoolean(INVERT_CREDIT_DEBIT_SETTING, true).apply();
     }
 
     @Test
     public void testSwitchCreditDebitTest() {
-	    table.getViewTreeObserver().addOnGlobalLayoutListener(
+	    getTable().getViewTreeObserver().addOnGlobalLayoutListener(
 			    new ViewTreeObserver.OnGlobalLayoutListener() {
 				    @Override
 				    public void onGlobalLayout() {
-					    table.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+					    getTable().getViewTreeObserver().removeOnGlobalLayoutListener(this);
 
-					    assertThat(table.findViewById(R.id.debit).getX(), lessThan(table.findViewById(R.id.credit).getX()));
+					    assertThat(getTable().findViewById(R.id.debit).getX(), lessThan(getTable().findViewById(R.id.credit).getX()));
 
-					    table.setInvertCreditAndDebit(false);
+					    getTable().setInvertCreditAndDebit(false);
 
-					    assertThat(table.findViewById(R.id.credit).getX(), lessThan(table.findViewById(R.id.debit).getX()));
+					    assertThat(getTable().findViewById(R.id.credit).getX(), lessThan(getTable().findViewById(R.id.debit).getX()));
 				    }
 			    });
     }
