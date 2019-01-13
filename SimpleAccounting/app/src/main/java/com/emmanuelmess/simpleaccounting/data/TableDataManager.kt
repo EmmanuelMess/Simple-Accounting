@@ -92,10 +92,6 @@ private class FirstRowDataHandler : RowDataHandler(BigDecimal.ZERO) {
 	override var debit: BigDecimal?
 		get() = throw UnsupportedOperationException()
 		set(value) { throw UnsupportedOperationException() }
-	override var total: BigDecimal = BigDecimal.ZERO
-		set(value) {
-			super.total = value
-		}
 
 	fun updateTotal(total: BigDecimal) {
 		this.total = total
