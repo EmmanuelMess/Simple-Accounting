@@ -25,7 +25,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static com.emmanuelmess.simpleaccounting.utils.database.SQLiteHelper.setUpDatabase;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
 public class MainActivityDatabaseTest extends MainActivityTest {
@@ -70,8 +72,8 @@ public class MainActivityDatabaseTest extends MainActivityTest {
 
         LedgerRow row = (LedgerRow) table.getChildAt(1);
 
-        assertEquals(1, activity.getFirstRealRow());
-        assertEquals(total, row.getBalanceText().toString());
+        assertThat(activity.getFirstRealRow(), is(1));
+        assertThat(row.getBalanceText().toString(), is(total));
     }
 	/*
 	TODO This test is broken and cannot be fixed until MainActivityTest.createNewRow(String, String) works
@@ -125,8 +127,8 @@ public class MainActivityDatabaseTest extends MainActivityTest {
 
         LedgerRow row = (LedgerRow) table.getChildAt(1);
 
-        assertEquals(2, activity.getFirstRealRow());
-        assertEquals(total, row.getBalanceText().toString());
+        assertThat(activity.getFirstRealRow(), is(2));
+        assertThat(row.getBalanceText().toString(), is(total));
     }
 
     @Test
@@ -149,8 +151,8 @@ public class MainActivityDatabaseTest extends MainActivityTest {
 
         LedgerRow row = (LedgerRow) table.getChildAt(1);
 
-        assertEquals(2, activity.getFirstRealRow());
-        assertEquals(total, row.getBalanceText().toString());
+        assertThat(activity.getFirstRealRow(), is(2));
+        assertThat(row.getBalanceText().toString(), is(total));
     }
 
     /*
