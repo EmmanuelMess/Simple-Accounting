@@ -34,6 +34,18 @@ android {
         }
     }
 
+    flavorDimensions 'normal'
+
+    productFlavors {
+        fdroid {
+            dimension 'normal'
+        }
+
+        play {
+            dimension 'normal'
+        }
+    }
+
     testOptions {
         unitTests {
             includeAndroidResources = true
