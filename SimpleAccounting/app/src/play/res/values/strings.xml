@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="crash_toast_text">The app has closed unexpectedly, an error report has been sent</string>
+</resources>
