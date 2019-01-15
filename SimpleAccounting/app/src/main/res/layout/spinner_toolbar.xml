@@ -22,5 +22,5 @@
           android:layout_height="wrap_content"
           android:ellipsize="marquee"
           android:textAlignment="inherit"
-          android:maxLines="1"
+          android:singleLine="true"
           android:maxEms="5"/>
