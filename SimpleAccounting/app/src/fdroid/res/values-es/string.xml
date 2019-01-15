@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="crash_toast_text">Por favor envie este mail para arreglar el error</string>
+</resources>

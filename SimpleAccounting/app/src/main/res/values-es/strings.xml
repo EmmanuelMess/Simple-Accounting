@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="balance">Balance</string>
-    <string name="crash_toast_text">La app se cerro inesperadamente, se ha enviado un reporte de error</string>
     <string name="credit">Credito</string>
     <string name="date">Dia</string>
     <string name="debit">Debito</string>
