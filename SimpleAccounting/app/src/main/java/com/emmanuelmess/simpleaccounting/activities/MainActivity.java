@@ -27,6 +27,7 @@ import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.emmanuelmess.simpleaccounting.BuildConfig;
 import com.emmanuelmess.simpleaccounting.fragments.EditRowFragment;
 import com.emmanuelmess.simpleaccounting.PPrintDocumentAdapter;
 import com.emmanuelmess.simpleaccounting.R;
@@ -320,6 +321,11 @@ public class MainActivity extends FragmentCanGoBackActivity
 
 		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.KITKAT)
 			menu.removeItem(R.id.action_print);
+
+		if(BuildConfig.isPlay) {
+			menu.removeItem(R.id.action_donate);
+		}
+		
 		return true;
 	}
 

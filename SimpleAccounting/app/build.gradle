@@ -39,10 +39,14 @@ android {
     productFlavors {
         fdroid {
             dimension 'normal'
+            buildConfigField "boolean", "isFdroid", "true"
+            buildConfigField "boolean", "isPlay", "false"
         }
 
         play {
             dimension 'normal'
+            buildConfigField "boolean", "isFdroid", "false"
+            buildConfigField "boolean", "isPlay", "true"
         }
     }
 
