@@ -45,4 +45,11 @@ class DonateActivity : AppCompatActivity() {
 		}
 	}
 
+	fun onClickKofi(view: View) {
+		Intent(Intent.ACTION_VIEW).let {
+			it.data = Uri.parse("https://ko-fi.com/emmanuelmess")
+			startActivity(it)
+		}
+	}
+
 }
