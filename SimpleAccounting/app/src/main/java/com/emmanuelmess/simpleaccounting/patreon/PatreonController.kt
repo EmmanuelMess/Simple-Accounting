@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.util.Log
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
+import com.emmanuelmess.simpleaccounting.BuildConfig
 import com.emmanuelmess.simpleaccounting.utils.seconds
 
 object PatreonController {
@@ -14,7 +15,7 @@ object PatreonController {
 		private const val TIMES_STARTED = "times started"
 		private const val DO_NOT_BOTHER = "do not bother"
 		private const val PAUSE_TIME = "pause time"
-		private val SHOW_DIALOG = intArrayOf(2, 8, 24, 60)
+		private val SHOW_DIALOG = intArrayOf(8, 24, 60)
 		/**
 		 * See [onPauseWasCalled]
 		 *
