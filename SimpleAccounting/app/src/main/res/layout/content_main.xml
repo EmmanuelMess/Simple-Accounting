@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.emmanuelmess.simpleaccounting.MainActivity"
+    tools:context="com.emmanuelmess.simpleaccounting.activities.MainActivity"
     tools:showIn="@layout/activity_main"
     android:id="@+id/relativeLayout">
 
@@ -38,7 +38,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_below="@+id/textMonth"/>
 
-            <android.support.v4.widget.Space
+            <Space
                     android:id="@+id/space"
                     android:layout_width="match_parent"
                     android:layout_height="72dp"
@@ -58,5 +58,22 @@
         android:layout_height="wrap_content"
         android:id="@+id/progressBar"
         android:layout_centerInParent="true"/>
+
+    <FrameLayout
+        android:id="@+id/fragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginEnd="0dp"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="0dp"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="0dp">
+
+    </FrameLayout>
 
 </RelativeLayout>

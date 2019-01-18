@@ -1,0 +1,36 @@
+language: android
+
+jdk:
+  - oraclejdk8
+
+android:
+  components:
+    - tools
+    - platform-tools
+    - build-tools-28.0.3
+    - android-28
+    - extra-google-m2repository
+    - extra-android-m2repository
+
+sudo: false
+
+before_install:
+  - cd ./SimpleAccounting
+
+before_script:
+  - keytool -genkey -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey -keypass android -dname "CN=Android Debug,O=Android,C=US"
+  - printf "storePassword=android\nkeyPassword=android\nkeyAlias=androiddebugkey\nstoreFile=/home/travis/.android/debug.keystore" > "./keystore.properties"
+  - chmod +x gradlew
+
+script:
+  - ./gradlew --no-daemon build
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - $HOME/.android/build-cache

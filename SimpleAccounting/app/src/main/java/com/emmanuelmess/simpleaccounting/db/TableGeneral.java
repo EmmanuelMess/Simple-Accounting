@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.emmanuelmess.simpleaccounting.data.Session;
 import com.emmanuelmess.simpleaccounting.utils.Utils;
 
 import java.math.BigDecimal;
@@ -102,9 +103,9 @@ public class TableGeneral extends Database {
 					}
 					for (String[] data : all) {
 						if (data[2] != null)
-							currentBalance = currentBalance.add(Utils.parseString(data[2]));
+							currentBalance = currentBalance.add(Utils.INSTANCE.parseString(data[2]));
 						if (data[3] != null)
-							currentBalance = currentBalance.subtract(Utils.parseString(data[3]));
+							currentBalance = currentBalance.subtract(Utils.INSTANCE.parseString(data[3]));
 					}
 
 					tableMonthlyBalance.updateMonth(OLDER_THAN_UPDATE, OLDER_THAN_UPDATE, "", currentBalance.doubleValue());
@@ -127,7 +128,10 @@ public class TableGeneral extends Database {
 		CV.clear();
 	}
 
-	public int newRowInMonth(int month, int year, String currency) {
+	public int newRowInMonth(Session session) {
+		int month = session.getMonth();
+		int year = session.getYear();
+		String currency = session.getCurrency();
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[]{NUMBER_COLUMN},
 				null, null, null, null, null);
 		int i;
@@ -176,11 +180,14 @@ public class TableGeneral extends Database {
 		return data;
 	}
 
-	public String[][] getAllForMonth(int month, int year, String currency) {
-		return getAllForMonth(month, year, currency, getReadableDatabase());
+	public String[][] getAllForMonth(Session session) {
+		return getAllForMonth(session, getReadableDatabase());
 	}
 
-	private String[][] getAllForMonth(int month, int year, String currency, SQLiteDatabase db) {
+	private String[][] getAllForMonth(Session session, SQLiteDatabase db) {
+		int month = session.getMonth();
+		int year = session.getYear();
+		String currency = session.getCurrency();
 		String [][] data;
 
 		Cursor c = db.query(TABLE_NAME, COLUMNS,
@@ -203,7 +210,10 @@ public class TableGeneral extends Database {
 		return data;
 	}
 
-	public int[] getIndexesForMonth(int month, int year, String currency) {
+	public int[] getIndexesForMonth(Session session) {
+		int month = session.getMonth();
+		int year = session.getYear();
+		String currency = session.getCurrency();
 		int[] data;
 
 		Cursor c = getReadableDatabase().query(TABLE_NAME, new String[]{NUMBER_COLUMN},

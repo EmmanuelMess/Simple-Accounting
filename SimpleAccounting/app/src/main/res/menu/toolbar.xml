@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:tools="http://schemas.android.com/tools"
       xmlns:app="http://schemas.android.com/apk/res-auto"
-      tools:context=".MainActivity">
+      tools:context=".activities.MainActivity">
 
     <item
         android:id="@+id/action_currency"
@@ -30,7 +30,7 @@
 <!--
     <item
         android:id="@+id/action_donate"
-        android:title="@string/donate"
+        android:title="@string/support_features"
         app:showAsAction="never"/>
 -->
     <!-- Settings, should always be in the overflow-->

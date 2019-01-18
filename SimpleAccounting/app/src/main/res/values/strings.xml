@@ -1,12 +1,11 @@
 <resources>
     <string name="app_name">Simple Accounting</string>
-    <string name="date">Date</string>
+    <string name="date">Day</string>
     <string name="reference">Reference</string>
     <string name="credit">Credit</string>
     <string name="debit">Debit</string>
     <string name="balance">Balance</string>
     <string name="total">Total</string>
-    <string name="crash_toast_text">The app has closed unexpectedly, an error report has been sent</string>
     <string name="loading">Loading...</string>
     <string name="showcase_main_title">Tap and hold to edit</string>
     <string name="showcase_example_ref">Supermarket</string>
@@ -42,11 +41,9 @@
     <string name="default_ext">Default</string>
     <string name="default_short">DFLT</string>
     <string name="version">Version</string>
-    <string name="app_ver" translatable="false">1.5.2</string>
     <string name="pref_title_invertcreditdebit">Invert credit and debit</string>
     <string name="pref_summary_invertcreditdebit">Credit and debit interchange places in table</string>
     <string name="item_hint">Set currency</string>
-    <string name="donate">Donate</string>
     <string name="bitcoin" translatable="false">Bitcoins</string>
     <string name="no_bitcoin_app">No bitcoin wallet app installed</string>
     <string name="graph">Graph</string>
@@ -62,4 +59,12 @@
     <string name="easier">These people made my job easier</string>
     <string name="simpleaccounting_description">Android app that helps you balance</string>
     <string name="license">License</string>
+
+    <string name="patreon_dialog_title">We need you!</string>
+    <string name="patreon_dialog_text">Would you enjoy a new feature?\nJust by pledging $1, you can! :)</string>
+    <string name="patreon_username" translatable="false">EmmanuelMess</string>
+    <string name="support_features">Support features</string>
+    <string name="other_methods">Other methods</string>
+
+    <string name="done">DONE</string>
 </resources>
