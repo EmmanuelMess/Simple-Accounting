@@ -22,7 +22,7 @@ android {
     }
 
     signingConfigs {
-        release {
+        debug {
             keyAlias keystoreProperties['keyAlias']
             keyPassword keystoreProperties['keyPassword']
             storeFile file(keystoreProperties['storeFile'])
@@ -39,7 +39,11 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
+        }
+        proguardedDebug {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
         }
         debug {
             applicationIdSuffix ".debug"
@@ -77,34 +81,24 @@ androidExtensions {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
     implementation 'com.google.android.material:material:1.1.0-alpha02'
     implementation 'androidx.preference:preference:1.1.0-alpha02'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha3'
-
     annotationProcessor 'androidx.annotation:annotation:1.0.1'
-
     def acraVersion = '5.2.1'
     implementation "ch.acra:acra-toast:$acraVersion"
     playImplementation "ch.acra:acra-http:$acraVersion"
     fdroidImplementation "ch.acra:acra-mail:$acraVersion"
-
-    implementation "com.github.emmanuelmess:SQLiteQueryBuilder:0.5.0"
-
-    implementation "com.github.emmanuelmess:SQLiteQueryBuilder:0.5.0"
-
+    implementation 'com.github.emmanuelmess:SQLiteQueryBuilder:0.5.0'
     implementation 'com.github.amlcurran.showcaseview:library:5.4.3'
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
-
     implementation 'com.mikepenz:aboutlibraries:6.0.8'
-
     // --From here for testing--
     androidTestImplementation 'androidx.test.ext:junit:1.1.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
     androidTestImplementation 'androidx.test:runner:1.1.1'
     androidTestImplementation 'androidx.test:rules:1.1.1'
-
-    testImplementation "org.robolectric:robolectric:4.1"
+    testImplementation 'org.robolectric:robolectric:4.1'
     testImplementation 'com.github.emmanuelmess:SQLiteQueryBuilder:0.3.0'
     testImplementation 'junit:junit:4.12'
 }
