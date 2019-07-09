@@ -18,9 +18,11 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.TextView
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 
 import com.emmanuelmess.simpleaccounting.R
+import com.emmanuelmess.simpleaccounting.data.Month
 import com.emmanuelmess.simpleaccounting.dataloading.GetMonthsWithDataAsyncTask
 import com.emmanuelmess.simpleaccounting.db.TableGeneral
 import kotlinx.android.synthetic.main.activity_month.*
@@ -38,8 +40,8 @@ import java.util.Locale
  * @author Emmanuel
  */
 class MonthActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
-	private var monthListAdapter: MonthListAdapter? = null
-	private val dateIntValues = ArrayList<Array<Int>>()
+	private lateinit var monthListAdapter: MonthListAdapter
+	private val dateIntValues = mutableListOf<Month>()
 	private var updateYear: Int = 0
 	private var updateMonth: Int = 0
 
@@ -52,14 +54,11 @@ class MonthActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 
 		val preferences = PreferenceManager.getDefaultSharedPreferences(this)
 
-		GetMonthsWithDataAsyncTask(TableGeneral(this)) { existingMonths: Array<IntArray> ->
-			val monthListData = ArrayList<Array<String>>()
+		GetMonthsWithDataAsyncTask(TableGeneral(this)) { existingMonths: List<Month> ->
+			val monthListData = mutableListOf<MonthListAdapter.MonthItemData>()
 			var olderThanAlreadyPut = false
 
-			for (d in existingMonths) {
-				val m = d[0]
-				val y = d[1]
-
+			for ((m, y) in existingMonths) {
 				if (m == TableGeneral.OLDER_THAN_UPDATE && y == TableGeneral.OLDER_THAN_UPDATE
 					&& olderThanAlreadyPut)
 					continue
@@ -70,29 +69,36 @@ class MonthActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 					updateYear = preferences.getInt(MainActivity.UPDATE_YEAR_SETTING, -1)
 					updateMonth = preferences.getInt(MainActivity.UPDATE_MONTH_SETTING, -1)
 
-					monthListData.add(arrayOf(getString(R.string.before_update_1_2)
-						+ " " + getString(MainActivity.MONTH_STRINGS[updateMonth]).toLowerCase(), updateYear.toString()))
-					dateIntValues.add(arrayOf(m, y))
+					monthListData.add(MonthListAdapter.MonthItemData(
+						getString(R.string.before, getString(MainActivity.MONTH_STRINGS[updateMonth])).toLowerCase(),
+						updateYear.toString()
+					))
 				} else {
-					monthListData.add(arrayOf(getString(MainActivity.MONTH_STRINGS[m]), y.toString()))
-					dateIntValues.add(arrayOf(m, y))
+					monthListData.add(MonthListAdapter.MonthItemData(
+						getString(MainActivity.MONTH_STRINGS[m]),
+						y.toString())
+					)
 				}
+
+				dateIntValues.add(Month(m, y))
 			}
 
 			val currentM = Integer.parseInt(SimpleDateFormat("M", Locale.getDefault()).format(Date())) - 1
 			//YEARS ALREADY START IN 0!!!
 			val currentY = Integer.parseInt(SimpleDateFormat("yyyy", Locale.getDefault()).format(Date()))
 
-			if (dateIntValues.size == 0 || !Arrays.equals(dateIntValues[dateIntValues.size - 1], arrayOf(currentM, currentY))) {
-				monthListData.add(arrayOf(getString(MainActivity.MONTH_STRINGS[currentM]), currentY.toString()))
-				dateIntValues.add(arrayOf(currentM, currentY))
+			if (dateIntValues.size == 0 || dateIntValues[dateIntValues.size - 1] != Month(currentM, currentY)) {
+				monthListData.add(MonthListAdapter.MonthItemData(
+					getString(MainActivity.MONTH_STRINGS[currentM]),
+					currentY.toString())
+				)
+				dateIntValues.add(Month(currentM, currentY))
 			}
 
-			Collections.reverse(monthListData)
-			Collections.reverse(dateIntValues)
+			monthListData.reverse()
+			dateIntValues.reverse()
 
-			monthListAdapter = MonthListAdapter(applicationContext,
-				monthListData.toTypedArray())
+			monthListAdapter = MonthListAdapter(applicationContext, monthListData)
 			monthList.adapter = monthListAdapter
 			monthList.onItemClickListener = this@MonthActivity
 		}.execute()
@@ -110,14 +116,14 @@ class MonthActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 	}
 
 	override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-		MainActivity.setDate(dateIntValues[position][0], dateIntValues[position][1])
+		MainActivity.setDate(dateIntValues[position].month, dateIntValues[position].year)
 		onBackPressed()
 	}
 
 	private class MonthListAdapter(
 		context: Context,
-		val values: Array<Array<String>>
-	) : ArrayAdapter<Array<String>>(context, R.layout.item_month, values) {
+		val values: List<MonthItemData>
+	) : ArrayAdapter<MonthListAdapter.MonthItemData>(context, R.layout.item_month, values) {
 		val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
 		override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
@@ -128,10 +134,12 @@ class MonthActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 			val monthView = view.textMonth
 			val yearView = view.textYear
 
-			monthView.text = values[position][0]
-			yearView.text = values[position][1]
+			monthView.text = values[position].monthName
+			yearView.text = values[position].yearName
 
 			return view
 		}
+
+		data class MonthItemData(val monthName: String, val yearName: String)
 	}
 }

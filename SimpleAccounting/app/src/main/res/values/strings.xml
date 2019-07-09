@@ -26,6 +26,7 @@
     <string name="previous_balance">Prev. balance</string>
     <string name="print">Print</string>
     <string name="nothing_to_print">There\'s nothing to print!</string>
+    <string name="before">Before %s</string>
     <string name="before_update_1.2">Before</string>
     <string name="page">Page</string>
 

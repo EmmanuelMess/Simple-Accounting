@@ -1,17 +1,18 @@
 package com.emmanuelmess.simpleaccounting.dataloading
 
 import android.os.AsyncTask
+import com.emmanuelmess.simpleaccounting.data.Month
 import com.emmanuelmess.simpleaccounting.db.TableGeneral
 
 class GetMonthsWithDataAsyncTask(
 	private val tableGeneral: TableGeneral,
-	private val onAsyncFinished: (Array<IntArray>) -> Unit
-): AsyncTask<Void, Void, Array<IntArray>>() {
+	private val onAsyncFinished: (List<Month>) -> Unit
+): AsyncTask<Void, Void, List<Month>>() {
 
-	override fun doInBackground(vararg params: Void?): Array<IntArray>
-		= tableGeneral.monthsWithData
+	override fun doInBackground(vararg params: Void?): List<Month>
+		= tableGeneral.monthsWithData.map { Month(it[0], it[1]) }
 
-	override fun onPostExecute(monthsWithData: Array<IntArray>) {
+	override fun onPostExecute(monthsWithData: List<Month>) {
 		onAsyncFinished(monthsWithData)
 	}
 }
