@@ -14,14 +14,17 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 
 import com.emmanuelmess.simpleaccounting.R
 import com.emmanuelmess.simpleaccounting.dataloading.GetMonthsWithDataAsyncTask
 import com.emmanuelmess.simpleaccounting.db.TableGeneral
 import kotlinx.android.synthetic.main.activity_month.*
+import kotlinx.android.synthetic.main.content_month.*
 import kotlinx.android.synthetic.main.item_month.view.*
 
 import java.text.SimpleDateFormat
@@ -34,8 +37,7 @@ import java.util.Locale
 /**
  * @author Emmanuel
  */
-class MonthActivity : ListActivity() {
-
+class MonthActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 	private var monthListAdapter: MonthListAdapter? = null
 	private val dateIntValues = ArrayList<Array<Int>>()
 	private var updateYear: Int = 0
@@ -45,23 +47,8 @@ class MonthActivity : ListActivity() {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_month)
 
-		val callback = object : AppCompatCallback {
-			override fun onSupportActionModeStarted(actionMode: ActionMode) {}
-
-			override fun onSupportActionModeFinished(actionMode: ActionMode) {}
-
-			override fun onWindowStartingSupportActionMode(callback: ActionMode.Callback): ActionMode? {
-				return null
-			}
-		}
-
-		val delegate = AppCompatDelegate.create(this, callback)
-
-		delegate.onCreate(savedInstanceState)
-		delegate.setContentView(R.layout.activity_month)
-
-		delegate.setSupportActionBar(toolbar)
-		delegate.supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+		setSupportActionBar(toolbar)
+		supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
 		val preferences = PreferenceManager.getDefaultSharedPreferences(this)
 
@@ -106,7 +93,8 @@ class MonthActivity : ListActivity() {
 
 			monthListAdapter = MonthListAdapter(applicationContext,
 				monthListData.toTypedArray())
-			listAdapter = monthListAdapter
+			monthList.adapter = monthListAdapter
+			monthList.onItemClickListener = this@MonthActivity
 		}.execute()
 	}
 
@@ -121,7 +109,7 @@ class MonthActivity : ListActivity() {
 		}
 	}
 
-	public override fun onListItemClick(l: ListView, v: View, position: Int, id: Long) {
+	override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
 		MainActivity.setDate(dateIntValues[position][0], dateIntValues[position][1])
 		onBackPressed()
 	}
