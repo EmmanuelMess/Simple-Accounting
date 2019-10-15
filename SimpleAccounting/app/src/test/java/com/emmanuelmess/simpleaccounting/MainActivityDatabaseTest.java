@@ -5,8 +5,8 @@ import android.view.View;
 
 import com.emmanuelmess.simpleaccounting.activities.views.LedgerRow;
 import com.emmanuelmess.simpleaccounting.data.Session;
-import com.emmanuelmess.simpleaccounting.db.TableGeneral;
-import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
+import com.emmanuelmess.simpleaccounting.db.legacy.TableGeneral;
+import com.emmanuelmess.simpleaccounting.db.legacy.TableMonthlyBalance;
 import com.emmanuelmess.simpleaccounting.utils.SimpleBalanceFormatter;
 
 import org.junit.Test;

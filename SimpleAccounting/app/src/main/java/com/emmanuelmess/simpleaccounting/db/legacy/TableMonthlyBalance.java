@@ -1,4 +1,4 @@
-package com.emmanuelmess.simpleaccounting.db;
+package com.emmanuelmess.simpleaccounting.db.legacy;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -18,8 +18,8 @@ import static java.lang.String.format;
  */
 public class TableMonthlyBalance extends Database {
 	//Beware the columns in this array may not be in the real order
-	private static final String[] COLUMNS = new String[] {"MONTH", "YEAR", "CURRENCY", "BALANCE"};
-	private static final String TABLE_NAME = "MONTHLY_BALANCE";
+	public static final String[] COLUMNS = new String[] {"MONTH", "YEAR", "CURRENCY", "BALANCE"};
+	public static final String TABLE_NAME = "MONTHLY_BALANCE";
 
 	private static final int DATABASE_VERSION = 4;
 	public static final String TABLE_CREATE = format("CREATE TABLE %1$s(%2$s INT, %3$s INT, %4$s INT, %5$s TEXT, %6$s REAL);",

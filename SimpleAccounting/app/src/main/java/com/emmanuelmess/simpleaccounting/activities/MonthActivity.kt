@@ -1,38 +1,25 @@
 package com.emmanuelmess.simpleaccounting.activities
 
-import android.app.ListActivity
 import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.preference.PreferenceManager
-import androidx.appcompat.app.ActionBar
-import androidx.appcompat.app.AppCompatCallback
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.appcompat.view.ActionMode
-import androidx.appcompat.widget.Toolbar
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.ListView
-import android.widget.TextView
-import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 
 import com.emmanuelmess.simpleaccounting.R
 import com.emmanuelmess.simpleaccounting.data.Month
 import com.emmanuelmess.simpleaccounting.dataloading.GetMonthsWithDataAsyncTask
-import com.emmanuelmess.simpleaccounting.db.TableGeneral
+import com.emmanuelmess.simpleaccounting.db.legacy.TableGeneral
 import kotlinx.android.synthetic.main.activity_month.*
 import kotlinx.android.synthetic.main.content_month.*
 import kotlinx.android.synthetic.main.item_month.view.*
 
 import java.text.SimpleDateFormat
-import java.util.ArrayList
-import java.util.Arrays
-import java.util.Collections
 import java.util.Date
 import java.util.Locale
 

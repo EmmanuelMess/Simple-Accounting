@@ -2,7 +2,7 @@ package com.emmanuelmess.simpleaccounting.dataloading
 
 import android.os.AsyncTask
 import com.emmanuelmess.simpleaccounting.data.Month
-import com.emmanuelmess.simpleaccounting.db.TableGeneral
+import com.emmanuelmess.simpleaccounting.db.legacy.TableGeneral
 
 class GetMonthsWithDataAsyncTask(
 	private val tableGeneral: TableGeneral,

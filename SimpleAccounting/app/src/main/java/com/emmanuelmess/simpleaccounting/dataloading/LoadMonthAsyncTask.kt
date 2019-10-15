@@ -4,8 +4,8 @@ import android.os.AsyncTask
 import com.emmanuelmess.simpleaccounting.data.MonthData
 import com.emmanuelmess.simpleaccounting.data.Session
 
-import com.emmanuelmess.simpleaccounting.db.TableGeneral
-import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance
+import com.emmanuelmess.simpleaccounting.db.legacy.TableGeneral
+import com.emmanuelmess.simpleaccounting.db.legacy.TableMonthlyBalance
 
 import java.util.ArrayList
 

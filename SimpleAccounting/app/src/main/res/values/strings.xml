@@ -68,4 +68,11 @@
     <string name="other_methods">Other methods</string>
 
     <string name="done">DONE</string>
+
+    <string name="service_channel_name">Background work channel</string>
+
+    <string name="migrating_database">Migrating database, you can close the app</string>
+    <string name="migrating_notification_title">Migrating database</string>
+    <string name="migration_service_description">Migration to Room database background service</string>
+    <string name="migration_activity">Migrating...</string>
 </resources>

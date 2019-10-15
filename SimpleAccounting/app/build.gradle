@@ -83,18 +83,28 @@ androidExtensions {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'com.google.android.material:material:1.1.0-alpha08'
-    implementation 'androidx.preference:preference:1.1.0-rc01'
+    implementation 'com.google.android.material:material:1.1.0-beta01'
+    implementation 'androidx.preference:preference:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta2'
-    annotationProcessor 'androidx.annotation:annotation:1.1.0'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    kapt 'androidx.annotation:annotation:1.1.0'
+
+    def room_version = "2.2.0"
+    implementation "androidx.room:room-runtime:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
+    testImplementation "androidx.room:room-testing:$room_version"
+
     def acraVersion = '5.2.1'
     implementation "ch.acra:acra-toast:$acraVersion"
     playImplementation "ch.acra:acra-http:$acraVersion"
     fdroidImplementation "ch.acra:acra-mail:$acraVersion"
+
     implementation 'com.github.emmanuelmess:SQLiteQueryBuilder:0.5.0'
     implementation 'com.github.amlcurran.showcaseview:library:5.4.3'
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
     implementation 'com.mikepenz:aboutlibraries:6.1.1'
+
     // --From here for testing--
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'

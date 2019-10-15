@@ -1,7 +1,7 @@
 package com.emmanuelmess.simpleaccounting.data
 
 import android.os.Parcelable
-import com.emmanuelmess.simpleaccounting.db.TableGeneral
+import com.emmanuelmess.simpleaccounting.db.legacy.TableGeneral
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize

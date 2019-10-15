@@ -1,4 +1,4 @@
-package com.emmanuelmess.simpleaccounting.db;
+package com.emmanuelmess.simpleaccounting.db.legacy;
 
 import android.content.ContentValues;
 import android.content.Context;

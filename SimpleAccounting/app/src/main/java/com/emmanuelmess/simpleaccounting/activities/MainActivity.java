@@ -28,6 +28,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.emmanuelmess.simpleaccounting.BuildConfig;
+import com.emmanuelmess.simpleaccounting.db.migration.MigrationHelperKt;
 import com.emmanuelmess.simpleaccounting.fragments.EditRowFragment;
 import com.emmanuelmess.simpleaccounting.PPrintDocumentAdapter;
 import com.emmanuelmess.simpleaccounting.R;
@@ -41,8 +42,8 @@ import com.emmanuelmess.simpleaccounting.dataloading.AsyncFinishedListener;
 import com.emmanuelmess.simpleaccounting.dataloading.LoadMonthAsyncTask;
 import com.emmanuelmess.simpleaccounting.data.MonthData;
 import com.emmanuelmess.simpleaccounting.data.Session;
-import com.emmanuelmess.simpleaccounting.db.TableGeneral;
-import com.emmanuelmess.simpleaccounting.db.TableMonthlyBalance;
+import com.emmanuelmess.simpleaccounting.db.legacy.TableGeneral;
+import com.emmanuelmess.simpleaccounting.db.legacy.TableMonthlyBalance;
 import com.emmanuelmess.simpleaccounting.patreon.PatreonController;
 import com.emmanuelmess.simpleaccounting.utils.ACRAHelper;
 import com.emmanuelmess.simpleaccounting.utils.SimpleBalanceFormatter;
@@ -183,6 +184,11 @@ public class MainActivity extends FragmentCanGoBackActivity
 
 		updateMonth = preferences.getInt(UPDATE_MONTH_SETTING, -1);
 		updateYear = preferences.getInt(UPDATE_YEAR_SETTING, -1);
+
+		if(!preferences.getBoolean(MigrationHelperKt.getMIGRATED_DATABASE_SETTING(), false)) {
+			Intent i = new Intent(getApplicationContext(), MigrationActivity.class);
+			startActivity(i);
+		}
 
 		editableMonth = currentMonthYear[0];
 		editableYear = currentMonthYear[1];
