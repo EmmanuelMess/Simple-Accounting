@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.core.view.MenuItemCompat;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.room.Room;
 
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -28,6 +29,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.emmanuelmess.simpleaccounting.BuildConfig;
+import com.emmanuelmess.simpleaccounting.db.AppDatabase;
 import com.emmanuelmess.simpleaccounting.db.migration.MigrationHelperKt;
 import com.emmanuelmess.simpleaccounting.fragments.EditRowFragment;
 import com.emmanuelmess.simpleaccounting.PPrintDocumentAdapter;
@@ -43,7 +45,6 @@ import com.emmanuelmess.simpleaccounting.dataloading.LoadMonthAsyncTask;
 import com.emmanuelmess.simpleaccounting.data.MonthData;
 import com.emmanuelmess.simpleaccounting.data.Session;
 import com.emmanuelmess.simpleaccounting.db.legacy.TableGeneral;
-import com.emmanuelmess.simpleaccounting.db.legacy.TableMonthlyBalance;
 import com.emmanuelmess.simpleaccounting.patreon.PatreonController;
 import com.emmanuelmess.simpleaccounting.utils.ACRAHelper;
 import com.emmanuelmess.simpleaccounting.utils.SimpleBalanceFormatter;
@@ -60,6 +61,7 @@ import org.jetbrains.annotations.NotNull;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -95,8 +97,7 @@ public class MainActivity extends FragmentCanGoBackActivity
 	private TableDataManager tableDataManager = null;
 	private View space;
 	private FloatingActionButton fab;
-	private TableGeneral tableGeneral;
-	private TableMonthlyBalance tableMonthlyBalance;
+	private AppDatabase appDatabase;
 	private LayoutInflater inflater;
 	private ScrollView scrollView;
 	private LoadMonthAsyncTask loadingMonthTask = null;
@@ -165,8 +166,7 @@ public class MainActivity extends FragmentCanGoBackActivity
 		table.setFormatter(SimpleBalanceFormatter.INSTANCE);
 		table.setListener(this);
 		tableDataManager = new TableDataManager();
-		tableGeneral = new TableGeneral(this);//DO NOT change the order of table creation!
-		tableMonthlyBalance = new TableMonthlyBalance(this);
+		appDatabase = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "database-name").build();
 
 		Date d = new Date();
 		int[] currentMonthYear = {Integer.parseInt(new SimpleDateFormat("M", Locale.getDefault()).format(d)) - 1,
@@ -225,14 +225,13 @@ public class MainActivity extends FragmentCanGoBackActivity
 			scrollView.fullScroll(View.FOCUS_DOWN);
 
 			if (table.getChildCount() > FIRST_REAL_ROW) {
-				String day = new SimpleDateFormat("dd", Locale.getDefault()).format(new Date());
+				int day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 
-				int index = tableGeneral.newRowInMonth(new Session(editableMonth, editableYear, editableCurrency));
-				tableGeneral.update(index, TableGeneral.COLUMNS[0], day);
+				appDatabase.rowDao().newRowInMonth(day, new Session(editableMonth, editableYear, editableCurrency));
 
-				rowToDBRowConversion.add(tableGeneral.getLastIndex());
+				rowToDBRowConversion.add(appDatabase.rowDao().getLastIndex());
 				LedgerRow row = loadRow();
-				LedgerRow.LedgerRowModel model = new LedgerRow.LedgerRowModel(day, "", "", "", "");
+				LedgerRow.LedgerRowModel model = new LedgerRow.LedgerRowModel(day + "", "", "", "", "");
 
 				row.setModel(model);
 				resetEditableHash(model);
@@ -504,8 +503,8 @@ public class MainActivity extends FragmentCanGoBackActivity
 
 			scrollView.fullScroll(View.FOCUS_DOWN);
 
-			tableGeneral.newRowInMonth(new Session(editableMonth, editableYear, editableCurrency));
-			this.rowToDBRowConversion.add(tableGeneral.getLastIndex());
+			appDatabase.rowDao().newRowInMonth(null, new Session(editableMonth, editableYear, editableCurrency));
+			this.rowToDBRowConversion.add(appDatabase.rowDao().getLastIndex());
 			LedgerRow row = loadRow();
 
 			String day = new SimpleDateFormat("dd", Locale.getDefault()).format(new Date());
@@ -680,21 +679,12 @@ public class MainActivity extends FragmentCanGoBackActivity
 		String editDebitText = model.getDebit();
 		if(editableRowColumnsHash[2] != editCreditText.hashCode()
 				|| editableRowColumnsHash[3] != editDebitText.hashCode()) {
-			tableMonthlyBalance.updateMonth(editableMonth, editableYear, editableCurrency,
+			appDatabase.monthlyBalanceDao().updateMonthCreating(editableMonth, editableYear, editableCurrency,
 					tableDataManager.getTotal(getCorrectedIndexForDataManager(rowIndex)).doubleValue());
 		}
 
-		String[] text = {model.getDate(), model.getReference(), model.getCredit(), model.getDebit()};
-
-		for (int i = 0; i < text.length; i++) {
-			String t = text[i];
-
-			if (editableRowColumnsHash[i] != t.hashCode()) {
-				tableGeneral.update(rowToDBRowConversion.get(rowIndex - FIRST_REAL_ROW),
-						TableGeneral.COLUMNS[i], (!t.isEmpty() ? t : null));
-				editableRowColumnsHash[i] = -1;
-			}
-		}
+		appDatabase.rowDao().update(rowToDBRowConversion.get(rowIndex - FIRST_REAL_ROW),
+				model.getDate(), model.getReference(), model.getCredit(), model.getDebit());
 	}
 
 	private void performDataManagerSave(int managerRowIndex,
