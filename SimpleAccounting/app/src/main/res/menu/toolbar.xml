@@ -27,12 +27,10 @@
         android:icon="@drawable/ic_print_white_24dp"
         android:title="@string/print"
         app:showAsAction="ifRoom"/>
-<!--
     <item
         android:id="@+id/action_donate"
         android:title="@string/support_features"
         app:showAsAction="never"/>
--->
     <!-- Settings, should always be in the overflow-->
     <item android:id="@+id/action_settings"
           android:title="@string/settings"
