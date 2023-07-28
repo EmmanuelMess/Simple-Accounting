@@ -9,7 +9,9 @@ Android app that helps you balance.
       height="80">](https://play.google.com/store/apps/details?id=com.emmanuelmess.simpleaccounting)
 
 ### Donating: 
-Bitcoin: 1HFhPxH9bqMKvs44nHqXjEEPC2m7z1V8tW
+* **Bitcoin**: ```1HFhPxH9bqMKvs44nHqXjEEPC2m7z1V8tW```
+* [https://patreon.com/EmmanuelMess](https://patreon.com/EmmanuelMess)
+* [https://ko-fi.com/EmmanuelMess](https://ko-fi.com/EmmanuelMess)
 
 ## Screenshots
 
